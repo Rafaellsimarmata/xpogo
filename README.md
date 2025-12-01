@@ -1,6 +1,6 @@
-# XPogo Hackathon Monorepo
+# XPogo Monorepo
 
-This repository is a minimal monorepo scaffold for a microservice-style hackathon.
+This repository is a minimal monorepo scaffold for a microservice-style .
 It contains two packages:
 
 - `frontend` — Next.js app (port 3000)
