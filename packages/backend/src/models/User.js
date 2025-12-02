@@ -16,10 +16,10 @@ class User {
     return result.rows[0];
   }
 
-  static async create(email, username, passwordHash) {
+  static async create(email, username, business_name, passwordHash) {
     const result = await pool.query(
-      'INSERT INTO users (email, username, password_hash) VALUES ($1, $2, $3) RETURNING id, email, username, created_at',
-      [email, username, passwordHash]
+      'INSERT INTO users (email, username, business_name, password_hash) VALUES ($1, $2, $3, $4) RETURNING id, email, username, business_name, created_at',
+      [email, username, business_name, passwordHash]
     );
     return result.rows[0];
   }

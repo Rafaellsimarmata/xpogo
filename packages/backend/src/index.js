@@ -86,6 +86,7 @@ const swaggerSpec = {
                 properties: {
                   email: { type: 'string' },
                   username: { type: 'string' },
+                  business_name: { type: 'string' },
                   password: { type: 'string' }
                 },
                 required: ['email', 'username', 'password']

@@ -6,10 +6,10 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key-change-in-prod';
 const JWT_EXPIRY = process.env.JWT_EXPIRY || '7d';
 
 class AuthService {
-  static async register(email, username, password) {
+  static async register(email, username, business_name, password) {
     // Validate input
-    if (!email || !username || !password) {
-      throw new Error('Email, username, and password are required');
+    if (!email || !username || !business_name || !password) {
+      throw new Error('Email, username, business_name, and password are required');
     }
 
     // Check if user exists
@@ -28,7 +28,7 @@ class AuthService {
     const passwordHash = await bcrypt.hash(password, salt);
 
     // Create user
-    const newUser = await User.create(email, username, passwordHash);
+    const newUser = await User.create(email, username, business_name, passwordHash);
     return newUser;
   }
 
