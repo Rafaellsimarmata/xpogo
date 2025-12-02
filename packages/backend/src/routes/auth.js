@@ -21,11 +21,14 @@ const router = express.Router();
  *                 type: string
  *               username:
  *                 type: string
+ *               business_name:
+ *                 type: string
  *               password:
  *                 type: string
  *             required:
  *               - email
  *               - username
+ *               - business_name
  *               - password
  *     responses:
  *       201:

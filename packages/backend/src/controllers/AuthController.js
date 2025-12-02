@@ -3,8 +3,8 @@ const AuthService = require('../services/AuthService');
 class AuthController {
   static async register(req, res) {
     try {
-      const { email, username, password } = req.body;
-      const newUser = await AuthService.register(email, username, password);
+      const { email, username, business_name, password } = req.body;
+      const newUser = await AuthService.register(email, username, business_name, password);
       res.status(201).json({ message: 'User registered successfully', user: newUser });
     } catch (err) {
       res.status(400).json({ error: err.message });
