@@ -1,7 +1,23 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const dotenv = require('dotenv');
+
+// Load environment variables
+const env = process.env.NODE_ENV || 'development';
+const envFile = path.resolve(__dirname, '..', `.env.${env}`);
+dotenv.config();
+try {
+  dotenv.config({ path: envFile });
+  console.log(`Loaded env from ${envFile}`);
+} catch (err) {
+  // ignore if file not present
+}
+
+const initDatabase = require('./config/initDb');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -9,6 +25,9 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+initDatabase();
+
+const backendUrl = process.env.BACKEND_URL || `http://localhost:${port}`;
 
 const swaggerSpec = {
   openapi: '3.0.0',
@@ -19,9 +38,18 @@ const swaggerSpec = {
   },
   servers: [
     {
-      url: `http://localhost:${port}`
+      url: backendUrl
     }
   ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
+      }
+    }
+  },
   paths: {
     '/health': {
       get: {
@@ -41,6 +69,65 @@ const swaggerSpec = {
                 }
               }
             }
+          }
+        }
+      }
+    },
+    '/auth/register': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Register a new user',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string' },
+                  username: { type: 'string' },
+                  password: { type: 'string' }
+                },
+                required: ['email', 'username', 'password']
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'User registered successfully'
+          },
+          '400': {
+            description: 'Registration error'
+          }
+        }
+      }
+    },
+    '/auth/login': {
+      post: {
+        tags: ['Auth'],
+        summary: 'Login user',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string' },
+                  password: { type: 'string' }
+                },
+                required: ['email', 'password']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Login successful, returns JWT token'
+          },
+          '401': {
+            description: 'Invalid credentials'
           }
         }
       }
@@ -72,6 +159,9 @@ const swaggerSpec = {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+
+app.use('/auth', authRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
@@ -86,5 +176,5 @@ app.get('/api/example', (req, res) => {
 
 app.listen(port, () => {
   console.log(`Backend listening on http://localhost:${port}`);
-  console.log(`Swagger UI available at http://localhost:${port}/api-docs`);
+  console.log(`Swagger UI available at ${backendUrl.replace(/\/$/, '')}/api-docs`);
 });
