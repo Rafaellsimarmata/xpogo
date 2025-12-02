@@ -225,7 +225,7 @@ const swaggerSpec = {
 };
 
 const swaggerUiOptions = {
-  customCss: '.swagger-ui { max-width: 1200px; margin: 0 auto; }',
+  customCss: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css',
   customCdnPrefix: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@3',
   customSiteTitle: 'XPogo API Documentation',
   swaggerOptions: {
