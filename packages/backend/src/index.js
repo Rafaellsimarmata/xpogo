@@ -26,7 +26,6 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Static files for Swagger UI (fixes CSS/JS loading on Vercel)
 app.use(express.static('node_modules/swagger-ui-dist'));
 
 initDatabase();
@@ -225,7 +224,6 @@ const swaggerSpec = {
   }
 };
 
-// Swagger UI custom options for proper CSS/JS loading (works on Vercel with CDN)
 const swaggerUiOptions = {
   customCss: '.swagger-ui { max-width: 1200px; margin: 0 auto; }',
   customCdnPrefix: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@3',
