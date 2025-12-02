@@ -39,40 +39,87 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const classes = cn(baseStyles, variantStyles[variant], sizeStyles[size], className);
-    const contentChildren =
-      asChild && React.isValidElement(children) ? children.props.children : children;
 
-    const content = (
+    // Content untuk button biasa
+    const buttonContent = (
       <>
         {loading ? (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white" />
         ) : (
           icon && <span className="text-lg">{icon}</span>
         )}
-        <span>{contentChildren}</span>
+        <span>{children}</span>
       </>
     );
 
-    if (asChild) {
-      if (!React.isValidElement(children)) {
-        if (process.env.NODE_ENV !== "production") {
-          console.warn("Button with asChild expects a single React element as child.");
-        }
-        return null;
+    // Jika asChild dan children adalah React element
+    if (asChild && React.isValidElement(children)) {
+      // Type assertion dengan interface yang jelas
+      const elementChild = children as React.ReactElement<{
+        className?: string;
+        ref?: React.Ref<unknown>;
+        children?: React.ReactNode;
+        onClick?: React.MouseEventHandler<unknown>;
+        onMouseEnter?: React.MouseEventHandler<unknown>;
+        onMouseLeave?: React.MouseEventHandler<unknown>;
+        disabled?: boolean;
+        [key: string]: unknown;
+      }>;
+
+      // Ambil children dari element child dengan type guard
+      const childChildren = elementChild.props?.children ?? children;
+
+      // Content untuk asChild
+      const asChildContent = (
+        <>
+          {loading ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white" />
+          ) : (
+            icon && <span className="text-lg">{icon}</span>
+          )}
+          {childChildren}
+        </>
+      );
+
+      // Buat props untuk cloneElement
+      const clonedProps: Record<string, unknown> = {
+        ...elementChild.props,
+        className: cn(classes, elementChild.props?.className || ""),
+        children: asChildContent,
+      };
+
+      // Tambahkan ref jika element child tidak punya ref
+      if (!elementChild.props?.ref) {
+        clonedProps.ref = ref;
       }
 
-      const childElement = children as React.ReactElement<Record<string, unknown>>;
-      return React.cloneElement(childElement, {
-        ...childElement.props,
-        ...props,
-        className: cn(classes, childElement.props.className as string),
-        children: content,
-      });
+      // Tambahkan event handlers dari props button
+      if (props.onClick) clonedProps.onClick = props.onClick;
+      if (props.onMouseEnter) clonedProps.onMouseEnter = props.onMouseEnter;
+      if (props.onMouseLeave) clonedProps.onMouseLeave = props.onMouseLeave;
+      if (props.disabled !== undefined) clonedProps.disabled = props.disabled;
+
+      // Clone element dengan props yang sudah aman
+      return React.cloneElement(elementChild, clonedProps);
     }
 
+    // Jika asChild tapi children bukan React element
+    if (asChild) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Button with asChild expects a single React element as child.");
+      }
+      // Fallback ke button biasa
+      return (
+        <button ref={ref} className={classes} type={type ?? "button"} {...props}>
+          {buttonContent}
+        </button>
+      );
+    }
+
+    // Default: render sebagai button biasa
     return (
       <button ref={ref} className={classes} type={type ?? "button"} {...props}>
-        {content}
+        {buttonContent}
       </button>
     );
   },
