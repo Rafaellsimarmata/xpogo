@@ -18,6 +18,7 @@ try {
 
 const initDatabase = require('./config/initDb');
 const authRoutes = require('./routes/auth');
+const marketIntelligenceRoutes = require('./routes/marketIntelligence');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -132,6 +133,70 @@ const swaggerSpec = {
         }
       }
     },
+    '/market-intelligence/analyze': {
+      post: {
+        tags: ['Market Intelligence'],
+        summary: 'Analyze market intelligence for a product',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  productName: { type: 'string', description: 'Name of the product to analyze' }
+                },
+                required: ['productName']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Market intelligence generated successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate market intelligence'
+          }
+        }
+      }
+    },
+    '/market-intelligence/parse-data': {
+      post: {
+        tags: ['Market Intelligence'],
+        summary: 'Parse market data from AI response',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  aiResponse: { type: 'string', description: 'Raw AI response containing market data table' }
+                },
+                required: ['aiResponse']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Data parsed successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to parse data'
+          }
+        }
+      }
+    },
     '/api/example': {
       get: {
         tags: ['Example'],
@@ -159,8 +224,11 @@ const swaggerSpec = {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-
+// Auth routes
 app.use('/auth', authRoutes);
+
+// Market Intelligence routes
+app.use('/market-intelligence', marketIntelligenceRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });

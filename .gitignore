@@ -15,6 +15,7 @@ coverage
 # Service-specific env files
 packages/backend/.env
 packages/backend/.env.development
+packages/backend/.env.staging
 packages/backend/.env.production
 packages/frontend/.env.development
 packages/frontend/.env.production
