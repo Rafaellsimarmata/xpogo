@@ -1,13 +1,29 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'xpogo_dev'
-});
+// Database configuration based on NODE_ENV
+let poolConfig;
+
+if (process.env.NODE_ENV === 'production') {
+  // Production: Use Supabase PostgreSQL with connection pooling
+  poolConfig = {
+    connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  };
+} else {
+  // Development/Staging: Use local PostgreSQL with individual parameters
+  poolConfig = {
+    user: process.env.POSTGRES_USER || 'postgres',
+    password: process.env.POSTGRES_PASSWORD || 'postgres',
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: process.env.POSTGRES_PORT || 5432,
+    database: process.env.POSTGRES_DATABASE || 'xpogo_dev',
+  };
+}
+
+const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
