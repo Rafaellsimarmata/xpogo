@@ -26,6 +26,9 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Static files for Swagger UI (fixes CSS/JS loading on Vercel)
+app.use(express.static('node_modules/swagger-ui-dist'));
+
 initDatabase();
 
 const backendUrl = process.env.BACKEND_URL || `http://localhost:${port}`;
@@ -222,12 +225,23 @@ const swaggerSpec = {
   }
 };
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// Swagger UI custom options for proper CSS/JS loading (works on Vercel with CDN)
+const swaggerUiOptions = {
+  customCss: '.swagger-ui { max-width: 1200px; margin: 0 auto; }',
+  customCdnPrefix: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@3',
+  customSiteTitle: 'XPogo API Documentation',
+  swaggerOptions: {
+    deepLinking: true,
+    displayOperationId: false,
+    defaultModelsExpandDepth: 1,
+    defaultModelExpandDepth: 1
+  }
+};
 
-// Auth routes
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
 app.use('/auth', authRoutes);
 
-// Market Intelligence routes
 app.use('/market-intelligence', marketIntelligenceRoutes);
 
 app.get('/health', (req, res) => {
