@@ -26,8 +26,6 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static('node_modules/swagger-ui-dist'));
-
 initDatabase();
 
 const backendUrl = process.env.BACKEND_URL || `http://localhost:${port}`;
@@ -228,12 +226,17 @@ const swaggerSpec = {
 const swaggerUiOptions = {
   customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css',
   customCdnPrefix: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@3',
+  customJs: [
+    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js'
+  ],
   customSiteTitle: 'XPogo API Documentation',
   swaggerOptions: {
     deepLinking: true,
     displayOperationId: false,
     defaultModelsExpandDepth: 1,
-    defaultModelExpandDepth: 1
+    defaultModelExpandDepth: 1,
+    persistAuthorization: true
   }
 };
 
