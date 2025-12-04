@@ -19,6 +19,7 @@ try {
 const initDatabase = require('./config/initDb');
 const authRoutes = require('./routes/auth');
 const marketIntelligenceRoutes = require('./routes/marketIntelligence');
+const documentAssistantRoutes = require('./routes/documentAssistant');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -198,6 +199,264 @@ const swaggerSpec = {
         }
       }
     },
+    '/document-assistant/product-description': {
+      post: {
+        tags: ['Document Assistant'],
+        summary: 'Generate product export description',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  productName: { type: 'string', description: 'Name of the product' },
+                  category: { type: 'string', description: 'Product category' },
+                  features: { type: 'string', description: 'Key features of the product' },
+                  targetMarket: { type: 'string', description: 'Target export market' },
+                  specifications: { type: 'string', description: 'Product specifications' }
+                },
+                required: ['productName']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Product description generated successfully'
+          },
+          '400': {
+            description: 'Missing required fields'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate product description'
+          }
+        }
+      }
+    },
+    '/document-assistant/compliance': {
+      post: {
+        tags: ['Document Assistant'],
+        summary: 'Generate export compliance checklist',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  productName: { type: 'string', description: 'Name of the product' },
+                  origin: { type: 'string', description: 'Country of origin' },
+                  destinationCountries: { type: 'string', description: 'Destination countries' },
+                  productType: { type: 'string', description: 'Type of product' }
+                },
+                required: ['productName']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Compliance document generated successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate compliance document'
+          }
+        }
+      }
+    },
+    '/document-assistant/invoice-template': {
+      post: {
+        tags: ['Document Assistant'],
+        summary: 'Generate export invoice template',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  companyName: { type: 'string', description: 'Name of the company' },
+                  companyAddress: { type: 'string', description: 'Company address' },
+                  companyPhone: { type: 'string', description: 'Company phone number' },
+                  companyEmail: { type: 'string', description: 'Company email' },
+                  invoiceTerms: { type: 'string', description: 'Invoice payment terms' }
+                },
+                required: ['companyName']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Invoice template generated successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate invoice template'
+          }
+        }
+      }
+    },
+    '/document-assistant/packing-list': {
+      post: {
+        tags: ['Document Assistant'],
+        summary: 'Generate packing list for shipment',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  productNames: { type: 'string', description: 'Names of products' },
+                  quantities: { type: 'string', description: 'Product quantities' },
+                  totalWeight: { type: 'string', description: 'Total shipment weight' },
+                  destination: { type: 'string', description: 'Destination country/port' },
+                  shipmentDate: { type: 'string', description: 'Shipment date' },
+                  packagingType: { type: 'string', description: 'Type of packaging' }
+                },
+                required: ['productNames', 'destination']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Packing list generated successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate packing list'
+          }
+        }
+      }
+    },
+    '/document-assistant/bill-of-lading': {
+      post: {
+        tags: ['Document Assistant'],
+        summary: 'Generate bill of lading for shipment',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  shipperName: { type: 'string', description: 'Name of the shipper' },
+                  consigneeName: { type: 'string', description: 'Name of the consignee' },
+                  notifyParty: { type: 'string', description: 'Notify party information' },
+                  portOfLoading: { type: 'string', description: 'Port of loading' },
+                  portOfDischarge: { type: 'string', description: 'Port of discharge' },
+                  carrierName: { type: 'string', description: 'Name of the carrier' },
+                  shipmentDate: { type: 'string', description: 'Shipment date' }
+                },
+                required: ['shipperName', 'consigneeName', 'portOfLoading', 'portOfDischarge']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Bill of lading generated successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate bill of lading'
+          }
+        }
+      }
+    },
+    '/document-assistant/proforma-invoice': {
+      post: {
+        tags: ['Document Assistant'],
+        summary: 'Generate proforma invoice for quotation',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  companyName: { type: 'string', description: 'Seller company name' },
+                  buyerName: { type: 'string', description: 'Buyer company name' },
+                  products: { type: 'string', description: 'Products to be invoiced' },
+                  quantities: { type: 'string', description: 'Product quantities' },
+                  unitPrices: { type: 'string', description: 'Unit prices' },
+                  paymentTerms: { type: 'string', description: 'Payment terms' },
+                  validityPeriod: { type: 'string', description: 'Validity period of the quote' }
+                },
+                required: ['companyName', 'buyerName', 'products']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Proforma invoice generated successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate proforma invoice'
+          }
+        }
+      }
+    },
+    '/document-assistant/market-analysis': {
+      post: {
+        tags: ['Document Assistant'],
+        summary: 'Generate export market analysis',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  productType: { type: 'string', description: 'Type of product' },
+                  targetCountries: { type: 'string', description: 'Target countries for export' },
+                  currentMarketShare: { type: 'string', description: 'Current market position' },
+                  competitorInfo: { type: 'string', description: 'Competitor information' }
+                },
+                required: ['productType']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Market analysis generated successfully'
+          },
+          '401': {
+            description: 'Unauthorized - no valid token'
+          },
+          '500': {
+            description: 'Failed to generate market analysis'
+          }
+        }
+      }
+    },
     '/api/example': {
       get: {
         tags: ['Example'],
@@ -245,6 +504,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOpti
 app.use('/auth', authRoutes);
 
 app.use('/market-intelligence', marketIntelligenceRoutes);
+
+app.use('/document-assistant', documentAssistantRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
