@@ -35,8 +35,6 @@ class MarketIntelligenceService {
       model: model
     };  
 
-    console.log("secret token ", `Bearer ${secretToken}`);
-
     try {
       const response = await axios.post(`${apiBaseUrl}/chat/completions`, payload, {
         headers: {
