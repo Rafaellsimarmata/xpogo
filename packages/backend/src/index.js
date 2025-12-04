@@ -4,6 +4,8 @@ const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const dotenv = require('dotenv');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // Load environment variables
 const env = process.env.NODE_ENV || 'development';
@@ -20,14 +22,29 @@ const initDatabase = require('./config/initDb');
 const authRoutes = require('./routes/auth');
 const marketIntelligenceRoutes = require('./routes/marketIntelligence');
 const documentAssistantRoutes = require('./routes/documentAssistant');
+const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Create HTTP server with socket.io
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
 
 app.use(cors());
 app.use(express.json());
 
 initDatabase();
+
+// Initialize WebSocket handlers
+const chatbotHandler = new ChatbotWebSocketHandler(io);
+console.log("WebSocket handlers initialized");
+chatbotHandler.initialize();
 
 const backendUrl = process.env.BACKEND_URL || `http://localhost:${port}`;
 
@@ -37,6 +54,11 @@ const swaggerSpec = {
     title: 'XPogo Backend API',
     version: '0.1.0',
     description: 'Minimal API documentation for the XPogo backend'
+  },
+  externalDocs: {
+    description: 'WebSocket API Documentation (AsyncAPI 3.0.0) - View event-driven communication patterns',
+    url: 'https://studio.asyncapi.com/'
+    // url: 'https://studio.asyncapi.com/url=github.com/your-repo-path/CHATBOT_ASYNCAPI.yaml'
   },
   servers: [
     {
@@ -483,20 +505,12 @@ const swaggerSpec = {
 };
 
 const swaggerUiOptions = {
-  customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css',
+  customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
   customCdnPrefix: 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@3',
   customJs: [
     'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js'
-  ],
-  customSiteTitle: 'XPogo API Documentation',
-  swaggerOptions: {
-    deepLinking: true,
-    displayOperationId: false,
-    defaultModelsExpandDepth: 1,
-    defaultModelExpandDepth: 1,
-    persistAuthorization: true
-  }
+  ]
 };
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
@@ -519,7 +533,8 @@ app.get('/api/example', (req, res) => {
   res.json({ message: 'Hello from backend', ts: Date.now() });
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Backend listening on http://localhost:${port}`);
   console.log(`Swagger UI available at ${backendUrl.replace(/\/$/, '')}/api-docs`);
+  console.log(`WebSocket (Socket.io) available at ws://localhost:${port}`);
 });
