@@ -30,7 +30,11 @@ const CountryPage = ({ params }: CountryPageProps) => {
     <section className="bg-gradient-to-b from-white to-blue-50/40 py-12">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6">
         <CountryDetail country={country} />
-        <DocumentChecklist documents={checklist} />
+        <DocumentChecklist
+          documents={checklist}
+          title={`Checklist dokumen untuk ${country.name}`}
+          description="Daftar persyaratan yang wajib dipenuhi sebelum proses pengiriman berlangsung."
+        />
         <StoreSelector stores={country.stores} unlocked={unlocked} />
       </div>
     </section>

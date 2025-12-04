@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle, MapPin, Phone } from "lucide-react";
+import { CheckCircle, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
-import Button from "@/src/components/ui/Button";
+import { Button } from "@/src/components/ui/Button";
 import { CountryMatch } from "@/src/lib/data/countries";
 import { formatCurrency, getScoreTone, readinessColor } from "@/src/lib/utils";
 
@@ -56,7 +56,7 @@ const CountryDetail = ({ country }: CountryDetailProps) => (
           </span>
         ))}
       </div>
-      <Button variant="secondary" className="mt-8" asChild icon={<ArrowLeft className="h-4 w-4" />}>
+      <Button variant="secondary" className="mt-8" asChild>
         <Link href="/market-analysis">Kembali ke market analysis</Link>
       </Button>
     </div>

@@ -3,9 +3,8 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
-import Button from "@/src/components/ui/Button";
+import { Button } from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
-import GoogleButton from "@/src/components/auth/GoogleButton";
 import { useAuth } from "@/src/context/AuthContext";
 
 type SignInValues = {
@@ -71,11 +70,18 @@ const SignInForm = () => {
           Lupa password?
         </Link>
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      <Button type="submit" className="w-full" loading={loading}>
-        Masuk
+      {error && (
+        <div className="rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+      <Button
+        type="submit"
+        className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+        disabled={loading}
+      >
+        {loading ? "Memproses..." : "Masuk"}
       </Button>
-      <GoogleButton onClick={() => console.log("google login")} />
       <p className="text-center text-sm text-slate-500">
         Belum punya akun?{" "}
         <Link href="/signup" className="font-semibold text-blue-500">

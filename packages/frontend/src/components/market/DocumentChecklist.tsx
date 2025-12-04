@@ -1,11 +1,15 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Check, AlertCircle, UploadCloud } from "lucide-react";
 import { DocumentRequirement, checklistCompletion } from "@/src/lib/data/documents";
 
 type DocumentChecklistProps = {
   documents: DocumentRequirement[];
+  title?: string;
+  description?: string;
+  meta?: ReactNode;
 };
 
 const statusStyles: Record<string, string> = {
@@ -20,21 +24,26 @@ const statusLabel: Record<string, string> = {
   pending: "Belum lengkap",
 };
 
-const DocumentChecklist = ({ documents }: DocumentChecklistProps) => {
+const DocumentChecklist = ({
+  documents,
+  title = "DocuAssist Checklist",
+  description = "Checklist otomatis berdasarkan produk, negara, dan profil UMKM Anda.",
+  meta,
+}: DocumentChecklistProps) => {
   const progress = checklistCompletion(documents);
 
   return (
     <div className="rounded-3xl border border-white/40 bg-white/80 p-6 shadow">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-slate-900">DocuAssist Checklist</h3>
-          <p className="text-sm text-slate-500">
-            Checklist otomatis berdasarkan produk, negara, dan profil UMKM Anda.
-          </p>
+          <h3 className="text-xl font-semibold text-slate-900">{title}</h3>
+          <p className="text-sm text-slate-500">{description}</p>
         </div>
-        <span className="rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-600">
-          Progress {progress}%
-        </span>
+        {meta ?? (
+          <span className="rounded-full bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-600">
+            Progress {progress}%
+          </span>
+        )}
       </div>
       <div className="mt-6 h-3 rounded-full bg-slate-100">
         <motion.span
