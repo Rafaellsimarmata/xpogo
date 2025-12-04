@@ -2,46 +2,41 @@
 
 import { motion } from "framer-motion";
 
-const activities = [
-  {
-    title: "Checklist dokumen Jepang 80% selesai",
-    time: "Baru saja",
-    status: "success",
-  },
-  {
-    title: "Analisis pasar untuk Kopi disimpan",
-    time: "1 jam lalu",
-    status: "info",
-  },
-  {
-    title: "Upload kontrak dagang draft",
-    time: "Kemarin",
-    status: "warning",
-  },
-];
-
-const statusColor: Record<string, string> = {
-  success: "bg-green-100 text-green-700",
-  info: "bg-blue-100 text-blue-700",
-  warning: "bg-amber-100 text-amber-700",
+export type ActivityItem = {
+  title: string;
+  detail: string;
+  time: string;
+  status: "done" | "progress" | "waiting";
 };
 
-const RecentActivity = () => (
-  <div className="rounded-3xl border border-white/40 bg-white/80 p-6 shadow">
-    <h3 className="text-lg font-semibold text-slate-900">Aktivitas Terbaru</h3>
-    <div className="mt-4 space-y-4">
-      {activities.map((activity) => (
+type RecentActivityProps = {
+  items: ActivityItem[];
+};
+
+const statusStyles: Record<ActivityItem["status"], string> = {
+  done: "bg-emerald-500",
+  progress: "bg-amber-400",
+  waiting: "bg-slate-300",
+};
+
+const RecentActivity = ({ items }: RecentActivityProps) => (
+  <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
+    <h3 className="text-base font-semibold text-foreground">Linimasa Aktivitas</h3>
+    <div className="mt-5 space-y-4">
+      {items.map((activity, index) => (
         <motion.div
-          key={activity.title}
-          initial={{ opacity: 0, x: -20 }}
+          key={`${activity.title}-${index}`}
+          initial={{ opacity: 0, x: -12 }}
           whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          className="flex items-start gap-4"
+          viewport={{ once: true, amount: 0.2 }}
+          className="flex items-start gap-3"
         >
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusColor[activity.status]}`}>
-            {activity.time}
-          </span>
-          <p className="text-sm text-slate-600">{activity.title}</p>
+          <span className={`mt-1 h-2 w-2 rounded-full ${statusStyles[activity.status]}`} />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-foreground">{activity.title}</p>
+            <p className="text-xs text-muted-foreground">{activity.detail}</p>
+          </div>
+          <span className="text-xs text-muted-foreground">{activity.time}</span>
         </motion.div>
       ))}
     </div>

@@ -3,14 +3,14 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
-import Button from "@/src/components/ui/Button";
+import { Button } from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
-import GoogleButton from "./GoogleButton";
 
 type SignUpValues = {
   email: string;
   password: string;
   confirmPassword: string;
+  businessName: string;
 };
 
 const SignUpForm = () => {
@@ -26,6 +26,7 @@ const SignUpForm = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      businessName: "",
     },
   });
 
@@ -73,11 +74,26 @@ const SignUpForm = () => {
           error={errors.confirmPassword?.message}
         />
       </div>
-      {success && <p className="text-sm text-green-600">Registrasi berhasil! Silakan masuk.</p>}
-      <Button type="submit" className="w-full">
+      <div>
+        <label className="mb-2 block text-sm font-semibold text-slate-600">Email</label>
+        <Input
+          type="text"
+          placeholder="CV RempahIndoNusa"
+          {...register("businessName", { required: "Nama Perusahaan Wajib diisi" })}
+          error={errors.email?.message}
+        />
+      </div>
+      {success && (
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-600">
+          Registrasi berhasil! Silakan cek email untuk aktivasi akun.
+        </div>
+      )}
+      <Button
+        type="submit"
+        className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+      >
         Buat Akun
       </Button>
-      <GoogleButton onClick={() => console.log("google signup")} />
       <p className="text-center text-sm text-slate-500">
         Sudah punya akun?{" "}
         <Link href="/signin" className="font-semibold text-blue-500">

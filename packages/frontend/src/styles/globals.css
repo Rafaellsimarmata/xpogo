@@ -1,12 +1,84 @@
 @import "tailwindcss";
 
-:root {
-  color-scheme: light;
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --glass: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 215 25% 27%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 27%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 27%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 215 25% 27%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 187 85% 53%;
+    --accent-foreground: 215 25% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    /* XPOGO Brand Colors */
+    --xpogo-blue: 217 91% 60%;
+    --xpogo-cyan: 187 85% 53%;
+    --xpogo-slate: 215 25% 27%;
+    --xpogo-light: 210 40% 98%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(187 85% 53%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 50%, hsl(0 0% 100%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100% / 0.9) 0%, hsl(0 0% 100% / 0.5) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(215 71% 8%) 0%, hsl(215 65% 12%) 100%);
+
+    /* Shadows */
+    --shadow-card: 0 4px 24px -4px hsl(217 91% 60% / 0.1);
+    --shadow-card-hover: 0 12px 40px -8px hsl(217 91% 60% / 0.2);
+    --shadow-button: 0 4px 16px -2px hsl(217 91% 60% / 0.25);
+  }
+
+  .dark {
+    --background: 215 71% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 215 65% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 215 65% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 187 85% 53%;
+    --accent-foreground: 215 25% 15%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,7 +86,20 @@
     color-scheme: dark;
     --background: #0b1220;
     --foreground: #e2e8f0;
-    --card: rgba(15, 23, 42, 0.8);
+    --card: rgba(15, 23, 42, 0.85);
+    --primary: #60a5fa;
+    --primary-foreground: #020617;
+    --secondary: #3b82f6;
+    --secondary-foreground: #020617;
+    --accent: #93c5fd;
+    --accent-foreground: #020617;
+    --muted: #94a3b8;
+    --muted-foreground: #cbd5f5;
+    --border: rgba(226, 232, 240, 0.25);
+    --input: rgba(226, 232, 240, 0.35);
+    --ring: #60a5fa;
+    --destructive: #f87171;
+    --destructive-foreground: #0b1220;
     --glass: rgba(15, 23, 42, 0.6);
     --glass-border: rgba(148, 163, 184, 0.3);
   }
@@ -23,14 +108,23 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: #2563eb;
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-primary-dark: #1e40af;
-  --color-secondary: #3b82f6;
-  --color-accent: #60a5fa;
-  --color-muted: #64748b;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-card: var(--card);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --font-sans: var(--font-inter);
 }
 
@@ -57,13 +151,13 @@
 
 @layer utilities {
   .glass-panel {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(12px);
+    @apply backdrop-blur-md bg-white/10 border border-white/20;
   }
 
   .gradient-border {
-    position: relative;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(to right, #3b82f6, #06b6d4) border-box;
+    border: 2px solid transparent;
   }
 
   .gradient-border::before {
@@ -81,8 +175,18 @@
   }
 
   .gradient-text {
-    background: linear-gradient(120deg, #2563eb, #3b82f6 60%, #60a5fa);
-    -webkit-background-clip: text;
-    color: transparent;
+    @apply bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-500 bg-clip-text text-transparent;
+  }
+
+  .shadow-card {
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 40px 80px rgba(37, 99, 235, 0.28);
+  }
+
+  .shadow-button {
+    box-shadow: 0 18px 35px rgba(37, 99, 235, 0.35);
   }
 }

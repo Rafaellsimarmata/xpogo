@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
-import Button from "@/src/components/ui/Button";
+import { Button } from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
 import { useUser } from "@/src/context/UserContext";
 

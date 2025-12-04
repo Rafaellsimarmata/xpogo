@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
-import Navbar from "@/src/components/layout/Navbar";
-import Footer from "@/src/components/layout/Footer";
 import { AuthProvider } from "@/src/context/AuthContext";
 import { UserProvider } from "@/src/context/UserContext";
 
@@ -29,13 +27,7 @@ export default function RootLayout({
     <html lang="id" className={inter.variable}>
       <body className="bg-background text-foreground antialiased">
         <AuthProvider>
-          <UserProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-          </UserProvider>
+          <UserProvider>{children}</UserProvider>
         </AuthProvider>
       </body>
     </html>

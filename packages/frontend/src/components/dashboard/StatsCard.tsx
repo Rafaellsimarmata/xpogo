@@ -1,27 +1,29 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Card from "@/src/components/ui/Card";
 
 type StatsCardProps = {
   label: string;
   value: string;
   subtext: string;
   icon: React.ReactNode;
+  footnote?: string;
 };
 
-const StatsCard = ({ label, value, subtext, icon }: StatsCardProps) => (
-  <motion.div whileHover={{ y: -4 }}>
-    <Card className="glass-panel rounded-3xl border border-white/50 bg-white/80 p-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-slate-500">{label}</p>
-          <p className="mt-1 text-2xl font-semibold text-slate-900">{value}</p>
-          <p className="text-xs text-slate-400">{subtext}</p>
-        </div>
-        <div className="rounded-2xl bg-blue-50 p-3 text-blue-500">{icon}</div>
+const StatsCard = ({ label, value, subtext, icon, footnote }: StatsCardProps) => (
+  <motion.div
+    whileHover={{ y: -2 }}
+    className="rounded-2xl border border-border/60 bg-card/90 p-5 shadow-sm shadow-slate-900/5"
+  >
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">{label}</p>
+        <p className="mt-3 text-3xl font-bold text-foreground">{value}</p>
+        <p className="text-sm text-muted-foreground">{subtext}</p>
       </div>
-    </Card>
+      <div className="rounded-xl bg-primary/10 p-3 text-primary">{icon}</div>
+    </div>
+    {footnote && <p className="mt-4 text-xs text-muted-foreground">{footnote}</p>}
   </motion.div>
 );
 
