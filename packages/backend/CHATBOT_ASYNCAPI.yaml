@@ -1,0 +1,809 @@
+asyncapi: 3.0.0
+info:
+  title: XPogo AI Chatbot WebSocket API
+  version: 1.0.0
+  description: |
+    Real-time AI-powered chatbot WebSocket service for export assistance.
+    This document describes all WebSocket events for the XPogo AI Chatbot service.
+    
+    The chatbot provides real-time chat support with AI responses, conversation memory,
+    and specialized guidance for small enterprises looking to export their products.
+  contact:
+    name: XPogo Support
+    email: support@xpogo.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  x-apiType: websocket
+  x-asyncapi-spec-version: 3.0.0
+
+servers:
+  development:
+    host: localhost:3001
+    protocol: ws
+    description: Local development server
+    variables:
+      port:
+        default: '3001'
+  production:
+    host: api.xpogo.com
+    protocol: wss
+    description: Production server with SSL/TLS
+    
+channels:
+  socket.io:
+    address: socket.io
+    title: XPogo AI Chatbot Channel
+    description: Main WebSocket channel for AI chatbot communication
+    
+    messages:
+      # Client → Server Messages
+      join-chat:
+        name: join-chat
+        title: Join Chat Session
+        summary: Initialize WebSocket connection and start a new chat session
+        description: |
+          Emitted by client to join the chat. This must be called first before sending messages.
+          Initializes conversation history for the user and sets up the WebSocket connection.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+            - userName
+          properties:
+            userId:
+              type: string
+              description: Unique identifier for the user
+              example: user123
+            userName:
+              type: string
+              description: Display name of the user
+              example: John Doe
+        examples:
+          - name: joinChatExample
+            summary: User joining the chat
+            payload:
+              userId: user123
+              userName: John Doe
+        tags:
+          - name: Client Events
+          - name: Connection Management
+        x-response-event: chat-started
+        x-example-response:
+          event: chat-started
+          userId: user123
+          message: "Welcome to XPogo AI Chatbot! How can I help you export your products?"
+          timestamp: "2024-12-04T10:30:00Z"
+
+      send-message:
+        name: send-message
+        title: Send Chat Message
+        summary: Send a chat message and receive AI response
+        description: |
+          Sends a user message to the AI chatbot. The server will process the message,
+          maintain conversation history, and respond with an AI-generated response
+          that includes context from previous messages.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+            - message
+          properties:
+            userId:
+              type: string
+              description: User ID from join-chat event
+              example: user123
+            message:
+              type: string
+              description: Chat message to send
+              example: How do I export coffee to Europe?
+        examples:
+          - name: chatMessageExample
+            summary: User sending a chat message
+            payload:
+              userId: user123
+              message: How do I export coffee to Europe?
+        tags:
+          - name: Client Events
+          - name: Chat Messages
+        x-related-events:
+          - bot-typing
+          - bot-response
+          - error
+        x-example-response:
+          event: bot-response
+          userId: user123
+          message: "To export coffee to Europe, you need to..."
+          timestamp: "2024-12-04T10:35:00Z"
+
+      analyze-product:
+        name: analyze-product
+        title: Analyze Product Export Feasibility
+        summary: Get AI analysis of product suitability for export
+        description: |
+          Requests specialized AI analysis of a product's export potential.
+          Provides insights on target markets, requirements, certifications needed,
+          and overall export feasibility.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+            - productInfo
+          properties:
+            userId:
+              type: string
+              example: user123
+            productInfo:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Product name
+                  example: Premium Coffee Beans
+                origin:
+                  type: string
+                  description: Country of origin
+                  example: Colombia
+                quantity:
+                  type: string
+                  description: Available quantity
+                  example: 500kg
+                quality:
+                  type: string
+                  description: Quality level
+                  example: Premium
+                certifications:
+                  type: string
+                  description: Current certifications
+                  example: Fair Trade, Organic
+        examples:
+          - name: analyzeProductExample
+            summary: Analyzing premium coffee beans for export
+            payload:
+              userId: user123
+              productInfo:
+                name: Premium Coffee Beans
+                origin: Colombia
+                quantity: 500kg
+                quality: Premium
+                certifications: Fair Trade, Organic
+        tags:
+          - name: Client Events
+          - name: Product Analysis
+        x-analysis-type: product
+        x-example-response:
+          event: bot-response
+          analysis: "Your Colombian coffee has excellent export potential..."
+          recommendations:
+            - "Target specialty coffee markets in Europe"
+            - "Maintain Fair Trade certification"
+            - "Package in eco-friendly materials"
+
+      market-strategy:
+        name: market-strategy
+        title: Get Market Entry Strategy
+        summary: Receive AI-generated market entry planning
+        description: |
+          Requests a strategic market entry plan for a specific country or region.
+          Includes competition analysis, pricing recommendations, distribution channels,
+          and timeline for market entry.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+            - marketInfo
+          properties:
+            userId:
+              type: string
+              example: user123
+            marketInfo:
+              type: object
+              required:
+                - targetCountry
+              properties:
+                targetCountry:
+                  type: string
+                  description: Target country for export
+                  example: Germany
+                productType:
+                  type: string
+                  description: Type of product
+                  example: Coffee
+                budget:
+                  type: string
+                  description: Budget for market entry
+                  example: $50,000
+                timeline:
+                  type: string
+                  description: Target timeline
+                  example: 6 months
+        tags:
+          - name: Client Events
+          - name: Market Strategy
+        x-strategy-type: market-entry
+        x-example-response:
+          event: bot-response
+          strategy: "Here's a comprehensive market entry plan..."
+          steps:
+            - "Research local regulations"
+            - "Find distribution partners"
+            - "Set up supply chain"
+
+      compliance-guidance:
+        name: compliance-guidance
+        title: Get Compliance and Regulations Guidance
+        summary: Receive information on export compliance requirements
+        description: |
+          Requests detailed compliance information including certifications,
+          documentation requirements, and regulations for exporting to specific countries.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+            - complianceQuery
+          properties:
+            userId:
+              type: string
+              example: user123
+            complianceQuery:
+              type: object
+              required:
+                - productType
+              properties:
+                productType:
+                  type: string
+                  description: Type of product
+                  example: Food Product
+                destinationCountry:
+                  type: string
+                  description: Destination country
+                  example: USA
+                currentCertifications:
+                  type: string
+                  description: Current certifications held
+                  example: ISO 9001
+        tags:
+          - name: Client Events
+          - name: Compliance
+        x-compliance-scope: regulations
+        x-example-response:
+          event: bot-response
+          requirements:
+            - "FDA registration required"
+            - "Nutritional label in English"
+            - "Safety certificates"
+          timeline: "4-6 weeks"
+
+      shipping-guidance:
+        name: shipping-guidance
+        title: Get Shipping and Logistics Guidance
+        summary: Receive shipping method recommendations and logistics advice
+        description: |
+          Requests recommendations for shipping methods, packaging, carriers,
+          and logistics planning for export shipments.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+            - shippingInfo
+          properties:
+            userId:
+              type: string
+              example: user123
+            shippingInfo:
+              type: object
+              required:
+                - productType
+              properties:
+                productType:
+                  type: string
+                  description: Type of product
+                  example: Coffee Beans
+                weight:
+                  type: string
+                  description: Shipment weight
+                  example: 500kg
+                destination:
+                  type: string
+                  description: Destination port/country
+                  example: Hamburg, Germany
+                urgency:
+                  type: string
+                  enum: [Standard, Express, Urgent]
+                  description: Shipping urgency
+                  example: Standard
+        tags:
+          - name: Client Events
+          - name: Shipping
+        x-logistics-type: shipping
+        x-example-response:
+          event: bot-response
+          shippingMethods:
+            - "Ocean freight (recommended - most cost-effective)"
+            - "Air freight (fastest)"
+          estimatedCost: "$2,000 - $3,000"
+          timeline: "15-30 days"
+
+      get-history:
+        name: get-history
+        title: Retrieve Conversation History
+        summary: Get the complete chat history for current session
+        description: |
+          Retrieves all messages in the conversation for the current user.
+          Includes both user messages and bot responses with timestamps.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: User ID to retrieve history for
+              example: user123
+        tags:
+          - name: Client Events
+          - name: History Management
+        x-response-event: conversation-history
+        x-example-response:
+          event: conversation-history
+          userId: user123
+          messages:
+            - role: user
+              content: "How do I export coffee?"
+              timestamp: "2024-12-04T10:30:00Z"
+            - role: bot
+              content: "You can export coffee by..."
+              timestamp: "2024-12-04T10:31:00Z"
+          messageCount: 2
+
+      clear-chat:
+        name: clear-chat
+        title: Clear Conversation History
+        summary: Reset conversation and start fresh
+        description: |
+          Clears the conversation history for the current user.
+          All previous messages will be removed and the conversation will reset.
+        contentType: application/json
+        payload:
+          type: object
+          required:
+            - userId
+          properties:
+            userId:
+              type: string
+              description: User ID for which to clear chat
+              example: user123
+        tags:
+          - name: Client Events
+          - name: History Management
+        x-response-event: chat-cleared
+        x-example-response:
+          event: chat-cleared
+          userId: user123
+          message: "Conversation cleared. Ready to start fresh!"
+          timestamp: "2024-12-04T10:35:00Z"
+
+      # Server → Client Messages
+      chat-started:
+        name: chat-started
+        title: Chat Started Confirmation
+        summary: Server confirmation that chat session has started
+        description: |
+          Sent by server when user successfully joins the chat.
+          Indicates that the conversation has been initialized and ready for messages.
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            event:
+              type: string
+              enum: [chat-started]
+              example: chat-started
+            userId:
+              type: string
+              example: user123
+            message:
+              type: string
+              description: Welcome message
+              example: "Welcome to XPogo AI Chatbot!"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-12-04T10:30:00Z"
+        tags:
+          - name: Server Events
+          - name: Connection Management
+        x-triggered-by:
+          - join-chat
+
+      bot-response:
+        name: bot-response
+        title: AI Bot Response
+        summary: Server sends AI-generated response to client
+        description: |
+          Sent by server with AI response to user messages or analysis requests.
+          Contains the AI-generated text and additional metadata about the response.
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            event:
+              type: string
+              enum: [bot-response]
+              example: bot-response
+            success:
+              type: boolean
+              example: true
+            message:
+              type: string
+              description: AI response text
+              example: "To export coffee to Europe, you need to..."
+            userId:
+              type: string
+              example: user123
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-12-04T10:35:00Z"
+            messageType:
+              type: string
+              enum: [standard, analysis, strategy]
+              description: Type of response
+              example: standard
+            tokens_used:
+              type: integer
+              description: AI model tokens used
+              example: 125
+        tags:
+          - name: Server Events
+          - name: Chat Messages
+        x-triggered-by:
+          - send-message
+          - analyze-product
+          - market-strategy
+          - compliance-guidance
+          - shipping-guidance
+
+      bot-typing:
+        name: bot-typing
+        title: Bot Typing Indicator
+        summary: Server indicates bot is processing message
+        description: |
+          Sent by server when bot starts processing a user message.
+          Useful for showing typing indicator or loading animation in UI.
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            event:
+              type: string
+              enum: [bot-typing]
+              example: bot-typing
+            status:
+              type: string
+              enum: [typing, processing]
+              example: typing
+            userId:
+              type: string
+              example: user123
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-12-04T10:33:00Z"
+        tags:
+          - name: Server Events
+          - name: User Experience
+        x-triggered-by:
+          - send-message
+          - analyze-product
+
+      conversation-history:
+        name: conversation-history
+        title: Conversation History Response
+        summary: Server sends conversation history
+        description: |
+          Sent by server in response to get-history request.
+          Contains complete message history with roles and timestamps.
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            event:
+              type: string
+              enum: [conversation-history]
+              example: conversation-history
+            userId:
+              type: string
+              example: user123
+            messages:
+              type: array
+              items:
+                type: object
+                properties:
+                  role:
+                    type: string
+                    enum: [user, bot, system]
+                    example: user
+                  content:
+                    type: string
+                    example: "How do I export coffee?"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2024-12-04T10:30:00Z"
+            messageCount:
+              type: integer
+              example: 5
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-12-04T10:35:00Z"
+        tags:
+          - name: Server Events
+          - name: History Management
+        x-triggered-by:
+          - get-history
+
+      chat-cleared:
+        name: chat-cleared
+        title: Chat Cleared Confirmation
+        summary: Server confirms conversation has been cleared
+        description: |
+          Sent by server after clearing conversation history.
+          Indicates that the chat has been reset and is ready for new messages.
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            event:
+              type: string
+              enum: [chat-cleared]
+              example: chat-cleared
+            userId:
+              type: string
+              example: user123
+            message:
+              type: string
+              description: Confirmation message
+              example: "Conversation cleared successfully"
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-12-04T10:35:00Z"
+        tags:
+          - name: Server Events
+          - name: History Management
+        x-triggered-by:
+          - clear-chat
+
+      error:
+        name: error
+        title: Error Event
+        summary: Server sends error information
+        description: |
+          Sent by server when an error occurs during message processing.
+          Contains error details and affected user ID for debugging.
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            event:
+              type: string
+              enum: [error]
+              example: error
+            success:
+              type: boolean
+              enum: [false]
+              example: false
+            error:
+              type: string
+              description: Error message
+              example: "Failed to process message"
+            userId:
+              type: string
+              example: user123
+            timestamp:
+              type: string
+              format: date-time
+              example: "2024-12-04T10:36:00Z"
+            errorCode:
+              type: string
+              description: Error code for debugging
+              example: "MSG_PROCESSING_ERROR"
+        tags:
+          - name: Server Events
+          - name: Error Handling
+
+operations:
+  SendMessage:
+    action: send
+    title: Send Message to Chatbot
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/send-message'
+    tags:
+      - name: Client Operations
+      - name: Chat
+
+  ReceiveResponse:
+    action: receive
+    title: Receive Bot Response
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/bot-response'
+      - $ref: '#/channels/socket.io/messages/bot-typing'
+      - $ref: '#/channels/socket.io/messages/error'
+    tags:
+      - name: Server Operations
+      - name: Chat
+
+  JoinChat:
+    action: send
+    title: Join Chat Session
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/join-chat'
+    tags:
+      - name: Client Operations
+      - name: Connection
+
+  ReceiveJoinConfirmation:
+    action: receive
+    title: Receive Join Confirmation
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/chat-started'
+    tags:
+      - name: Server Operations
+      - name: Connection
+
+  RequestProductAnalysis:
+    action: send
+    title: Request Product Analysis
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/analyze-product'
+    tags:
+      - name: Client Operations
+      - name: Analysis
+
+  RequestMarketStrategy:
+    action: send
+    title: Request Market Strategy
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/market-strategy'
+    tags:
+      - name: Client Operations
+      - name: Strategy
+
+  RequestComplianceGuidance:
+    action: send
+    title: Request Compliance Information
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/compliance-guidance'
+    tags:
+      - name: Client Operations
+      - name: Compliance
+
+  RequestShippingGuidance:
+    action: send
+    title: Request Shipping Guidance
+    channel:
+      $ref: '#/channels/socket.io'
+    messages:
+      - $ref: '#/channels/socket.io/messages/shipping-guidance'
+    tags:
+      - name: Client Operations
+      - name: Shipping
+
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, bot, system]
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    ProductInfo:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        origin:
+          type: string
+        quantity:
+          type: string
+        quality:
+          type: string
+        certifications:
+          type: string
+
+    MarketInfo:
+      type: object
+      required:
+        - targetCountry
+      properties:
+        targetCountry:
+          type: string
+        productType:
+          type: string
+        budget:
+          type: string
+        timeline:
+          type: string
+
+tags:
+  - name: Client Events
+    description: Events sent from client to server
+  - name: Server Events
+    description: Events sent from server to client
+  - name: Connection Management
+    description: Events related to connection lifecycle
+  - name: Chat Messages
+    description: Basic chat messaging
+  - name: Product Analysis
+    description: Product-specific analysis requests
+  - name: Market Strategy
+    description: Market entry and strategy
+  - name: Compliance
+    description: Compliance and regulations
+  - name: Shipping
+    description: Shipping and logistics
+  - name: History Management
+    description: Conversation history operations
+  - name: Error Handling
+    description: Error and exception events
+  - name: User Experience
+    description: UX-related events like typing indicators
+
+x-links:
+  swagger-docs:
+    description: REST API documentation (OpenAPI/Swagger)
+    url: /api-docs
+  chatbot-setup:
+    description: Chatbot setup and integration guide
+    url: /docs/CHATBOT_SETUP.md
+  rest-api-reference:
+    description: Complete REST API reference
+    url: /api-docs
+
+x-metadata:
+  license: MIT
+  version: 1.0.0
+  specVersion: 3.0.0
+  supportedProtocols:
+    - ws
+    - wss
+  authentication:
+    - type: userId
+      description: User identification via userId parameter
+      location: message payload
+  rateLimit:
+    messagesPerSecond: 10
+    maxConnections: 1000
