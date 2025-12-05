@@ -54,21 +54,42 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async broadcastMessage(userId, event, data) {
     try {
-      // Use Supabase Realtime to broadcast
-      const channel = this.supabase
-        .channel(`user-${userId}`)
-        .send('broadcast', {
-          event,
-          data: {
-            ...data,
-            timestamp: new Date().toISOString()
-          }
+      // Skip broadcasting if Supabase not configured
+      if (!this.supabaseUrl || !this.supabaseKey) {
+        console.log('Supabase not configured, skipping broadcast');
+        return null;
+      }
+
+      const channelName = `user-${userId}`;
+      
+      // Get or create channel
+      let channel = this.userConnections.get(channelName);
+      
+      if (!channel) {
+        // Create new channel and subscribe
+        channel = this.supabase.channel(channelName);
+        channel = await channel.subscribe((status) => {
+          console.log(`Channel subscription status: ${status}`);
         });
+        
+        // Store channel for future use
+        this.userConnections.set(channelName, channel);
+      }
+
+      // Broadcast message
+      channel.send('broadcast', {
+        event,
+        data: {
+          ...data,
+          timestamp: new Date().toISOString()
+        }
+      });
 
       return channel;
     } catch (error) {
       console.error('Error broadcasting message:', error);
-      throw error;
+      // Don't throw - broadcasting is best-effort
+      return null;
     }
   }
 
@@ -258,6 +279,24 @@ class ChatbotSupabaseRealtimeHandler {
     } catch (error) {
       console.error('Error handling shipping-guidance:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Cleanup channel subscription when user disconnects
+   */
+  async cleanupUserConnection(userId) {
+    try {
+      const channelName = `user-${userId}`;
+      const channel = this.userConnections.get(channelName);
+      
+      if (channel) {
+        await channel.unsubscribe();
+        this.userConnections.delete(channelName);
+        console.log(`Cleaned up channel for user ${userId}`);
+      }
+    } catch (error) {
+      console.error('Error cleaning up user connection:', error);
     }
   }
 }
