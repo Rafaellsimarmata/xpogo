@@ -3,6 +3,9 @@ import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import { AuthProvider } from "@/src/context/AuthContext";
 import { UserProvider } from "@/src/context/UserContext";
+import { QueryProvider } from "@/src/components/providers/QueryProvider";
+import { WorkspaceProvider } from "@/src/store/workspaceStore";
+import WorkspaceLayoutProvider from "@/src/components/providers/WorkspaceLayoutProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,9 +29,15 @@ export default function RootLayout({
   return (
     <html lang="id" className={inter.variable}>
       <body className="bg-background text-foreground antialiased">
-        <AuthProvider>
-          <UserProvider>{children}</UserProvider>
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider>
+            <UserProvider>
+              <WorkspaceProvider>
+                <WorkspaceLayoutProvider>{children}</WorkspaceLayoutProvider>
+              </WorkspaceProvider>
+            </UserProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

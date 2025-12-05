@@ -6,10 +6,9 @@ import Link from "next/link";
 import { Button } from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
 import { useAuth } from "@/src/context/AuthContext";
+import type { SignInPayload } from "@/src/types/auth";
 
-type SignInValues = {
-  email: string;
-  password: string;
+type SignInValues = SignInPayload & {
   remember: boolean;
 };
 

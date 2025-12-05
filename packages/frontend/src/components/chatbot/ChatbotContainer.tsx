@@ -27,7 +27,7 @@ export default function ChatbotContainer() {
   // init chat
   useEffect(() => {
     if (user?.id) {
-      joinChat(user.name || "User");
+      joinChat(user.name || "User").catch(() => {});
     }
   }, [user?.id, user?.name, joinChat]);
 
@@ -82,7 +82,7 @@ export default function ChatbotContainer() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2">
-        <div className="flex h-[600px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+        <div className="flex h-[70vh] max-h-[600px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6">
             <ChatbotMessages
