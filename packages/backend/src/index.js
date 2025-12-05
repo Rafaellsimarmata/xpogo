@@ -490,6 +490,390 @@ const swaggerSpec = {
         }
       }
     },
+    '/api/chatbot/join': {
+      post: {
+        tags: ['Chatbot'],
+        summary: 'Join chat session',
+        description: 'Initialize a chat session with the AI chatbot. Creates a new conversation record.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  userName: { 
+                    type: 'string',
+                    description: 'Display name for the user in chat',
+                    example: 'John Doe'
+                  }
+                },
+                required: ['userName']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Chat session initialized successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' },
+                    userId: { type: 'integer' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required field: userName'
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error initializing chat session'
+          }
+        }
+      }
+    },
+    '/api/chatbot/send-message': {
+      post: {
+        tags: ['Chatbot'],
+        summary: 'Send message to chatbot',
+        description: 'Send a message to the AI chatbot and receive a response. Messages are persisted in the database.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  message: { 
+                    type: 'string',
+                    description: 'Message content to send to the chatbot',
+                    example: 'How do I export coffee to the US?'
+                  }
+                },
+                required: ['message']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Message processed successfully, bot response returned',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string', description: 'Original user message' },
+                    response: { type: 'string', description: 'AI chatbot response' },
+                    timestamp: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required field: message'
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error processing message'
+          }
+        }
+      }
+    },
+    '/api/chatbot/history': {
+      get: {
+        tags: ['Chatbot'],
+        summary: 'Get conversation history',
+        description: 'Retrieve the complete message history for the current user\'s conversation.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Conversation history retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    messages: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer' },
+                          role: { type: 'string', enum: ['user', 'assistant', 'system'] },
+                          content: { type: 'string' },
+                          created_at: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error retrieving history'
+          }
+        }
+      }
+    },
+    '/api/chatbot/clear': {
+      post: {
+        tags: ['Chatbot'],
+        summary: 'Clear conversation',
+        description: 'Clear the current conversation. Marks the conversation as inactive.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Conversation cleared successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    message: { type: 'string' }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error clearing conversation'
+          }
+        }
+      }
+    },
+    '/api/chatbot/analyze-product': {
+      post: {
+        tags: ['Chatbot'],
+        summary: 'Analyze product for export',
+        description: 'Get AI analysis of a product for export viability, market potential, and export requirements.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  productInfo: { 
+                    type: 'string',
+                    description: 'Description of the product including name, specifications, and features',
+                    example: 'Premium Ethiopian coffee beans, medium roast, 1kg bags'
+                  }
+                },
+                required: ['productInfo']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Product analysis completed successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    analysis: { type: 'string', description: 'AI-generated product analysis' },
+                    timestamp: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required field: productInfo'
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error analyzing product'
+          }
+        }
+      }
+    },
+    '/api/chatbot/market-strategy': {
+      post: {
+        tags: ['Chatbot'],
+        summary: 'Get market entry strategy',
+        description: 'Receive AI-generated market entry strategy for exporting to specific countries.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  marketInfo: { 
+                    type: 'string',
+                    description: 'Information about target market, product, and current business status',
+                    example: 'Product: Coffee, Target: USA Market, Currently exporting to 2 countries'
+                  }
+                },
+                required: ['marketInfo']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Market strategy generated successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    strategy: { type: 'string', description: 'AI-generated market entry strategy' },
+                    timestamp: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required field: marketInfo'
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error generating strategy'
+          }
+        }
+      }
+    },
+    '/api/chatbot/compliance-guidance': {
+      post: {
+        tags: ['Chatbot'],
+        summary: 'Get compliance guidance',
+        description: 'Receive AI guidance on export compliance requirements, certifications, and regulations.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  complianceQuery: { 
+                    type: 'string',
+                    description: 'Your compliance question or scenario',
+                    example: 'What certifications do I need to export organic coffee to Europe?'
+                  }
+                },
+                required: ['complianceQuery']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Compliance guidance provided successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    guidance: { type: 'string', description: 'AI-generated compliance guidance' },
+                    timestamp: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required field: complianceQuery'
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error retrieving guidance'
+          }
+        }
+      }
+    },
+    '/api/chatbot/shipping-guidance': {
+      post: {
+        tags: ['Chatbot'],
+        summary: 'Get shipping guidance',
+        description: 'Receive AI guidance on shipping options, logistics, and best practices for export.',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  shippingInfo: { 
+                    type: 'string',
+                    description: 'Information about your shipment and destination',
+                    example: 'Exporting 1000kg of coffee beans from Ethiopia to USA'
+                  }
+                },
+                required: ['shippingInfo']
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Shipping guidance provided successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean' },
+                    guidance: { type: 'string', description: 'AI-generated shipping guidance' },
+                    timestamp: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          },
+          '400': {
+            description: 'Missing required field: shippingInfo'
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error retrieving guidance'
+          }
+        }
+      }
+    },
     '/api/example': {
       get: {
         tags: ['Example'],
