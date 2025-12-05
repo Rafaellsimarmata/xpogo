@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import MarkdownTyping from "../ui/MarkdownTyping";
 
 type Message = {
   id: string;
@@ -12,28 +13,17 @@ type Message = {
 type ChatbotMessagesProps = {
   messages: Message[];
   isLoading: boolean;
+  onBotTyping: () => void;
 };
 
-export default function ChatbotMessages({
-  messages,
-  isLoading,
-}: ChatbotMessagesProps) {
+export default function ChatbotMessages({ messages, isLoading, onBotTyping }: ChatbotMessagesProps) {
   if (messages.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center text-center">
-        <div className="space-y-4">
-          <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <div className="h-8 w-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              Welcome to Export Assistant
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground max-w-xs">
-              Ask me about products, market strategies, compliance requirements, or shipping logistics.
-            </p>
-          </div>
-        </div>
+        <h3 className="text-lg font-semibold">Welcome to Export Assistant</h3>
+        <p className="mt-2 text-sm text-muted-foreground max-w-xs">
+          Ask me about products, market strategies, compliance requirements, or shipping logistics.
+        </p>
       </div>
     );
   }
@@ -52,14 +42,19 @@ export default function ChatbotMessages({
               <div className="h-4 w-4 rounded-full bg-primary" />
             </div>
           )}
+
           <div
-            className={`max-w-xs lg:max-w-md rounded-2xl px-4 py-2 text-sm leading-relaxed whitespace-pre-wrap break-words ${
+            className={`max-w-xs lg:max-w-md rounded-2xl px-4 py-2 text-sm leading-relaxed break-words ${
               message.role === "user"
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-foreground"
             }`}
           >
-            {message.content}
+            {message.role === "assistant" ? (
+              <MarkdownTyping text={message.content} onProgress={onBotTyping} />
+            ) : (
+              message.content
+            )}
           </div>
         </div>
       ))}
