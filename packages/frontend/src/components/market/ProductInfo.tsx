@@ -1,56 +1,47 @@
-"use client";
+import type { MarketProduct } from "@/src/types/market";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-import { motion } from "framer-motion";
-import { Product } from "@/src/lib/data/products";
+interface ProductInfoProps {
+  product: MarketProduct;
+}
 
-type ProductInfoProps = {
-  product: Product;
+const ProductInfo = ({ product }: ProductInfoProps) => {
+  return (
+    <div className="rounded-3xl border border-border/60 bg-card/90 p-8 shadow-sm">
+      {/* Product Header */}
+      <div className="mb-8 pb-6 border-b-2 border-border/50">
+        <h2 className="text-3xl font-bold text-foreground mb-3">{product.name}</h2>
+        
+        {product.hsCode && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">HS Code:</span>
+            <span className="font-mono font-semibold text-primary bg-primary/10 px-3 py-1 rounded-lg">
+              {product.hsCode}
+            </span>
+          </div>
+        )}
+      </div>
+      
+      {/* Market Intelligence Content */}
+      <article className="prose prose-slate max-w-none dark:prose-invert
+        prose-headings:font-bold prose-headings:text-foreground
+        prose-h1:text-2xl prose-h1:mb-6 prose-h1:mt-8 prose-h1:border-b-2 prose-h1:border-border/50 prose-h1:pb-3
+        prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:text-primary
+        prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3 prose-h3:font-semibold
+        prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-3
+        prose-li:text-foreground/90 prose-li:leading-relaxed prose-li:mb-1.5
+        prose-ul:my-4 prose-ul:ml-6 prose-ul:space-y-1.5
+        prose-ol:my-4 prose-ol:ml-6
+        prose-strong:text-primary prose-strong:font-bold
+        prose-hr:border-border/50 prose-hr:my-8
+      ">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {product.marketIntelligence}
+        </ReactMarkdown>
+      </article>
+    </div>
+  );
 };
-
-const ProductInfo = ({ product }: ProductInfoProps) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="rounded-3xl border border-white/40 bg-white/80 p-6 shadow-lg"
-  >
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm uppercase tracking-widest text-blue-500">Produk Dipilih</p>
-        <h3 className="text-2xl font-semibold text-slate-900">{product.name}</h3>
-        <p className="text-sm text-slate-500">{product.hsCode}</p>
-      </div>
-      <span className="rounded-full border border-blue-100 bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-600">
-        {product.category}
-      </span>
-    </div>
-    <p className="mt-4 text-sm text-slate-600">{product.description}</p>
-    <div className="mt-6 grid gap-4 md:grid-cols-4">
-      <div className="rounded-2xl bg-blue-50/70 p-3 text-center">
-        <p className="text-xs uppercase text-blue-500">Demand Index</p>
-        <p className="text-2xl font-semibold text-blue-700">{product.stats.demandIndex}</p>
-      </div>
-      <div className="rounded-2xl bg-blue-50/70 p-3 text-center">
-        <p className="text-xs uppercase text-blue-500">Price Index</p>
-        <p className="text-2xl font-semibold text-blue-700">{product.stats.priceIndex}</p>
-      </div>
-      <div className="rounded-2xl bg-blue-50/70 p-3 text-center">
-        <p className="text-xs uppercase text-blue-500">Growth</p>
-        <p className="text-2xl font-semibold text-blue-700">{product.stats.growth}</p>
-      </div>
-      <div className="rounded-2xl bg-blue-50/70 p-3 text-center">
-        <p className="text-xs uppercase text-blue-500">Readiness</p>
-        <p className="text-lg font-semibold text-blue-700">{product.stats.readiness}</p>
-      </div>
-    </div>
-    <div className="mt-6 rounded-2xl border border-dashed border-blue-200 p-4 text-sm text-slate-600">
-      <p className="font-semibold text-slate-900">Best Practices</p>
-      <ul className="mt-2 list-disc space-y-2 pl-5">
-        {product.bestPractices.map((tip) => (
-          <li key={tip}>{tip}</li>
-        ))}
-      </ul>
-    </div>
-  </motion.div>
-);
 
 export default ProductInfo;
