@@ -125,7 +125,7 @@ const DashboardPage = () => {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                 Workspace Overview
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-foreground">Halo, {profile.fullName}</h1>
+              <h1 className="mt-2 text-3xl font-bold text-foreground">Halo, {profile.businessName}</h1>
               <p className="text-sm text-muted-foreground">
                 Progress ekspor untuk {profile.company} terlihat di sini.
               </p>

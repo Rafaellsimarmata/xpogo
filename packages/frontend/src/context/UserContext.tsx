@@ -1,11 +1,13 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, useCallback } from "react";
+import { createContext, useContext, useMemo, useState, useCallback, useEffect } from "react";
+import { useAuth } from "./AuthContext";
 
 export type UserProfile = {
   fullName: string;
   username: string;
   company: string;
+  businessName: string;
   businessType: string;
   onboardingComplete: boolean;
   focusProduct?: string;
@@ -22,6 +24,7 @@ const defaultProfile: UserProfile = {
   fullName: "Alya Pratama",
   username: "alya",
   company: "Nusantara Craft",
+  businessName: "Nusantara Craft",
   businessType: "Kerajinan Kayu",
   onboardingComplete: false,
 };
@@ -29,7 +32,21 @@ const defaultProfile: UserProfile = {
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
+
+  // Sync user data from AuthContext to UserProfile
+  useEffect(() => {
+    if (user) {
+      setProfile((prev) => ({
+        ...prev,
+        fullName: user.name,
+        username: user.name,
+        company: user.company,
+        businessName: user.company, // Use company as business_name from auth
+      }));
+    }
+  }, [user]);
 
   const updateProfile = useCallback((updates: Partial<UserProfile>) => {
     setProfile((prev) => ({ ...prev, ...updates }));

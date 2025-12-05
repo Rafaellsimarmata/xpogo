@@ -57,7 +57,15 @@ class AuthService {
       { expiresIn: JWT_EXPIRY }
     );
 
-    return { token, user: { id: user.id, email: user.email, username: user.username } };
+    return { 
+      token, 
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        username: user.username,
+        business_name: user.business_name
+      } 
+    };
   }
 
   static verifyToken(token) {

@@ -9,6 +9,7 @@ import { useAuth } from "@/src/context/AuthContext";
 
 const workspaceNav = [
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Export Assistant", href: "/chatbot" },
   { label: "Market Intelligence", href: "/market-analysis" },
   { label: "DocuAssist", href: "/docuassist" },
   { label: "Document Center", href: "/documents" },
