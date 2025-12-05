@@ -27,6 +27,14 @@ const createMessage = (
   timestamp: new Date().toISOString(),
 });
 
+const formatAssistantMarkdown = (content?: string) => {
+  const trimmed = content?.trim();
+  if (!trimmed) {
+    return "_Maaf, saya belum menemukan jawaban untuk pertanyaan itu._";
+  }
+  return trimmed;
+};
+
 export function useChatbot() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -125,8 +133,11 @@ export function useChatbot() {
     }
   }, [joinRequest]);
 
-  const appendAssistantMessage = (content: string) => {
-    setMessages((prev) => [...prev, createMessage("assistant", content)]);
+  const appendAssistantMessage = (content?: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("assistant", formatAssistantMarkdown(content)),
+    ]);
   };
 
   const sendMessage = useCallback(async (message: string) => {
@@ -141,7 +152,7 @@ export function useChatbot() {
 
     try {
       const response = await sendRequest(message);
-      appendAssistantMessage(response.response ?? response.message ?? "");
+      appendAssistantMessage(response.response ?? response.message);
     } catch (err) {
       throw new Error(handleError(err));
     }
@@ -156,7 +167,7 @@ export function useChatbot() {
 
     try {
       const response = await analyzeRequest(productInfo);
-      appendAssistantMessage(response.analysis ?? response.response ?? "");
+      appendAssistantMessage(response.analysis ?? response.response);
     } catch (err) {
       throw new Error(handleError(err));
     }
@@ -171,7 +182,7 @@ export function useChatbot() {
 
     try {
       const response = await strategyRequest(marketInfo);
-      appendAssistantMessage(response.strategy ?? response.response ?? "");
+      appendAssistantMessage(response.strategy ?? response.response);
     } catch (err) {
       throw new Error(handleError(err));
     }
@@ -186,7 +197,7 @@ export function useChatbot() {
 
     try {
       const response = await complianceRequest(complianceQuery);
-      appendAssistantMessage(response.guidance ?? response.response ?? "");
+      appendAssistantMessage(response.guidance ?? response.response);
     } catch (err) {
       throw new Error(handleError(err));
     }
@@ -201,7 +212,7 @@ export function useChatbot() {
 
     try {
       const response = await shippingRequest(shippingInfo);
-      appendAssistantMessage(response.guidance ?? response.response ?? "");
+      appendAssistantMessage(response.guidance ?? response.response);
     } catch (err) {
       throw new Error(handleError(err));
     }
