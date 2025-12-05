@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import ProductInfo from "@/src/components/market/ProductInfo";
 import CountryCard from "@/src/components/market/CountryCard";
 import type { MarketProduct, CountryData, ParsedCountryRow } from "@/src/types/market";
@@ -9,145 +9,132 @@ import { useAuth } from "@/src/context/AuthContext";
 type LookupState = "idle" | "loading" | "not-found" | "empty";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-const TOKEN_KEYS = ["xpogo_token", "token", "authToken"];
 
 const MarketAnalysisPage = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [productQuery, setProductQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<MarketProduct | null>(null);
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
   const [lookupState, setLookupState] = useState<LookupState>("idle");
   const [recommendedCountries, setRecommendedCountries] = useState<CountryData[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [authToken, setAuthToken] = useState<string | null>(null);
-  const isAuthenticated = useMemo(() => Boolean(user), [user]);
+  const isAuthenticated = useMemo(() => Boolean(user && token), [user, token]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored =
-        TOKEN_KEYS.map((key) => window.localStorage.getItem(key) ?? window.sessionStorage.getItem(key))
-          .find((value) => Boolean(value)) ?? null;
-      setAuthToken(stored);
-    }, [user]);
+  const activeCountry = recommendedCountries.find((c) => c.id === selectedCountryId) ?? recommendedCountries[0] ?? null;
 
-    const activeCountry = recommendedCountries.find((c) => c.id === selectedCountryId) ?? recommendedCountries[0] ?? null;
+  const handleLookup = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-    const handleLookup = async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+    if (!productQuery.trim()) {
+      setLookupState("empty");
+      setErrorMessage("Masukkan nama produk atau HS Code terlebih dahulu.");
+      setSelectedProduct(null);
+      return;
+    }
 
-      if (!productQuery.trim()) {
-        setLookupState("empty");
-        setErrorMessage("Masukkan nama produk atau HS Code terlebih dahulu.");
-        setSelectedProduct(null);
-        return;
+    if (!isAuthenticated) {
+      setLookupState("not-found");
+      setErrorMessage("Sesi Anda berakhir, silakan login ulang.");
+      setSelectedProduct(null);
+      setRecommendedCountries([]);
+      return;
+    }
+
+    if (!BACKEND_URL) {
+      setLookupState("not-found");
+      setErrorMessage("Konfigurasi backend belum disetel.");
+      setSelectedProduct(null);
+      setRecommendedCountries([]);
+      return;
+    }
+
+    setLookupState("loading");
+    setErrorMessage(null);
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
       }
 
-      if (!isAuthenticated) {
-        setLookupState("not-found");
-        setErrorMessage("Sesi Anda berakhir, silakan login ulang.");
-        setSelectedProduct(null);
-        setRecommendedCountries([]);
-        return;
+      const analyzeResponse = await fetch(`${BACKEND_URL}market-intelligence/analyze`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ productName: productQuery }),
+      });
+
+      if (!analyzeResponse.ok) {
+        const payload = await analyzeResponse.json().catch(() => null);
+        const message =
+          payload?.message ??
+          payload?.error ??
+          (analyzeResponse.status === 401 || analyzeResponse.status === 403
+            ? "Sesi Anda berakhir, silakan login ulang."
+            : "Produk belum ditemukan, coba istilah lain.");
+        throw new Error(message);
       }
 
-      if (!BACKEND_URL) {
-        setLookupState("not-found");
-        setErrorMessage("Konfigurasi backend belum disetel.");
-        setSelectedProduct(null);
-        setRecommendedCountries([]);
-        return;
+      const analyzeData = await analyzeResponse.json();
+
+      const cleanedMarketIntelligence = analyzeData.marketIntelligence
+        .substring(0, analyzeData.marketIntelligence.indexOf("## 3. VISUALIZATION DATA"))
+        .trim();
+
+      const productData: MarketProduct = {
+        name: analyzeData.product,
+        marketIntelligence: cleanedMarketIntelligence,
+      };
+
+      setSelectedProduct(productData);
+
+      const parseResponse = await fetch(`${BACKEND_URL}market-intelligence/parse-data`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ aiResponse: analyzeData.marketIntelligence }),
+      });
+
+      if (!parseResponse.ok) {
+        const payload = await parseResponse.json().catch(() => null);
+        const message =
+          payload?.message ??
+          payload?.error ??
+          (parseResponse.status === 401 || parseResponse.status === 403
+            ? "Sesi Anda berakhir, silakan login ulang."
+            : "Gagal membaca data negara.");
+        throw new Error(message);
       }
 
-      setLookupState("loading");
+      const parseData = await parseResponse.json();
+
+      const formattedCountries: CountryData[] = (parseData.parsedData as ParsedCountryRow[])
+        .filter((item) => item.country !== "---------")
+        .map((item) => ({
+          id: item.country.toLowerCase().replace(/\s+/g, "-"),
+          name: item.country,
+          productionVolume: item.productionVolume,
+          importVolume: item.importVolume,
+          exportVolume: item.exportVolume,
+          marketGrowthRate: item.marketGrowthRate,
+          keyTradePartners: item.keyTradePartners,
+        }));
+
+      setRecommendedCountries(formattedCountries);
+      setSelectedCountryId(null);
+      setLookupState("idle");
       setErrorMessage(null);
-
-      try {
-        const headers: Record<string, string> = {
-          "Content-Type": "application/json",
-        };
-
-        if (authToken) {
-          headers.Authorization = `Bearer ${authToken}`;
-        }
-
-        const analyzeResponse = await fetch(`${BACKEND_URL}market-intelligence/analyze`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ productName: productQuery }),
-        });
-
-        if (!analyzeResponse.ok) {
-          const payload = await analyzeResponse.json().catch(() => null);
-          const message =
-            payload?.message ??
-            payload?.error ??
-            (analyzeResponse.status === 401 || analyzeResponse.status === 403
-              ? "Sesi Anda berakhir, silakan login ulang."
-              : "Produk belum ditemukan, coba istilah lain.");
-          throw new Error(message);
-        }
-
-        const analyzeData = await analyzeResponse.json();
-        
-        const cleanedMarketIntelligence = analyzeData.marketIntelligence
-          .substring(0, analyzeData.marketIntelligence.indexOf("## 3. VISUALIZATION DATA"))
-          .trim();
-
-        const productData: MarketProduct = {
-          name: analyzeData.product,
-          marketIntelligence: cleanedMarketIntelligence,
-        };
-        
-        setSelectedProduct(productData);
-
-        const parseResponse = await fetch(`${BACKEND_URL}market-intelligence/parse-data`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ aiResponse: analyzeData.marketIntelligence }),
-        });
-
-        if (!parseResponse.ok) {
-          const payload = await parseResponse.json().catch(() => null);
-          const message =
-            payload?.message ??
-            payload?.error ??
-            (parseResponse.status === 401 || parseResponse.status === 403
-              ? "Sesi Anda berakhir, silakan login ulang."
-              : "Gagal membaca data negara.");
-          throw new Error(message);
-        }
-
-        const parseData = await parseResponse.json();
-        
-        const formattedCountries: CountryData[] = (parseData.parsedData as ParsedCountryRow[])
-          .filter((item) => item.country !== "---------")
-          .map((item) => ({
-            id: item.country.toLowerCase().replace(/\s+/g, "-"),
-            name: item.country,
-            productionVolume: item.productionVolume,
-            importVolume: item.importVolume,
-            exportVolume: item.exportVolume,
-            marketGrowthRate: item.marketGrowthRate,
-            keyTradePartners: item.keyTradePartners,
-          }));
-
-        setRecommendedCountries(formattedCountries);
-        setSelectedCountryId(null);
-        setLookupState("idle");
-        setErrorMessage(null);
-
-      } catch (error) {
-        console.error("Error during market analysis:", error);
-        setSelectedProduct(null);
-        setRecommendedCountries([]);
-        setLookupState("not-found");
-        setErrorMessage(
-          error instanceof Error
-            ? error.message
-            : "Terjadi kesalahan saat mengambil data pasar."
-        );
-      }
-    };
+    } catch (error) {
+      console.error("Error during market analysis:", error);
+      setSelectedProduct(null);
+      setRecommendedCountries([]);
+      setLookupState("not-found");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Terjadi kesalahan saat mengambil data pasar."
+      );
+    }
+  };
 
   return (
     <section className="bg-background py-16">

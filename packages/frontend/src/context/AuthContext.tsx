@@ -18,6 +18,7 @@ type SignInPayload = {
 
 type AuthContextValue = {
   user: AuthUser | null;
+  token: string | null;
   loading: boolean;
   signIn: (payload: SignInPayload) => Promise<void>;
   signOut: () => void;
@@ -30,6 +31,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const signIn = useCallback(
@@ -51,6 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Store token in localStorage
         localStorage.setItem("auth_token", data.token);
+        setToken(data.token);
 
         setUser({
           id: data.user.id,
@@ -75,12 +78,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = useCallback(() => {
     localStorage.removeItem("auth_token");
     setUser(null);
+    setToken(null);
     router.push("/signin"); 
   }, [router]);
 
   const value = useMemo(
-    () => ({ user, loading, signIn, signOut }),
-    [user, loading, signIn, signOut]
+    () => ({ user, token, loading, signIn, signOut }),
+    [user, token, loading, signIn, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
