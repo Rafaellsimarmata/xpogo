@@ -1,26 +1,54 @@
 const axios = require('axios');
+const pool = require('../config/database');
 
 /**
  * AI Chatbot Service for Export Assistance
  * Provides real-time chat support for small enterprises exporting products
+ * Stores conversation history in PostgreSQL database
  */
 class ChatbotService {
   constructor() {
     this.apiBaseUrl = process.env.AI_API_BASE_URL || 'https://api.kolosal.ai/v1';
     this.secretToken = process.env.AI_SECRET_TOKEN;
     this.model = process.env.AI_MODEL || 'meta-llama/llama-4-maverick-17b-128e-instruct';
-    this.conversationHistory = new Map(); // Store conversation history per user
+    this.conversationHistory = new Map(); // Cache for active conversations
   }
 
   /**
-   * Initialize conversation history for a user
+   * Initialize or get conversation for a user
+   * Loads existing messages from database or creates new conversation
    */
-  initializeConversation(userId) {
+  async initializeConversation(userId) {
     if (!this.conversationHistory.has(userId)) {
-      this.conversationHistory.set(userId, [
-        {
-          role: 'system',
-          content: `You are an expert AI assistant specializing in helping small enterprises export their products. 
+      try {
+        // Get or create conversation
+        const convResult = await pool.query(
+          'SELECT id FROM chatbot_conversations WHERE user_id = $1 AND is_active = true ORDER BY created_at DESC LIMIT 1',
+          [userId]
+        );
+
+        let conversationId;
+        if (convResult.rows.length === 0) {
+          // Create new conversation
+          const createConvResult = await pool.query(
+            'INSERT INTO chatbot_conversations (user_id, title) VALUES ($1, $2) RETURNING id',
+            [userId, `Conversation ${new Date().toLocaleDateString()}`]
+          );
+          conversationId = createConvResult.rows[0].id;
+        } else {
+          conversationId = convResult.rows[0].id;
+        }
+
+        // Load conversation history from database
+        const messagesResult = await pool.query(
+          'SELECT role, content FROM chatbot_messages WHERE user_id = $1 ORDER BY created_at ASC',
+          [userId]
+        );
+
+        const messages = [
+          {
+            role: 'system',
+            content: `You are an expert AI assistant specializing in helping small enterprises export their products. 
           
 Your expertise includes:
 - Product export documentation and compliance
@@ -36,40 +64,93 @@ Your expertise includes:
 
 Be helpful, professional, and provide actionable advice. Ask clarifying questions when needed.
 If asked about something outside export assistance, politely redirect to export-related topics.`
-        }
-      ]);
+          }
+        ];
+
+        // Add existing messages to conversation
+        messagesResult.rows.forEach(msg => {
+          messages.push({
+            role: msg.role,
+            content: msg.content
+          });
+        });
+
+        this.conversationHistory.set(userId, {
+          conversationId,
+          messages
+        });
+      } catch (error) {
+        console.error('Error initializing conversation:', error);
+        // Fallback to in-memory conversation
+        this.conversationHistory.set(userId, {
+          conversationId: null,
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert AI assistant specializing in helping small enterprises export their products.`
+            }
+          ]
+        });
+      }
     }
     return this.conversationHistory.get(userId);
   }
 
   /**
-   * Get conversation history for a user
+   * Get conversation history for a user from database
    */
-  getConversationHistory(userId) {
-    return this.conversationHistory.get(userId) || [];
+  async getConversationHistory(userId) {
+    try {
+      const result = await pool.query(
+        'SELECT role, content, created_at FROM chatbot_messages WHERE user_id = $1 ORDER BY created_at ASC',
+        [userId]
+      );
+      return result.rows;
+    } catch (error) {
+      console.error('Error getting conversation history:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Save message to database
+   */
+  async saveMessage(userId, role, content, messageType = 'message') {
+    try {
+      await pool.query(
+        `INSERT INTO chatbot_messages (user_id, role, content, message_type) 
+         VALUES ($1, $2, $3, $4)`,
+        [userId, role, content, messageType]
+      );
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
   }
 
   /**
    * Send chat message and get AI response
-   * This method is used for streaming responses in WebSocket
    */
   async sendMessage(userId, userMessage) {
     try {
       // Initialize conversation if needed
-      const history = this.initializeConversation(userId);
+      const conv = await this.initializeConversation(userId);
+      const messages = conv.messages;
 
-      // Add user message to history
-      history.push({
+      // Add user message to memory
+      messages.push({
         role: 'user',
         content: userMessage
       });
+
+      // Save user message to database
+      await this.saveMessage(userId, 'user', userMessage, 'message');
 
       // Call AI API with conversation history
       const response = await axios.post(
         `${this.apiBaseUrl}/chat/completions`,
         {
           model: this.model,
-          messages: history,
+          messages: messages,
           temperature: 0.7,
           max_tokens: 800,
         },
@@ -82,18 +163,35 @@ If asked about something outside export assistance, politely redirect to export-
       );
 
       const assistantMessage = response.data.choices[0].message.content;
+      const tokensUsed = response.data.usage?.total_tokens || 0;
 
-      // Add assistant response to history
-      history.push({
+      // Add assistant response to memory
+      messages.push({
         role: 'assistant',
         content: assistantMessage
       });
+
+      // Save assistant message to database
+      await pool.query(
+        `INSERT INTO chatbot_messages (user_id, role, content, message_type, tokens_used) 
+         VALUES ($1, $2, $3, $4, $5)`,
+        [userId, 'assistant', assistantMessage, 'response', tokensUsed]
+      );
+
+      // Update conversation message count
+      if (conv.conversationId) {
+        await pool.query(
+          'UPDATE chatbot_conversations SET message_count = message_count + 2 WHERE id = $1',
+          [conv.conversationId]
+        );
+      }
 
       return {
         success: true,
         message: assistantMessage,
         messageType: 'response',
         timestamp: new Date().toISOString(),
+        tokensUsed
       };
     } catch (error) {
       console.error('Error in chatbot service:', error.message);
@@ -104,22 +202,41 @@ If asked about something outside export assistance, politely redirect to export-
   /**
    * Clear conversation history for a user
    */
-  clearConversation(userId) {
-    this.conversationHistory.delete(userId);
+  async clearConversation(userId) {
+    try {
+      // Mark conversation as inactive
+      await pool.query(
+        'UPDATE chatbot_conversations SET is_active = false WHERE user_id = $1',
+        [userId]
+      );
+      
+      // Clear from memory cache
+      this.conversationHistory.delete(userId);
+      
+      return { success: true, message: 'Conversation cleared' };
+    } catch (error) {
+      console.error('Error clearing conversation:', error);
+      throw error;
+    }
   }
 
   /**
-   * Get conversation summary (useful for displaying chat history)
+   * Get conversation summary
    */
-  getConversationSummary(userId) {
-    const history = this.getConversationHistory(userId);
-    return history
-      .filter(msg => msg.role !== 'system')
-      .map(msg => ({
-        role: msg.role,
-        content: msg.content,
-        timestamp: new Date().toISOString()
-      }));
+  async getConversationSummary(userId) {
+    try {
+      const history = await this.getConversationHistory(userId);
+      return history
+        .filter(msg => msg.role !== 'system')
+        .map(msg => ({
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.created_at
+        }));
+    } catch (error) {
+      console.error('Error getting summary:', error);
+      return [];
+    }
   }
 
   /**
@@ -253,24 +370,27 @@ Focus on cost-effective solutions for small businesses.`;
   }
 
   /**
-   * Stream response chunk by chunk (for real-time WebSocket delivery)
+   * Stream response chunk by chunk (for real-time Realtime delivery)
    */
   async streamMessage(userId, userMessage) {
     try {
-      const history = this.initializeConversation(userId);
+      const conv = await this.initializeConversation(userId);
+      const messages = conv.messages;
 
-      // Add user message to history
-      history.push({
+      // Add user message
+      messages.push({
         role: 'user',
         content: userMessage
       });
+
+      await this.saveMessage(userId, 'user', userMessage, 'message');
 
       // Call AI API
       const response = await axios.post(
         `${this.apiBaseUrl}/chat/completions`,
         {
           model: this.model,
-          messages: history,
+          messages: messages,
           temperature: 0.7,
           max_tokens: 800,
         },
@@ -283,19 +403,34 @@ Focus on cost-effective solutions for small businesses.`;
       );
 
       const assistantMessage = response.data.choices[0].message.content;
+      const tokensUsed = response.data.usage?.total_tokens || 0;
 
-      // Add assistant response to history
-      history.push({
+      // Add to memory and database
+      messages.push({
         role: 'assistant',
         content: assistantMessage
       });
 
-      // Return the full message for streaming
+      await pool.query(
+        `INSERT INTO chatbot_messages (user_id, role, content, message_type, tokens_used) 
+         VALUES ($1, $2, $3, $4, $5)`,
+        [userId, 'assistant', assistantMessage, 'response', tokensUsed]
+      );
+
+      // Update conversation count
+      if (conv.conversationId) {
+        await pool.query(
+          'UPDATE chatbot_conversations SET message_count = message_count + 2 WHERE id = $1',
+          [conv.conversationId]
+        );
+      }
+
       return {
         success: true,
         message: assistantMessage,
         messageType: 'response',
         timestamp: new Date().toISOString(),
+        tokensUsed
       };
     } catch (error) {
       console.error('Error in stream message:', error.message);

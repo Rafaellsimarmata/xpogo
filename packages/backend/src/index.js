@@ -22,29 +22,40 @@ const initDatabase = require('./config/initDb');
 const authRoutes = require('./routes/auth');
 const marketIntelligenceRoutes = require('./routes/marketIntelligence');
 const documentAssistantRoutes = require('./routes/documentAssistant');
+const chatbotRoutes = require('./routes/chatbot');
 const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Create HTTP server with socket.io
+// Determine realtime provider
+const realtimeProvider = process.env.REALTIME_PROVIDER || 'socket.io';
+const isDevelopment = env === 'development';
+
+// Create HTTP server
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST']
-  }
-});
+let io = null;
+
+// Setup Socket.io for development (or if explicitly configured)
+if (realtimeProvider === 'socket.io' || isDevelopment) {
+  io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST']
+    }
+  });
+
+  // Initialize Socket.io WebSocket handlers for development
+  const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
+  const chatbotHandler = new ChatbotWebSocketHandler(io);
+  console.log('Socket.io initialized (development mode)');
+  chatbotHandler.initialize();
+}
 
 app.use(cors());
 app.use(express.json());
 
 initDatabase();
-
-// Initialize WebSocket handlers
-const chatbotHandler = new ChatbotWebSocketHandler(io);
-console.log("WebSocket handlers initialized");
-chatbotHandler.initialize();
 
 const backendUrl = process.env.BACKEND_URL || `http://localhost:${port}`;
 
@@ -520,6 +531,9 @@ app.use('/auth', authRoutes);
 app.use('/market-intelligence', marketIntelligenceRoutes);
 
 app.use('/document-assistant', documentAssistantRoutes);
+
+// Chatbot routes - works with both Socket.io (dev) and Supabase Realtime (prod)
+app.use('/api/chatbot', chatbotRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
