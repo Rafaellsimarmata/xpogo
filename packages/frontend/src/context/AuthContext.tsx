@@ -49,12 +49,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const data = await res.json();
 
+        // Store token in localStorage
+        localStorage.setItem("auth_token", data.token);
+
         setUser({
           id: data.user.id,
           name: data.user.username,
           email: data.user.email,
           role: "Owner",
-          company: "Nusantara Craft",
+          company: data.user.business_name || "Nusantara Craft",
         });
 
         router.push("/dashboard");
@@ -70,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const signOut = useCallback(() => {
+    localStorage.removeItem("auth_token");
     setUser(null);
     router.push("/signin"); 
   }, [router]);
