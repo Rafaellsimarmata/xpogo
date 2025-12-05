@@ -16,7 +16,6 @@ type SignUpValues = {
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-
 const SignUpForm = () => {
   const [success, setSuccess] = useState(false);
   const {
@@ -43,7 +42,7 @@ const SignUpForm = () => {
     password: data.password,
   };
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`, {
+  const res = await fetch(`${BACKEND_URL}auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
