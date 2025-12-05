@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { StoreOption } from "@/src/lib/data/countries";
+import type { StoreOption } from "@/src/types/countries";
 import { Lock, Building2, Mail } from "lucide-react";
 
 type StoreSelectorProps = {

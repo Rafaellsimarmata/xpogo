@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/src/components/ui/Button";
-import { CountryMatch } from "@/src/lib/data/countries";
+import { CountryMatch } from "@/src/types/countries";
 import { formatCurrency, getScoreTone, readinessColor } from "@/src/lib/utils";
 
 type CountryDetailProps = {
@@ -33,7 +33,7 @@ const CountryDetail = ({ country }: CountryDetailProps) => (
       <div className="mt-8 grid gap-4 md:grid-cols-4">
         <div className="rounded-2xl border border-blue-50 bg-blue-50/60 p-4">
           <p className="text-xs text-blue-500">Nilai Impor</p>
-          <p className="text-2xl font-semibold text-slate-900">{formatCurrency(country.importValue)}</p>
+          <p className="text-2xl font-semibold text-slate-900">{country.importValue}</p>
           <p className="text-xs text-slate-500">per tahun</p>
         </div>
         <div className="rounded-2xl border border-blue-50 bg-blue-50/60 p-4">

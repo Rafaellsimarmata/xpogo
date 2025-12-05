@@ -1,4 +1,30 @@
-export interface CountryMatch {
+export type TradeAgreement = string;
+
+export type TopImport = {
+  name: string;
+  volume: string;
+  growth: string;
+};
+
+export type StoreOption = {
+  id: string;
+  name: string;
+  rating: number;
+  specialization: string;
+  contact: string;
+  location: string;
+  ready?: boolean;
+};
+
+export type BusinessTip = string;
+
+export type Contact = {
+  office: string;
+  phone: string;
+  email: string;
+};
+
+export type CountryMatch = {
   id: string;
   name: string;
   code: string;
@@ -11,16 +37,9 @@ export interface CountryMatch {
   population: string;
   estimatedTime: number;
   easeOfLogistics: string;
-  tradeAgreements: string[];
-  topImports: Array<{
-    name: string;
-    volume: string;
-    growth: string;
-  }>;
-  businessTips: string[];
-  contacts: Array<{
-    office: string;
-    phone: string;
-    email: string;
-  }>;
-}
+  tradeAgreements: TradeAgreement[];
+  topImports: TopImport[];
+  businessTips: BusinessTip[];
+  contacts: Contact[];
+  stores?: StoreOption[];
+};
