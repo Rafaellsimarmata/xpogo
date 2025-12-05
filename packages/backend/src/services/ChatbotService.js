@@ -243,19 +243,10 @@ If asked about something outside export assistance, politely redirect to export-
    * Analyze product and provide export guidance
    */
   async analyzeProductForExport(userId, productInfo) {
-    const {
-      productName,
-      description,
-      targetMarkets,
-      currentCapacity
-    } = productInfo;
-
+    // productInfo is now a string with product description
     const analysisPrompt = `Please analyze the following product for export potential and provide detailed guidance:
 
-Product Name: ${productName}
-Description: ${description}
-Target Markets: ${targetMarkets}
-Current Production Capacity: ${currentCapacity}
+${productInfo}
 
 Please provide:
 1. Export Feasibility Assessment
@@ -275,19 +266,10 @@ Format as actionable advice for a small business.`;
    * Get market entry strategy
    */
   async getMarketEntryStrategy(userId, marketInfo) {
-    const {
-      country,
-      productType,
-      budget,
-      timeline
-    } = marketInfo;
+    // marketInfo is now a string with market details
+    const strategyPrompt = `I need help developing an export strategy based on the following details:
 
-    const strategyPrompt = `I need help developing an export strategy for entering the ${country} market.
-
-Details:
-- Product Type: ${productType}
-- Available Budget: ${budget}
-- Timeline: ${timeline}
+${marketInfo}
 
 Please provide a detailed market entry strategy including:
 1. Market Overview & Opportunity Assessment
@@ -308,18 +290,10 @@ Make it specific and actionable for a small enterprise.`;
    * Get answers about specific compliance requirements
    */
   async getComplianceGuidance(userId, complianceQuery) {
-    const {
-      productType,
-      destinationCountry,
-      specificConcern
-    } = complianceQuery;
+    // complianceQuery is now a string with compliance details
+    const compliancePrompt = `I need guidance on export compliance based on the following details:
 
-    const compliancePrompt = `I need guidance on export compliance for my product.
-
-Details:
-- Product Type: ${productType}
-- Destination Country: ${destinationCountry}
-- Specific Concern: ${specificConcern}
+${complianceQuery}
 
 Please provide:
 1. Relevant Regulations & Standards
@@ -339,21 +313,10 @@ Provide practical, actionable advice.`;
    * Get shipping and logistics guidance
    */
   async getShippingGuidance(userId, shippingInfo) {
-    const {
-      productWeight,
-      productSize,
-      destination,
-      urgency,
-      budget
-    } = shippingInfo;
-
+    // shippingInfo is now a string with shipping details
     const shippingPrompt = `I need guidance on shipping my products internationally.
 
-Details:
-- Product Weight/Size: ${productWeight} / ${productSize}
-- Destination: ${destination}
-- Urgency: ${urgency}
-- Budget Constraints: ${budget}
+${shippingInfo}
 
 Please advise on:
 1. Best Shipping Methods

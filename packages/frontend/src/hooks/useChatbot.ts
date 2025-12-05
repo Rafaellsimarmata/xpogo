@@ -33,6 +33,8 @@ export function useChatbot() {
           body: body ? JSON.stringify(body) : undefined,
         });
 
+        console.log("body:", body);
+
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(
