@@ -41,7 +41,7 @@ const DashboardPage = () => {
   const completion = checklistCompletion(checklist);
   const completedDocs = checklist.filter((doc) => doc.status === "complete").length;
   const pendingDocs = checklist.filter((doc) => doc.status !== "complete").length;
-  const readyBuyers = primaryCountry?.stores.filter((store) => store.ready).length ?? 0;
+  const readyBuyers = primaryCountry?.stores?.filter((store) => store.ready).length ?? 0;
   const visibleDocs = checklist.slice(0, 6);
 
   const stats = [

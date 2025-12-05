@@ -35,7 +35,7 @@ const CountryPage = ({ params }: CountryPageProps) => {
           title={`Checklist dokumen untuk ${country.name}`}
           description="Daftar persyaratan yang wajib dipenuhi sebelum proses pengiriman berlangsung."
         />
-        <StoreSelector stores={country.stores} unlocked={unlocked} />
+        <StoreSelector stores={country.stores ?? []} unlocked={unlocked} />
       </div>
     </section>
   );
