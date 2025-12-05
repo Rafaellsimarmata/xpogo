@@ -1,24 +1,16 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, useCallback, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  startTransition,
+} from "react";
 import { useAuth } from "./AuthContext";
-
-export type UserProfile = {
-  fullName: string;
-  username: string;
-  company: string;
-  businessName: string;
-  businessType: string;
-  onboardingComplete: boolean;
-  focusProduct?: string;
-  targetCountry?: string;
-};
-
-type UserContextValue = {
-  profile: UserProfile;
-  updateProfile: (updates: Partial<UserProfile>) => void;
-  setOnboardingComplete: (status: boolean) => void;
-};
+import type { UserContextValue, UserProfile } from "@/src/types/user";
 
 const defaultProfile: UserProfile = {
   fullName: "Alya Pratama",
@@ -38,13 +30,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   // Sync user data from AuthContext to UserProfile
   useEffect(() => {
     if (user) {
-      setProfile((prev) => ({
-        ...prev,
-        fullName: user.name,
-        username: user.name,
-        company: user.company,
-        businessName: user.company, // Use company as business_name from auth
-      }));
+      startTransition(() => {
+        setProfile((prev) => ({
+          ...prev,
+          fullName: user.name,
+          username: user.name,
+          company: user.company,
+          businessName: user.company,
+        }));
+      });
     }
   }, [user]);
 
