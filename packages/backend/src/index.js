@@ -26,6 +26,8 @@ const chatbotRoutes = require('./routes/chatbot');
 const countriesRoutes = require('./routes/countries');
 const productsRoutes = require('./routes/products');
 const newsRoutes = require('./routes/news');
+const userProductsRoutes = require('./routes/userProducts');
+const exportAgentsRoutes = require('./routes/exportAgents');
 const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 
 const app = express();
@@ -1397,6 +1399,607 @@ const swaggerSpec = {
           }
         }
       }
+    },
+    '/api/user/products': {
+      get: {
+        tags: ['User Products'],
+        summary: 'Get all products for authenticated user',
+        description: 'Retrieve all products added by the authenticated user. Supports filtering by status.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'status',
+            in: 'query',
+            description: 'Filter by product status',
+            schema: {
+              type: 'string',
+              enum: ['active', 'archived'],
+              default: 'active'
+            }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved user products',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 3 },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer', example: 1 },
+                          user_id: { type: 'integer', example: 1 },
+                          name: { type: 'string', example: 'Kopi Arabika Premium' },
+                          description: { type: 'string', example: 'Kopi arabika kualitas premium dari Aceh' },
+                          category: { type: 'string', example: 'Agricultural' },
+                          hs_code: { type: 'string', example: '0901' },
+                          target_country_id: { type: 'string', example: 'us' },
+                          target_country_name: { type: 'string', example: 'United States' },
+                          status: { type: 'string', example: 'active' },
+                          metadata: { type: 'object' },
+                          created_at: { type: 'string', format: 'date-time' },
+                          updated_at: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      post: {
+        tags: ['User Products'],
+        summary: 'Create a new product',
+        description: 'Add a new product for the authenticated user',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name'],
+                properties: {
+                  name: { type: 'string', example: 'Kopi Arabika Premium' },
+                  description: { type: 'string', example: 'Kopi arabika kualitas premium dari Aceh' },
+                  category: { type: 'string', example: 'Agricultural' },
+                  hsCode: { type: 'string', example: '0901' },
+                  targetCountryId: { type: 'string', example: 'us' },
+                  targetCountryName: { type: 'string', example: 'United States' },
+                  metadata: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Product created successfully'
+          },
+          '400': {
+            description: 'Invalid input - name is required'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/user/products/stats': {
+      get: {
+        tags: ['User Products'],
+        summary: 'Get product statistics',
+        description: 'Get statistics about user products (total, active, archived)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved product statistics',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer', example: 5 },
+                        active: { type: 'integer', example: 4 },
+                        archived: { type: 'integer', example: 1 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/user/products/{id}': {
+      get: {
+        tags: ['User Products'],
+        summary: 'Get a single product by ID',
+        description: 'Retrieve details of a specific product owned by the authenticated user',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Product ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved product'
+          },
+          '404': {
+            description: 'Product not found'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      put: {
+        tags: ['User Products'],
+        summary: 'Update a product',
+        description: 'Update an existing product owned by the authenticated user',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Product ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  category: { type: 'string' },
+                  hsCode: { type: 'string' },
+                  targetCountryId: { type: 'string' },
+                  targetCountryName: { type: 'string' },
+                  status: { type: 'string', enum: ['active', 'archived'] },
+                  metadata: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Product updated successfully'
+          },
+          '404': {
+            description: 'Product not found'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      delete: {
+        tags: ['User Products'],
+        summary: 'Delete a product',
+        description: 'Soft delete a product (sets status to archived)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Product ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Product deleted successfully'
+          },
+          '404': {
+            description: 'Product not found'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/export-agents': {
+      get: {
+        tags: ['Export Agents'],
+        summary: 'Get all export agents with optional filters',
+        description: 'Retrieve a list of export agents. Supports filtering by category, target country, city, verification status, and minimum rating.',
+        parameters: [
+          {
+            name: 'category',
+            in: 'query',
+            description: 'Filter by specialization category',
+            schema: { type: 'string' },
+            example: 'Agricultural'
+          },
+          {
+            name: 'targetCountry',
+            in: 'query',
+            description: 'Filter by target country',
+            schema: { type: 'string' },
+            example: 'United States'
+          },
+          {
+            name: 'city',
+            in: 'query',
+            description: 'Filter by city',
+            schema: { type: 'string' },
+            example: 'Jakarta'
+          },
+          {
+            name: 'verifiedOnly',
+            in: 'query',
+            description: 'Only return verified agents',
+            schema: { type: 'boolean' },
+            example: true
+          },
+          {
+            name: 'minRating',
+            in: 'query',
+            description: 'Minimum rating',
+            schema: { type: 'number', format: 'float' },
+            example: 4.0
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved export agents',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 10 },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer', example: 1 },
+                          company_name: { type: 'string', example: 'PT Ekspor Global Indonesia' },
+                          contact_person: { type: 'string', example: 'Budi Santoso' },
+                          email: { type: 'string', example: 'info@eksporglobal.id' },
+                          phone: { type: 'string', example: '+62-21-12345678' },
+                          website: { type: 'string', example: 'https://eksporglobal.id' },
+                          address: { type: 'string' },
+                          city: { type: 'string', example: 'Jakarta' },
+                          province: { type: 'string', example: 'DKI Jakarta' },
+                          country: { type: 'string', example: 'Indonesia' },
+                          specialization_categories: { type: 'array', items: { type: 'string' } },
+                          target_countries: { type: 'array', items: { type: 'string' } },
+                          services: { type: 'array', items: { type: 'string' } },
+                          languages: { type: 'array', items: { type: 'string' } },
+                          rating: { type: 'number', format: 'float', example: 4.5 },
+                          review_count: { type: 'integer', example: 25 },
+                          experience_years: { type: 'integer', example: 10 },
+                          license_number: { type: 'string' },
+                          is_verified: { type: 'boolean', example: true },
+                          is_active: { type: 'boolean', example: true }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      post: {
+        tags: ['Export Agents'],
+        summary: 'Create a new export agent',
+        description: 'Add a new export agent to the database (admin function)',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['companyName'],
+                properties: {
+                  companyName: { type: 'string', example: 'PT Ekspor Global Indonesia' },
+                  contactPerson: { type: 'string', example: 'Budi Santoso' },
+                  email: { type: 'string', example: 'info@eksporglobal.id' },
+                  phone: { type: 'string', example: '+62-21-12345678' },
+                  website: { type: 'string', example: 'https://eksporglobal.id' },
+                  address: { type: 'string' },
+                  city: { type: 'string', example: 'Jakarta' },
+                  province: { type: 'string', example: 'DKI Jakarta' },
+                  country: { type: 'string', example: 'Indonesia' },
+                  specializationCategories: { type: 'array', items: { type: 'string' }, example: ['Agricultural', 'Manufacturing'] },
+                  targetCountries: { type: 'array', items: { type: 'string' }, example: ['United States', 'Japan'] },
+                  services: { type: 'array', items: { type: 'string' }, example: ['Documentation', 'Logistics', 'Customs'] },
+                  languages: { type: 'array', items: { type: 'string' }, example: ['Indonesian', 'English'] },
+                  rating: { type: 'number', format: 'float', example: 0.0 },
+                  reviewCount: { type: 'integer', example: 0 },
+                  experienceYears: { type: 'integer', example: 5 },
+                  licenseNumber: { type: 'string' },
+                  isVerified: { type: 'boolean', example: false },
+                  metadata: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Export agent created successfully'
+          },
+          '400': {
+            description: 'Invalid input - company name is required'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/export-agents/recommendations': {
+      get: {
+        tags: ['Export Agents'],
+        summary: 'Get AI-powered recommendations for export agents',
+        description: 'Get personalized recommendations for export agents based on user product. Uses AI to match agents with product requirements.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'productId',
+            in: 'query',
+            description: 'Product ID (optional, uses first active product if not provided)',
+            schema: { type: 'integer' },
+            example: 1
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            description: 'Maximum number of recommendations (default: 5, max: 10)',
+            schema: { type: 'integer', minimum: 1, maximum: 10, default: 5 },
+            example: 5
+          },
+          {
+            name: 'verifiedOnly',
+            in: 'query',
+            description: 'Only recommend verified agents',
+            schema: { type: 'boolean' },
+            example: true
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved recommendations',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 5 },
+                    product: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'integer', example: 1 },
+                        name: { type: 'string', example: 'Kopi Arabika Premium' },
+                        category: { type: 'string', example: 'Agricultural' },
+                        targetCountry: { type: 'string', example: 'United States' }
+                      }
+                    },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          agent: {
+                            type: 'object',
+                            properties: {
+                              id: { type: 'integer' },
+                              companyName: { type: 'string' },
+                              contactPerson: { type: 'string' },
+                              email: { type: 'string' },
+                              phone: { type: 'string' },
+                              website: { type: 'string' },
+                              address: { type: 'string' },
+                              city: { type: 'string' },
+                              province: { type: 'string' },
+                              specializationCategories: { type: 'array', items: { type: 'string' } },
+                              targetCountries: { type: 'array', items: { type: 'string' } },
+                              services: { type: 'array', items: { type: 'string' } },
+                              languages: { type: 'array', items: { type: 'string' } },
+                              rating: { type: 'number' },
+                              reviewCount: { type: 'integer' },
+                              experienceYears: { type: 'integer' },
+                              isVerified: { type: 'boolean' }
+                            }
+                          },
+                          score: { type: 'number', example: 85.5 },
+                          reasons: { type: 'array', items: { type: 'string' }, example: ['Spesialisasi dalam kategori Agricultural', 'Berpengalaman dengan ekspor ke United States', 'Rating tinggi'] }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '404': {
+            description: 'Product not found or no product available'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/export-agents/recommendations/history': {
+      get: {
+        tags: ['Export Agents'],
+        summary: 'Get user recommendation history',
+        description: 'Retrieve the history of export agent recommendations for the authenticated user',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'productId',
+            in: 'query',
+            description: 'Filter by product ID (optional)',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved recommendation history'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/export-agents/{id}': {
+      get: {
+        tags: ['Export Agents'],
+        summary: 'Get a single export agent by ID',
+        description: 'Retrieve details of a specific export agent',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Agent ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved export agent'
+          },
+          '404': {
+            description: 'Export agent not found'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      put: {
+        tags: ['Export Agents'],
+        summary: 'Update an export agent',
+        description: 'Update an existing export agent (admin function)',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Agent ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  company_name: { type: 'string' },
+                  contact_person: { type: 'string' },
+                  email: { type: 'string' },
+                  phone: { type: 'string' },
+                  website: { type: 'string' },
+                  address: { type: 'string' },
+                  city: { type: 'string' },
+                  province: { type: 'string' },
+                  country: { type: 'string' },
+                  specialization_categories: { type: 'array', items: { type: 'string' } },
+                  target_countries: { type: 'array', items: { type: 'string' } },
+                  services: { type: 'array', items: { type: 'string' } },
+                  languages: { type: 'array', items: { type: 'string' } },
+                  rating: { type: 'number' },
+                  review_count: { type: 'integer' },
+                  experience_years: { type: 'integer' },
+                  license_number: { type: 'string' },
+                  is_verified: { type: 'boolean' },
+                  is_active: { type: 'boolean' },
+                  metadata: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Export agent updated successfully'
+          },
+          '404': {
+            description: 'Export agent not found'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
     }
   }
 };
@@ -1429,6 +2032,12 @@ app.use('/api/products', productsRoutes);
 
 // News routes
 app.use('/api/news', newsRoutes);
+
+// User Products routes
+app.use('/api/user/products', userProductsRoutes);
+
+// Export Agents routes
+app.use('/api/export-agents', exportAgentsRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });

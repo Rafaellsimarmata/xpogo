@@ -1,21 +1,55 @@
 'use client';
 
+import { useMemo } from "react";
 import { useDocumentCenterController } from "@/src/controllers/workspace/documentController";
-import { DocumentTable } from "@/src/components/workspace/DocumentTable";
+import { DocumentTableWrapper } from "@/src/components/workspace/DocumentTableWrapper";
 import { RecommendationList } from "@/src/components/workspace/RecommendationList";
+import { useLocalStorage } from "@/src/hooks/useLocalStorage";
+import type { DocumentRequirement } from "@/src/lib/utils/parseCompliance";
 
 export const DocumentCenterContent = () => {
   const {
     product,
     country,
-    documents,
-    grouped,
+    documents: apiDocuments,
     serviceProviders,
     complianceLoading,
     complianceError,
     productLoading,
     productError,
   } = useDocumentCenterController();
+
+  const countryId = country?.id;
+
+  // Use custom hook to manage localStorage-backed state without React warnings
+  // Key changes with country to isolate saved states per country
+  const [allDocumentStatuses, setAllDocumentStatuses] = useLocalStorage<Record<string, DocumentRequirement["status"]>>(
+    `doc-statuses-${countryId || 'default'}`,
+    {}
+  );
+
+  // Apply updates and calculate counts
+  const documentsWithUpdates = useMemo(() => {
+    return apiDocuments.map((doc) => ({
+      ...doc,
+      status: allDocumentStatuses[doc.id] ?? doc.status,
+    }));
+  }, [apiDocuments, allDocumentStatuses]);
+
+  const counts = useMemo(() => {
+    return {
+      complete: documentsWithUpdates.filter(d => d.status === "complete").length,
+      "in-progress": documentsWithUpdates.filter(d => d.status === "in-progress").length,
+      pending: documentsWithUpdates.filter(d => d.status === "pending").length,
+    };
+  }, [documentsWithUpdates]);
+
+  const handleStatusChange = (docId: string, newStatus: DocumentRequirement["status"]) => {
+    setAllDocumentStatuses((prev) => ({
+      ...prev,
+      [docId]: newStatus,
+    }));
+  };
 
   return (
     <section className="bg-background py-12">
@@ -63,17 +97,17 @@ export const DocumentCenterContent = () => {
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Selesai</p>
-              <p className="mt-2 text-3xl font-bold text-success">{grouped.complete}</p>
+              <p className="mt-2 text-3xl font-bold text-success">{counts.complete}</p>
               <p className="text-xs text-muted-foreground">Berkas siap upload</p>
             </div>
             <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Proses</p>
-              <p className="mt-2 text-3xl font-bold text-warning">{grouped["in-progress"]}</p>
+              <p className="mt-2 text-3xl font-bold text-warning">{counts["in-progress"]}</p>
               <p className="text-xs text-muted-foreground">Menunggu update tim</p>
             </div>
             <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Pending</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{grouped.pending}</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">{counts.pending}</p>
               <p className="text-xs text-muted-foreground">Belum mulai</p>
             </div>
           </div>
@@ -115,7 +149,11 @@ export const DocumentCenterContent = () => {
                     </div>
                   )}
                   {!complianceLoading && (
-                    <DocumentTable documents={documents} />
+                    <DocumentTableWrapper 
+                      countryId={country?.id}
+                      documents={apiDocuments}
+                      onStatusChange={handleStatusChange}
+                    />
                   )}
                 </>
               ) : (

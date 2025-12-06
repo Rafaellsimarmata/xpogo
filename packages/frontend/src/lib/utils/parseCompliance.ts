@@ -1,4 +1,11 @@
-import type { DocumentRequirement } from "@/src/lib/data/documents";
+export type DocumentRequirement = {
+  id: string;
+  title: string;
+  description: string;
+  status: "complete" | "pending" | "in-progress";
+  level: "basic" | "advanced";
+  actionLabel?: string;
+};
 
 /**
  * Parse AI-generated compliance checklist text into structured document requirements
@@ -151,5 +158,11 @@ export const parseComplianceChecklist = (
   }
 
   return documents;
+};
+
+export const checklistCompletion = (items: DocumentRequirement[]): number => {
+  if (!items.length) return 0;
+  const completed = items.filter((item) => item.status === "complete").length;
+  return Math.round((completed / items.length) * 100);
 };
 
