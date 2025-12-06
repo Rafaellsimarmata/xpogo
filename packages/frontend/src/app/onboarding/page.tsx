@@ -40,8 +40,8 @@ const OnboardingPage = () => {
   });
 
   return (
-    <section className="bg-gradient-to-b from-white to-blue-50/40 py-16">
-      <div className="mx-auto max-w-3xl rounded-[32px] border border-white/40 bg-white/80 p-10 shadow-2xl">
+    <section className="bg-linear-to-b from-white to-blue-50/40 py-16">
+      <div className="mx-auto max-w-3xl rounded-4xl border border-white/40 bg-white/80 p-10 shadow-2xl">
         <p className="text-sm font-semibold uppercase tracking-[0.4em] text-blue-500">Onboarding</p>
         <h1 className="mt-4 text-3xl font-semibold text-slate-900">Lengkapi Profil UMKM Anda</h1>
         <p className="mt-2 text-sm text-slate-500">Data ini digunakan untuk personalisasi rekomendasi.</p>
@@ -52,7 +52,7 @@ const OnboardingPage = () => {
           </div>
           <div className="mt-2 h-2 rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-400"
+              className="h-full rounded-full bg-linear-to-r from-blue-600 to-cyan-400"
               style={{ width: `${completion}%` }}
             />
           </div>
