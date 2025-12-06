@@ -1,0 +1,167 @@
+[
+  {
+    "id": "palm-oil",
+    "name": "Palm Oil",
+    "category": "Agricultural",
+    "description": "Crude and refined palm oil products for food, cosmetics, and industrial use",
+    "hs_code": "1511",
+    "annual_exports_usd": 7200000000,
+    "major_markets": ["China", "India", "Netherlands", "Pakistan", "Malaysia"],
+    "image": "https://images.unsplash.com/photo-1585865388235-b2341eea340b?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "rubber",
+    "name": "Natural Rubber",
+    "category": "Agricultural",
+    "description": "High-quality natural rubber for tire manufacturing, industrial, and consumer products",
+    "hs_code": "4001",
+    "annual_exports_usd": 6500000000,
+    "major_markets": ["China", "United States", "Japan", "Germany", "India"],
+    "image": "https://images.unsplash.com/photo-1581092916550-e323be2ae537?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "coffee",
+    "name": "Coffee Beans",
+    "category": "Agricultural",
+    "description": "Premium robusta and arabica coffee beans from Indonesian plantations",
+    "hs_code": "0901",
+    "annual_exports_usd": 1200000000,
+    "major_markets": ["Germany", "United States", "Italy", "France", "Belgium"],
+    "image": "https://images.unsplash.com/photo-1559056199-641a0ac8b3f4?w=400",
+    "difficulty_level": "Medium"
+  },
+  {
+    "id": "cocoa",
+    "name": "Cocoa & Cocoa Products",
+    "category": "Agricultural",
+    "description": "Cocoa beans, cocoa butter, and cocoa preparations for chocolate and confectionery",
+    "hs_code": "1801",
+    "annual_exports_usd": 2400000000,
+    "major_markets": ["Netherlands", "Germany", "Belgium", "Malaysia", "Singapore"],
+    "image": "https://images.unsplash.com/photo-1599810694-b5ac4dd94548?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "spices",
+    "name": "Spices",
+    "category": "Agricultural",
+    "description": "Black pepper, cloves, nutmeg, cinnamon, and other premium spices",
+    "hs_code": "0907",
+    "annual_exports_usd": 890000000,
+    "major_markets": ["United States", "India", "Vietnam", "Japan", "Singapore"],
+    "image": "https://images.unsplash.com/photo-1596040571473-4b7d2baa04e7?w=400",
+    "difficulty_level": "Medium"
+  },
+  {
+    "id": "textiles",
+    "name": "Textiles & Garments",
+    "category": "Manufacturing",
+    "description": "Fabrics, garments, and textile products for apparel and industrial use",
+    "hs_code": "5208",
+    "annual_exports_usd": 12500000000,
+    "major_markets": ["United States", "Germany", "Japan", "Netherlands", "Belgium"],
+    "image": "https://images.unsplash.com/photo-1577720643272-265fea84324d?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "furniture",
+    "name": "Wooden Furniture",
+    "category": "Manufacturing",
+    "description": "High-quality wooden furniture including chairs, tables, and home furnishings",
+    "hs_code": "9401",
+    "annual_exports_usd": 3100000000,
+    "major_markets": ["United States", "Germany", "UK", "Netherlands", "Belgium"],
+    "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400",
+    "difficulty_level": "Medium"
+  },
+  {
+    "id": "seafood",
+    "name": "Seafood Products",
+    "category": "Agricultural",
+    "description": "Fresh, frozen, and processed seafood including shrimp, fish, and crab",
+    "hs_code": "0306",
+    "annual_exports_usd": 5200000000,
+    "major_markets": ["United States", "China", "Japan", "Vietnam", "Thailand"],
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "minerals",
+    "name": "Minerals & Metals",
+    "category": "Mining",
+    "description": "Tin, copper, nickel, coal, and other mineral products",
+    "hs_code": "2614",
+    "annual_exports_usd": 18900000000,
+    "major_markets": ["China", "Japan", "South Korea", "Taiwan", "India"],
+    "image": "https://images.unsplash.com/photo-1578408290490-ba900402f5bb?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "electronics",
+    "name": "Electronics & Components",
+    "category": "Manufacturing",
+    "description": "Electronic devices, semiconductors, and electrical components",
+    "hs_code": "8541",
+    "annual_exports_usd": 8700000000,
+    "major_markets": ["China", "Japan", "Germany", "Singapore", "Malaysia"],
+    "image": "https://images.unsplash.com/photo-1550355291-bbee04a92027?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "oil-gas",
+    "name": "Oil & Gas Products",
+    "category": "Energy",
+    "description": "Crude oil, liquefied natural gas (LNG), and petroleum products",
+    "hs_code": "2709",
+    "annual_exports_usd": 15400000000,
+    "major_markets": ["China", "Japan", "Singapore", "South Korea", "Australia"],
+    "image": "https://images.unsplash.com/photo-1532996122724-8f3c2cd83c5d?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "chemicals",
+    "name": "Chemicals & Petrochemicals",
+    "category": "Manufacturing",
+    "description": "Industrial chemicals, petrochemical products, and specialty chemicals",
+    "hs_code": "2909",
+    "annual_exports_usd": 4300000000,
+    "major_markets": ["China", "Vietnam", "United States", "Japan", "India"],
+    "image": "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "paper",
+    "name": "Paper & Pulp Products",
+    "category": "Manufacturing",
+    "description": "Paper, pulp, and paper products for packaging and industrial use",
+    "hs_code": "4707",
+    "annual_exports_usd": 2800000000,
+    "major_markets": ["China", "Japan", "Taiwan", "South Korea", "Vietnam"],
+    "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400",
+    "difficulty_level": "Medium"
+  },
+  {
+    "id": "footwear",
+    "name": "Footwear & Shoes",
+    "category": "Manufacturing",
+    "description": "Athletic shoes, casual footwear, and specialized footwear products",
+    "hs_code": "6404",
+    "annual_exports_usd": 3700000000,
+    "major_markets": ["United States", "Germany", "Netherlands", "Belgium", "France"],
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
+    "difficulty_level": "High"
+  },
+  {
+    "id": "handicrafts",
+    "name": "Handicrafts & Souvenirs",
+    "category": "Artisan",
+    "description": "Traditional handmade crafts, batik, wooden items, and cultural souvenirs",
+    "hs_code": "4420",
+    "annual_exports_usd": 890000000,
+    "major_markets": ["United States", "Germany", "Netherlands", "Australia", "Japan"],
+    "image": "https://images.unsplash.com/photo-1578500494198-246f612d03b3?w=400",
+    "difficulty_level": "Low"
+  }
+]

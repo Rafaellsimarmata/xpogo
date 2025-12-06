@@ -23,6 +23,8 @@ const authRoutes = require('./routes/auth');
 const marketIntelligenceRoutes = require('./routes/marketIntelligence');
 const documentAssistantRoutes = require('./routes/documentAssistant');
 const chatbotRoutes = require('./routes/chatbot');
+const countriesRoutes = require('./routes/countries');
+const productsRoutes = require('./routes/products');
 const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 
 const app = express();
@@ -895,6 +897,344 @@ const swaggerSpec = {
           }
         }
       }
+    },
+    '/api/countries': {
+      get: {
+        tags: ['Countries'],
+        summary: 'Get all countries',
+        description: 'Retrieve a list of all countries in the world with optional filtering by region or search query. Perfect for export market selection.',
+        parameters: [
+          {
+            name: 'region',
+            in: 'query',
+            description: 'Filter countries by region',
+            schema: {
+              type: 'string',
+              enum: ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania']
+            },
+            example: 'Asia'
+          },
+          {
+            name: 'search',
+            in: 'query',
+            description: 'Search countries by name (partial match, case-insensitive)',
+            schema: {
+              type: 'string'
+            },
+            example: 'coffee'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'List of countries retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 5 },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          name: { type: 'string', example: 'United States' },
+                          code: { type: 'string', example: 'US' },
+                          region: { type: 'string', example: 'Americas' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error retrieving countries'
+          }
+        }
+      }
+    },
+    '/api/countries/{code}': {
+      get: {
+        tags: ['Countries'],
+        summary: 'Get country by code',
+        description: 'Retrieve detailed information about a specific country using its ISO 3166-1 alpha-2 country code.',
+        parameters: [
+          {
+            name: 'code',
+            in: 'path',
+            required: true,
+            description: 'ISO 3166-1 alpha-2 country code (e.g., US, CN, IN)',
+            schema: {
+              type: 'string'
+            },
+            example: 'US'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Country information retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string', example: 'United States' },
+                        code: { type: 'string', example: 'US' },
+                        region: { type: 'string', example: 'Americas' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Country with the specified code not found',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: false },
+                    error: { type: 'string', example: 'Country with code XY not found' }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error retrieving country'
+          }
+        }
+      }
+    },
+    '/api/products': {
+      get: {
+        tags: ['Products'],
+        summary: 'Get all Indonesian export products with optional filtering',
+        description: 'Retrieve a comprehensive list of Indonesian export products that enterprises can add. Supports filtering by category, difficulty level, and search by name or description.',
+        parameters: [
+          {
+            name: 'category',
+            in: 'query',
+            description: 'Filter by product category (Agricultural, Manufacturing, Mining, Energy, Artisan)',
+            schema: { type: 'string' },
+            example: 'Agricultural'
+          },
+          {
+            name: 'difficulty',
+            in: 'query',
+            description: 'Filter by export difficulty level (Low, Medium, High)',
+            schema: { type: 'string' },
+            example: 'Medium'
+          },
+          {
+            name: 'search',
+            in: 'query',
+            description: 'Search products by name or description (partial match)',
+            schema: { type: 'string' },
+            example: 'coffee'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved products list',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 5 },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', example: 'coffee' },
+                          name: { type: 'string', example: 'Coffee Beans' },
+                          category: { type: 'string', example: 'Agricultural' },
+                          description: { type: 'string', example: 'Premium robusta and arabica coffee beans' },
+                          hs_code: { type: 'string', example: '0901' },
+                          annual_exports_usd: { type: 'number', example: 1200000000 },
+                          major_markets: { type: 'array', items: { type: 'string' }, example: ['Germany', 'United States'] },
+                          difficulty_level: { type: 'string', example: 'Medium' }
+                        }
+                      }
+                    }
+                  }
+                },
+                examples: {
+                  allProducts: {
+                    summary: 'Get all products',
+                    value: {
+                      success: true,
+                      count: 15,
+                      data: [
+                        {
+                          id: 'coffee',
+                          name: 'Coffee Beans',
+                          category: 'Agricultural',
+                          description: 'Premium robusta and arabica coffee beans from Indonesian plantations',
+                          hs_code: '0901',
+                          annual_exports_usd: 1200000000,
+                          major_markets: ['Germany', 'United States', 'Italy'],
+                          difficulty_level: 'Medium'
+                        }
+                      ]
+                    }
+                  },
+                  filtered: {
+                    summary: 'Filter by category',
+                    value: {
+                      success: true,
+                      count: 3,
+                      data: [
+                        {
+                          id: 'coffee',
+                          name: 'Coffee Beans',
+                          category: 'Agricultural',
+                          hs_code: '0901',
+                          annual_exports_usd: 1200000000,
+                          major_markets: ['Germany', 'United States'],
+                          difficulty_level: 'Medium'
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error retrieving products',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: false },
+                    error: { type: 'string', example: 'Failed to fetch products' }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    '/api/products/{id}': {
+      get: {
+        tags: ['Products'],
+        summary: 'Get a specific product by ID',
+        description: 'Retrieve detailed information about a specific Indonesian export product',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Product ID (e.g., coffee, palm-oil, rubber)',
+            schema: { type: 'string' },
+            example: 'coffee'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved product details',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        id: { type: 'string', example: 'coffee' },
+                        name: { type: 'string', example: 'Coffee Beans' },
+                        category: { type: 'string', example: 'Agricultural' },
+                        description: { type: 'string' },
+                        hs_code: { type: 'string', example: '0901' },
+                        annual_exports_usd: { type: 'number', example: 1200000000 },
+                        major_markets: { type: 'array', items: { type: 'string' } },
+                        difficulty_level: { type: 'string', example: 'Medium' }
+                      }
+                    }
+                  }
+                },
+                example: {
+                  success: true,
+                  data: {
+                    id: 'coffee',
+                    name: 'Coffee Beans',
+                    category: 'Agricultural',
+                    description: 'Premium robusta and arabica coffee beans from Indonesian plantations',
+                    hs_code: '0901',
+                    annual_exports_usd: 1200000000,
+                    major_markets: ['Germany', 'United States', 'Italy', 'France', 'Belgium'],
+                    difficulty_level: 'Medium'
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Product with the specified ID not found',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: false },
+                    error: { type: 'string', example: 'Product with ID invalid-id not found' }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error retrieving product'
+          }
+        }
+      }
+    },
+    '/api/products/categories/list': {
+      get: {
+        tags: ['Products'],
+        summary: 'Get all available product categories',
+        description: 'Retrieve a list of all available product categories for filtering',
+        responses: {
+          '200': {
+            description: 'Successfully retrieved categories',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 5 },
+                    data: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      example: ['Agricultural', 'Artisan', 'Energy', 'Manufacturing', 'Mining']
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error retrieving categories'
+          }
+        }
+      }
     }
   }
 };
@@ -918,6 +1258,12 @@ app.use('/document-assistant', documentAssistantRoutes);
 
 // Chatbot routes - works with both Socket.io (dev) and Supabase Realtime (prod)
 app.use('/api/chatbot', chatbotRoutes);
+
+// Countries routes
+app.use('/api/countries', countriesRoutes);
+
+// Products routes
+app.use('/api/products', productsRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
