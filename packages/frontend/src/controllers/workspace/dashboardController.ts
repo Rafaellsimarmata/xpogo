@@ -51,6 +51,7 @@ export const useDashboardController = () => {
   const {
     data: newsPayload,
     isLoading: newsLoading,
+    isFetching: newsFetching,
     error: newsError,
     refetch: refetchNews,
   } = useNews(newsFilters);
@@ -274,6 +275,7 @@ const newsProductOptions = useMemo(() => {
     primaryCountry,
     newsItems,
     newsLoading,
+    newsRefreshing: newsFetching && !newsLoading,
     newsError: newsError instanceof Error ? newsError.message : null,
     newsMeta,
     countryOptions,

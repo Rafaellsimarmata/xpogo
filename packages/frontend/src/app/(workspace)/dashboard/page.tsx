@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, RefreshCw, ExternalLink } from "lucide-react";
+import { Plus, RefreshCw, ExternalLink, Loader2 } from "lucide-react";
 import Modal from "@/src/components/ui/Modal";
 import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
@@ -12,6 +12,7 @@ const DashboardPage = () => {
     productCards,
     newsItems,
     newsLoading,
+    newsRefreshing,
     newsError,
     newsMeta,
     countryOptions,
@@ -30,6 +31,8 @@ const DashboardPage = () => {
     productsLoading,
     productsError,
   } = controller;
+
+  const showNewsSkeleton = newsLoading || newsRefreshing;
 
   return (
     <section className="bg-background py-12">
@@ -94,10 +97,15 @@ const DashboardPage = () => {
             <button
               type="button"
               onClick={actions.refreshNews}
-              className="inline-flex items-center gap-2 rounded-2xl border border-border/60 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/40"
+              className="inline-flex items-center gap-2 rounded-2xl border border-border/60 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/40 disabled:opacity-60"
+              disabled={newsRefreshing}
             >
-              <RefreshCw className="h-4 w-4" />
-              Muat ulang
+              {newsRefreshing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              {newsRefreshing ? "Memuat..." : "Muat ulang"}
             </button>
           </div>
 
@@ -153,7 +161,7 @@ const DashboardPage = () => {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            {newsLoading &&
+            {showNewsSkeleton &&
               Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`news-skeleton-${index}`}
@@ -164,7 +172,7 @@ const DashboardPage = () => {
                   <div className="mt-2 h-3 w-full rounded bg-border/40" />
                 </div>
               ))}
-            {!newsLoading &&
+            {!showNewsSkeleton &&
               newsItems.map((news) => (
                 <article
                   key={news.id}
@@ -192,64 +200,13 @@ const DashboardPage = () => {
                   </div>
                 </article>
               ))}
-            {!newsLoading && !newsItems.length && (
+            {!showNewsSkeleton && !newsItems.length && (
               <div className="md:col-span-2 rounded-3xl border border-dashed border-border/60 bg-background/60 p-6 text-center text-sm text-muted-foreground">
                 {newsError ?? "Belum ada berita sesuai filter yang dipilih."}
               </div>
             )}
           </div>
         </section>
-
-        {/* <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                Market Highlight
-              </p>
-              <h2 className="text-lg font-semibold text-foreground">
-                Negara prioritas minggu ini: {controller.primaryCountry?.name}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {controller.primaryCountry?.readiness} - estimasi proses {controller.primaryCountry?.estimatedTime} hari
-              </p>
-            </div>
-          </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {controller.countriesLoading &&
-              [1, 2, 3, 4].map((placeholder) => (
-                <div
-                  key={placeholder}
-                  className="h-24 animate-pulse rounded-2xl border border-border/60 bg-background/50"
-                />
-              ))}
-            {!controller.countriesLoading && controller.countryMatches.length > 0 && (
-              <>
-                {controller.countryMatches.map((country) => (
-                  <div
-                    key={country.id}
-                    className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold">{country.name}</p>
-                        <p className="text-xs text-muted-foreground">{country.region}</p>
-                      </div>
-                      <span className="text-xs font-semibold text-primary">{country.matchScore}/100</span>
-                    </div>
-                    <p className="mt-3 text-xs text-muted-foreground">
-                      {country.readiness} - estimasi {country.estimatedTime} hari
-                    </p>
-                  </div>
-                ))}
-              </>
-            )}
-            {!controller.countriesLoading && controller.countryMatches.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-border/60 bg-background/60 p-4 text-sm text-muted-foreground md:col-span-2">
-                {controller.countriesError ?? "Belum ada data negara yang dapat ditampilkan saat ini."}
-              </div>
-            )}
-          </div>
-        </div> */}
       </div>
 
       <Modal
