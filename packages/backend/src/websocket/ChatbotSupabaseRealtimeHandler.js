@@ -299,6 +299,189 @@ class ChatbotSupabaseRealtimeHandler {
       console.error('Error cleaning up user connection:', error);
     }
   }
+
+  /**
+   * Handle streaming message response using Server-Sent Events
+   */
+  async handleSendMessageStream(userId, userMessage, res) {
+    try {
+      // Initialize conversation if needed
+      const conv = await this.chatbotService.initializeConversation(userId);
+      const messages = conv.messages;
+
+      // Add user message to memory
+      messages.push({
+        role: 'user',
+        content: userMessage
+      });
+
+      // Save user message to database asynchronously (don't block streaming)
+      this.chatbotService.saveMessage(userId, 'user', userMessage, 'message').catch(err => 
+        console.error('Error saving user message:', err)
+      );
+
+      // Start streaming immediately - no "start" event, just begin streaming chunks
+      await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
+    } catch (error) {
+      console.error('Error in streaming send message:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          error: error.message,
+        })}\n\n`);
+      }
+      res.end();
+    }
+  }
+
+  /**
+   * Handle streaming product analysis
+   */
+  async handleAnalyzeProductStream(userId, productInfo, res) {
+    try {
+      // Initialize conversation if needed
+      const conv = await this.chatbotService.initializeConversation(userId);
+      const messages = conv.messages;
+
+      // Create product analysis prompt
+      const userMessage = `Please analyze this product for export: ${productInfo}`;
+      
+      // Add to message history
+      messages.push({
+        role: 'user',
+        content: userMessage
+      });
+
+      // Save user message asynchronously (don't block streaming)
+      this.chatbotService.saveMessage(userId, 'user', userMessage, 'analyze_product').catch(err => 
+        console.error('Error saving user message:', err)
+      );
+
+      // Start streaming immediately
+      await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
+    } catch (error) {
+      console.error('Error in streaming product analysis:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          error: error.message,
+        })}\n\n`);
+      }
+      res.end();
+    }
+  }
+
+  /**
+   * Handle streaming market strategy
+   */
+  async handleMarketStrategyStream(userId, marketInfo, res) {
+    try {
+      const conv = await this.chatbotService.initializeConversation(userId);
+      const messages = conv.messages;
+
+      const userMessage = `What's the best market entry strategy for: ${marketInfo}`;
+      
+      messages.push({
+        role: 'user',
+        content: userMessage
+      });
+
+      // Save user message asynchronously (don't block streaming)
+      this.chatbotService.saveMessage(userId, 'user', userMessage, 'market_strategy').catch(err => 
+        console.error('Error saving user message:', err)
+      );
+
+      // Start streaming immediately
+      await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
+    } catch (error) {
+      console.error('Error in streaming market strategy:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          error: error.message,
+        })}\n\n`);
+      }
+      res.end();
+    }
+  }
+
+  /**
+   * Handle streaming compliance guidance
+   */
+  async handleComplianceGuidanceStream(userId, complianceQuery, res) {
+    try {
+      const conv = await this.chatbotService.initializeConversation(userId);
+      const messages = conv.messages;
+
+      const userMessage = `I need compliance guidance: ${complianceQuery}`;
+      
+      messages.push({
+        role: 'user',
+        content: userMessage
+      });
+
+      // Save user message asynchronously (don't block streaming)
+      this.chatbotService.saveMessage(userId, 'user', userMessage, 'compliance_guidance').catch(err => 
+        console.error('Error saving user message:', err)
+      );
+
+      // Start streaming immediately
+      await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
+    } catch (error) {
+      console.error('Error in streaming compliance guidance:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          error: error.message,
+        })}\n\n`);
+      }
+      res.end();
+    }
+  }
+
+  /**
+   * Handle streaming shipping guidance
+   */
+  async handleShippingGuidanceStream(userId, shippingInfo, res) {
+    try {
+      const conv = await this.chatbotService.initializeConversation(userId);
+      const messages = conv.messages;
+
+      const userMessage = `Please provide shipping guidance for: ${shippingInfo}`;
+      
+      messages.push({
+        role: 'user',
+        content: userMessage
+      });
+
+      // Save user message asynchronously (don't block streaming)
+      this.chatbotService.saveMessage(userId, 'user', userMessage, 'shipping_guidance').catch(err => 
+        console.error('Error saving user message:', err)
+      );
+
+      // Start streaming immediately
+      await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
+    } catch (error) {
+      console.error('Error in streaming shipping guidance:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.write(`data: ${JSON.stringify({
+          type: 'error',
+          error: error.message,
+        })}\n\n`);
+      }
+      res.end();
+    }
+  }
 }
 
 module.exports = ChatbotSupabaseRealtimeHandler;

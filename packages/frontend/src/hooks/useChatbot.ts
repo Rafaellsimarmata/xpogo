@@ -12,6 +12,11 @@ import {
   fetchShippingGuidance,
   joinChat,
   sendChatMessage,
+  streamSendMessage,
+  streamAnalyzeProduct,
+  streamMarketStrategy,
+  streamComplianceGuidance,
+  streamShippingGuidance,
 } from "@/src/services/chatbotService";
 
 const createMessage = (
@@ -39,6 +44,7 @@ export function useChatbot() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const handleError = (err: unknown) => {
     const message =
@@ -111,7 +117,8 @@ export function useChatbot() {
       strategyPending ||
       compliancePending ||
       shippingPending ||
-      clearPending,
+      clearPending ||
+      isStreaming,
     [
       analyzePending,
       clearPending,
@@ -120,6 +127,7 @@ export function useChatbot() {
       sendPending,
       shippingPending,
       strategyPending,
+      isStreaming,
     ],
   );
 
@@ -140,6 +148,21 @@ export function useChatbot() {
     ]);
   };
 
+  const updateLastAssistantMessage = (content: string) => {
+    setMessages((prev) => {
+      const updated = [...prev];
+      const lastIndex = updated.length - 1;
+      if (lastIndex >= 0 && updated[lastIndex].role === "assistant") {
+        updated[lastIndex] = {
+          ...updated[lastIndex],
+          content,
+        };
+      }
+      return updated;
+    });
+  };
+
+  // Non-streaming versions (original)
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return;
     const senderName = user?.name ?? "User";
@@ -218,6 +241,184 @@ export function useChatbot() {
     }
   }, [shippingRequest]);
 
+  // Streaming versions (new - word-by-word)
+  const sendMessageStream = useCallback(async (message: string) => {
+    if (!message.trim()) return;
+    const senderName = user?.name ?? "User";
+
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `[${senderName}]: ${message}`),
+    ]);
+    setError(null);
+    setIsStreaming(true);
+
+    // Add empty assistant message to populate
+    appendAssistantMessage("");
+
+    try {
+      await streamSendMessage(
+        message,
+        (chunk) => {
+          if (chunk.type === "chunk" && chunk.content) {
+            updateLastAssistantMessage(chunk.fullResponse || "");
+          } else if (chunk.type === "start") {
+            updateLastAssistantMessage("Generating response...");
+          }
+        },
+        (fullResponse) => {
+          updateLastAssistantMessage(formatAssistantMarkdown(fullResponse));
+          setIsStreaming(false);
+        },
+        (error) => {
+          handleError(new Error(error));
+          setIsStreaming(false);
+        }
+      );
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, [user?.name]);
+
+  const analyzeProductStream = useCallback(async (productInfo: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `Analyze this product: ${productInfo}`),
+    ]);
+    setError(null);
+    setIsStreaming(true);
+
+    appendAssistantMessage("");
+
+    try {
+      await streamAnalyzeProduct(
+        productInfo,
+        (chunk) => {
+          if (chunk.type === "chunk" && chunk.content) {
+            updateLastAssistantMessage(chunk.fullResponse || "");
+          } else if (chunk.type === "start") {
+            updateLastAssistantMessage("Analyzing product...");
+          }
+        },
+        (fullResponse) => {
+          updateLastAssistantMessage(formatAssistantMarkdown(fullResponse));
+          setIsStreaming(false);
+        },
+        (error) => {
+          handleError(new Error(error));
+          setIsStreaming(false);
+        }
+      );
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, []);
+
+  const getMarketStrategyStream = useCallback(async (marketInfo: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `Market strategy request: ${marketInfo}`),
+    ]);
+    setError(null);
+    setIsStreaming(true);
+
+    appendAssistantMessage("");
+
+    try {
+      await streamMarketStrategy(
+        marketInfo,
+        (chunk) => {
+          if (chunk.type === "chunk" && chunk.content) {
+            updateLastAssistantMessage(chunk.fullResponse || "");
+          } else if (chunk.type === "start") {
+            updateLastAssistantMessage("Developing strategy...");
+          }
+        },
+        (fullResponse) => {
+          updateLastAssistantMessage(formatAssistantMarkdown(fullResponse));
+          setIsStreaming(false);
+        },
+        (error) => {
+          handleError(new Error(error));
+          setIsStreaming(false);
+        }
+      );
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, []);
+
+  const getComplianceGuidanceStream = useCallback(
+    async (complianceQuery: string) => {
+      setMessages((prev) => [
+        ...prev,
+        createMessage("user", `Compliance question: ${complianceQuery}`),
+      ]);
+      setError(null);
+      setIsStreaming(true);
+
+      appendAssistantMessage("");
+
+      try {
+        await streamComplianceGuidance(
+          complianceQuery,
+          (chunk) => {
+            if (chunk.type === "chunk" && chunk.content) {
+              updateLastAssistantMessage(chunk.fullResponse || "");
+            } else if (chunk.type === "start") {
+              updateLastAssistantMessage("Looking up compliance...");
+            }
+          },
+          (fullResponse) => {
+            updateLastAssistantMessage(formatAssistantMarkdown(fullResponse));
+            setIsStreaming(false);
+          },
+          (error) => {
+            handleError(new Error(error));
+            setIsStreaming(false);
+          }
+        );
+      } catch (err) {
+        throw new Error(handleError(err));
+      }
+    },
+    []
+  );
+
+  const getShippingGuidanceStream = useCallback(async (shippingInfo: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `Shipping info: ${shippingInfo}`),
+    ]);
+    setError(null);
+    setIsStreaming(true);
+
+    appendAssistantMessage("");
+
+    try {
+      await streamShippingGuidance(
+        shippingInfo,
+        (chunk) => {
+          if (chunk.type === "chunk" && chunk.content) {
+            updateLastAssistantMessage(chunk.fullResponse || "");
+          } else if (chunk.type === "start") {
+            updateLastAssistantMessage("Checking shipping options...");
+          }
+        },
+        (fullResponse) => {
+          updateLastAssistantMessage(formatAssistantMarkdown(fullResponse));
+          setIsStreaming(false);
+        },
+        (error) => {
+          handleError(new Error(error));
+          setIsStreaming(false);
+        }
+      );
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, []);
+
   const clearChat = useCallback(async () => {
     setError(null);
     try {
@@ -232,12 +433,20 @@ export function useChatbot() {
     messages,
     isLoading,
     error,
+    isStreaming,
     joinChat: join,
+    // Non-streaming (original)
     sendMessage,
     analyzeProduct,
     getMarketStrategy,
     getComplianceGuidance,
     getShippingGuidance,
+    // Streaming (word-by-word)
+    sendMessageStream,
+    analyzeProductStream,
+    getMarketStrategyStream,
+    getComplianceGuidanceStream,
+    getShippingGuidanceStream,
     clearChat,
   };
 }
