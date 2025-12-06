@@ -25,6 +25,7 @@ const documentAssistantRoutes = require('./routes/documentAssistant');
 const chatbotRoutes = require('./routes/chatbot');
 const countriesRoutes = require('./routes/countries');
 const productsRoutes = require('./routes/products');
+const newsRoutes = require('./routes/news');
 const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 
 const app = express();
@@ -1235,6 +1236,167 @@ const swaggerSpec = {
           }
         }
       }
+    },
+    '/api/news': {
+      get: {
+        tags: ['News'],
+        summary: 'Get export/import news articles',
+        description: 'Retrieve AI-generated news articles related to export/import for Indonesian small enterprises',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'category',
+            in: 'query',
+            description: 'News category filter',
+            schema: {
+              type: 'string',
+              enum: ['all', 'regulations', 'market-insights', 'programs', 'events'],
+              default: 'all'
+            },
+            example: 'regulations'
+          },
+          {
+            name: 'country',
+            in: 'query',
+            description: 'Filter news by target country',
+            schema: { type: 'string' },
+            example: 'United States'
+          },
+          {
+            name: 'productType',
+            in: 'query',
+            description: 'Filter news by product type',
+            schema: { type: 'string' },
+            example: 'coffee'
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            description: 'Number of news items to return (max: 20)',
+            schema: { type: 'integer', minimum: 1, maximum: 20, default: 5 },
+            example: 5
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved news articles',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 5 },
+                    category: { type: 'string', example: 'regulations' },
+                    filters: {
+                      type: 'object',
+                      properties: {
+                        country: { type: 'string', nullable: true },
+                        productType: { type: 'string', nullable: true }
+                      }
+                    },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string', example: 'news-1234567890-0' },
+                          title: { type: 'string', example: 'Update Kuota Ekspor Kopi ke Jepang 2025' },
+                          summary: { type: 'string', example: 'Kementerian Perdagangan merilis kuota baru...' },
+                          tag: { type: 'string', example: 'Regulasi' },
+                          date: { type: 'string', example: '5 Des 2025' },
+                          source: { type: 'string', example: 'Kementerian Perdagangan' },
+                          sourceUrl: { type: 'string', example: 'https://www.kemendag.go.id' }
+                        }
+                      }
+                    },
+                    timestamp: { type: 'string', format: 'date-time' }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized - invalid or missing JWT token'
+          },
+          '500': {
+            description: 'Server error generating news'
+          }
+        }
+      }
+    },
+    '/api/news/category/{category}': {
+      get: {
+        tags: ['News'],
+        summary: 'Get news by category',
+        description: 'Retrieve news articles filtered by specific category',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'category',
+            in: 'path',
+            required: true,
+            description: 'News category',
+            schema: {
+              type: 'string',
+              enum: ['regulations', 'market-insights', 'programs', 'events']
+            },
+            example: 'regulations'
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            description: 'Number of news items (max: 20)',
+            schema: { type: 'integer', minimum: 1, maximum: 20, default: 5 }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved news by category'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/news/country/{country}': {
+      get: {
+        tags: ['News'],
+        summary: 'Get news by country',
+        description: 'Retrieve news articles filtered by target country',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'country',
+            in: 'path',
+            required: true,
+            description: 'Target country name',
+            schema: { type: 'string' },
+            example: 'United States'
+          },
+          {
+            name: 'limit',
+            in: 'query',
+            description: 'Number of news items (max: 20)',
+            schema: { type: 'integer', minimum: 1, maximum: 20, default: 5 }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved news by country'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
     }
   }
 };
@@ -1264,6 +1426,9 @@ app.use('/api/countries', countriesRoutes);
 
 // Products routes
 app.use('/api/products', productsRoutes);
+
+// News routes
+app.use('/api/news', newsRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
