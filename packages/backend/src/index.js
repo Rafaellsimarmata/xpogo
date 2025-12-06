@@ -26,6 +26,7 @@ const chatbotRoutes = require('./routes/chatbot');
 const countriesRoutes = require('./routes/countries');
 const productsRoutes = require('./routes/products');
 const newsRoutes = require('./routes/news');
+const userProductsRoutes = require('./routes/userProducts');
 const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 
 const app = express();
@@ -1397,6 +1398,257 @@ const swaggerSpec = {
           }
         }
       }
+    },
+    '/api/user/products': {
+      get: {
+        tags: ['User Products'],
+        summary: 'Get all products for authenticated user',
+        description: 'Retrieve all products added by the authenticated user. Supports filtering by status.',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'status',
+            in: 'query',
+            description: 'Filter by product status',
+            schema: {
+              type: 'string',
+              enum: ['active', 'archived'],
+              default: 'active'
+            }
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved user products',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 3 },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer', example: 1 },
+                          user_id: { type: 'integer', example: 1 },
+                          name: { type: 'string', example: 'Kopi Arabika Premium' },
+                          description: { type: 'string', example: 'Kopi arabika kualitas premium dari Aceh' },
+                          category: { type: 'string', example: 'Agricultural' },
+                          hs_code: { type: 'string', example: '0901' },
+                          target_country_id: { type: 'string', example: 'us' },
+                          target_country_name: { type: 'string', example: 'United States' },
+                          status: { type: 'string', example: 'active' },
+                          metadata: { type: 'object' },
+                          created_at: { type: 'string', format: 'date-time' },
+                          updated_at: { type: 'string', format: 'date-time' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      post: {
+        tags: ['User Products'],
+        summary: 'Create a new product',
+        description: 'Add a new product for the authenticated user',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['name'],
+                properties: {
+                  name: { type: 'string', example: 'Kopi Arabika Premium' },
+                  description: { type: 'string', example: 'Kopi arabika kualitas premium dari Aceh' },
+                  category: { type: 'string', example: 'Agricultural' },
+                  hsCode: { type: 'string', example: '0901' },
+                  targetCountryId: { type: 'string', example: 'us' },
+                  targetCountryName: { type: 'string', example: 'United States' },
+                  metadata: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '201': {
+            description: 'Product created successfully'
+          },
+          '400': {
+            description: 'Invalid input - name is required'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/user/products/stats': {
+      get: {
+        tags: ['User Products'],
+        summary: 'Get product statistics',
+        description: 'Get statistics about user products (total, active, archived)',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved product statistics',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        total: { type: 'integer', example: 5 },
+                        active: { type: 'integer', example: 4 },
+                        archived: { type: 'integer', example: 1 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
+    },
+    '/api/user/products/{id}': {
+      get: {
+        tags: ['User Products'],
+        summary: 'Get a single product by ID',
+        description: 'Retrieve details of a specific product owned by the authenticated user',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Product ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Successfully retrieved product'
+          },
+          '404': {
+            description: 'Product not found'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      put: {
+        tags: ['User Products'],
+        summary: 'Update a product',
+        description: 'Update an existing product owned by the authenticated user',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Product ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  description: { type: 'string' },
+                  category: { type: 'string' },
+                  hsCode: { type: 'string' },
+                  targetCountryId: { type: 'string' },
+                  targetCountryName: { type: 'string' },
+                  status: { type: 'string', enum: ['active', 'archived'] },
+                  metadata: { type: 'object' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': {
+            description: 'Product updated successfully'
+          },
+          '404': {
+            description: 'Product not found'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      },
+      delete: {
+        tags: ['User Products'],
+        summary: 'Delete a product',
+        description: 'Soft delete a product (sets status to archived)',
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description: 'Product ID',
+            schema: { type: 'integer' },
+            example: 1
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Product deleted successfully'
+          },
+          '404': {
+            description: 'Product not found'
+          },
+          '401': {
+            description: 'Unauthorized'
+          },
+          '500': {
+            description: 'Server error'
+          }
+        }
+      }
     }
   }
 };
@@ -1429,6 +1681,9 @@ app.use('/api/products', productsRoutes);
 
 // News routes
 app.use('/api/news', newsRoutes);
+
+// User Products routes
+app.use('/api/user/products', userProductsRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });

@@ -60,10 +60,31 @@ const initDatabase = async () => {
     console.log('Database initialized: chatbot_analysis_requests table created/exists');
 
     await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_products (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        category VARCHAR(100),
+        hs_code VARCHAR(20),
+        target_country_id VARCHAR(10),
+        target_country_name VARCHAR(255),
+        status VARCHAR(50) DEFAULT 'active',
+        metadata JSONB,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+    console.log('Database initialized: user_products table created/exists');
+
+    await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_chatbot_messages_user_id ON chatbot_messages(user_id);
       CREATE INDEX IF NOT EXISTS idx_chatbot_messages_created_at ON chatbot_messages(created_at);
       CREATE INDEX IF NOT EXISTS idx_chatbot_conversations_user_id ON chatbot_conversations(user_id);
       CREATE INDEX IF NOT EXISTS idx_chatbot_analysis_requests_user_id ON chatbot_analysis_requests(user_id);
+      CREATE INDEX IF NOT EXISTS idx_user_products_user_id ON user_products(user_id);
+      CREATE INDEX IF NOT EXISTS idx_user_products_status ON user_products(status);
     `);
     console.log('Database initialized: indices created/exist');
 
