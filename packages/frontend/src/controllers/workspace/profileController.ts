@@ -18,7 +18,7 @@ type ProfileFormValues = {
 export const useProfileController = () => {
   const router = useRouter();
   const { profile, updateProfile, setOnboardingComplete } = useUser();
-  const { addProduct } = useWorkspaceStore();
+  const { addProduct, setActiveProduct } = useWorkspaceStore();
   const isFirstSetup = !profile.onboardingComplete;
   const {
     products,
@@ -77,7 +77,7 @@ export const useProfileController = () => {
     }
   }, [form, defaultFormValues]);
 
-  const onSubmit = form.handleSubmit((values) => {
+  const onSubmit = form.handleSubmit(async (values) => {
     updateProfile({
       fullName: values.fullName,
       username: values.username,
@@ -87,10 +87,22 @@ export const useProfileController = () => {
     });
     if (isFirstSetup) {
       const product = products.find((item) => item.id === values.focusProduct);
-      addProduct(values.focusProduct, product?.name ?? values.focusProduct);
+      if (product) {
+        await addProduct({
+          baseProductId: product.id,
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          hsCode: product.hsCode,
+          metadata: {
+            difficultyLevel: product.difficultyLevel,
+          },
+        });
+        setActiveProduct(product.id);
+      }
       setOnboardingComplete(true);
     } else if (profile.focusProduct) {
-      addProduct(profile.focusProduct);
+      setActiveProduct(profile.focusProduct);
     }
     router.push(ROUTES.workspace.dashboard);
   });

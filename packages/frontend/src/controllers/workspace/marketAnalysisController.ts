@@ -30,7 +30,7 @@ export const useMarketAnalysisController = () => {
   const productMeta =
     productCatalog.find((product) => product.id === activeProductId) ??
     (trackedProduct
-      ? { id: trackedProduct.id, name: trackedProduct.customName ?? trackedProduct.id }
+      ? { id: trackedProduct.id, name: trackedProduct.name ?? trackedProduct.id }
       : productCatalog[0] ?? { id: fallbackProductId, name: DEFAULT_PRODUCT_NAME });
 
   useEffect(() => {
@@ -82,12 +82,22 @@ export const useMarketAnalysisController = () => {
     (country) => country.id === selectedCountryId,
   );
 
-  const handleSaveCountry = () => {
+  const handleSaveCountry = async () => {
     if (!activeProductId || !selectedCountryId) {
       setErrorMessage(WORKSPACE_MESSAGES.missingCountry);
       return;
     }
-    assignCountry(activeProductId, selectedCountryId);
+    const workspaceProduct = state.products.find((product) => product.id === activeProductId);
+    const country = recommendedCountries.find((candidate) => candidate.id === selectedCountryId);
+    if (!workspaceProduct || !country) {
+      setErrorMessage(WORKSPACE_MESSAGES.missingCountry);
+      return;
+    }
+    await assignCountry({
+      userProductId: workspaceProduct.userProductId,
+      countryId: country.id,
+      countryName: country.name,
+    });
     router.push(ROUTES.workspace.dashboard);
   };
 

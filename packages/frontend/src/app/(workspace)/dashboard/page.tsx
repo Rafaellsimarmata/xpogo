@@ -10,6 +10,8 @@ const DashboardPage = () => {
   const {
     profile,
     productCards,
+    workspaceLoading,
+    workspaceError,
     newsItems,
     newsLoading,
     newsRefreshing,
@@ -25,6 +27,9 @@ const DashboardPage = () => {
     setSelectedCatalogProductId,
     productPendingRemoval,
     newsFilters,
+    addProductLoading,
+    countrySelectionLoading,
+    removeProductLoading,
     actions,
     messages,
     canRemoveProducts,
@@ -33,6 +38,7 @@ const DashboardPage = () => {
   } = controller;
 
   const showNewsSkeleton = newsLoading || newsRefreshing;
+  const showProductSkeleton = workspaceLoading && productCards.length === 0;
 
   return (
     <section className="bg-background py-12">
@@ -43,36 +49,58 @@ const DashboardPage = () => {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                 Workspace Overview
               </p>
-              <h1 className="mt-2 text-3xl font-bold text-foreground">Halo, {profile.businessName}</h1>
+              <h1 className="mt-2 text-3xl font-bold text-foreground">
+                Halo, {profile.fullName ?? profile.username ?? "Eksportir"}
+              </h1>
               <p className="text-sm text-muted-foreground">
                 Pantau produk ekspor dan temukan insight terbaru tiap hari.
               </p>
             </div>
-            <div className="rounded-2xl border border-border/60 bg-background/70 px-5 py-3 text-sm text-foreground">
-              Fokus produk: {productCards[0]?.meta.name ?? "Belum dipilih"}
+            <div className="rounded-2xl border border-border/60 bg-background/70 px-5 py-3 text-right text-sm text-foreground">
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Perusahaan</p>
+              <p className="text-base font-semibold">
+                {profile.company ?? profile.businessName ?? "Belum ditentukan"}
+              </p>
             </div>
           </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {productCards.map((card) => (
-              <ProductCard
-                key={card.workspace.id}
-                title={card.meta.name}
-                description={card.meta.description}
-                countryName={card.targetCountry?.name}
-                onExport={() => actions.startExportFlow(card.workspace.id)}
-                onAnalyze={() => actions.startAnalysis(card.workspace.id, card.meta.name)}
-                onRemove={
-                  canRemoveProducts ? () => actions.requestRemoveProduct(card.workspace.id) : undefined
-                }
-                disableRemove={!canRemoveProducts}
-                isFocus={card.isFocus}
-              />
-            ))}
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {showProductSkeleton
+              ? Array.from({ length: 2 }).map((_, index) => (
+                  <div
+                    key={`product-skeleton-${index}`}
+                    className="animate-pulse rounded-3xl border border-border/60 bg-background/70 p-6"
+                  >
+                    <div className="h-4 w-24 rounded bg-border/60" />
+                    <div className="mt-3 h-6 w-2/3 rounded bg-border/50" />
+                    <div className="mt-2 h-4 w-full rounded bg-border/40" />
+                    <div className="mt-6 h-5 w-1/2 rounded bg-border/50" />
+                  </div>
+                ))
+              : productCards.map((card) => (
+                  <ProductCard
+                    key={`${card.workspace.userProductId}-${card.workspace.id}`}
+                    title={card.workspace.name ?? card.meta.name}
+                    description={card.workspace.description ?? card.meta.description}
+                    countryName={card.targetCountry?.name ?? card.workspace.targetCountryName}
+                    onExport={() => actions.startExportFlow(card.workspace.id)}
+                    onAnalyze={() => actions.startAnalysis(card.workspace.id, card.meta.name)}
+                    onRemove={
+                      canRemoveProducts ? () => actions.requestRemoveProduct(card.workspace.id) : undefined
+                    }
+                    disableRemove={!canRemoveProducts}
+                  />
+                ))}
+
+            {!workspaceLoading && productCards.length === 0 && (
+              <div className="rounded-3xl border border-dashed border-border/60 bg-background/70 p-6 text-center text-sm text-muted-foreground">
+                Belum ada produk yang dipantau. Tambahkan produk unggulan Anda terlebih dahulu.
+              </div>
+            )}
 
             <button
               type="button"
               onClick={actions.openAddProductModal}
-              className="flex min-h-[220px] flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-background/70 p-6 text-center text-sm text-muted-foreground transition hover:border-primary/50 hover:text-primary"
+              className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-background/70 p-6 text-center text-sm text-muted-foreground transition hover:border-primary/50 hover:text-primary"
             >
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Plus className="h-6 w-6" />
@@ -81,6 +109,9 @@ const DashboardPage = () => {
               <p className="mt-2">Pilih produk siap ekspor lainnya untuk dipantau.</p>
             </button>
           </div>
+          {workspaceError && (
+            <p className="mt-3 text-xs text-destructive">Gagal memuat produk pengguna: {workspaceError}</p>
+          )}
         </div>
 
         <section className="space-y-4 rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
@@ -245,6 +276,7 @@ const DashboardPage = () => {
           value={selectedCountryId}
           onChange={(event) => setSelectedCountryId(event.target.value)}
           className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          disabled={countrySelectionLoading}
         >
           {countryOptions.map((country) => (
             <option key={country.id} value={country.id}>
@@ -255,9 +287,10 @@ const DashboardPage = () => {
         <button
           type="button"
           onClick={actions.submitCountrySelection}
-          className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+          disabled={countrySelectionLoading || !selectedCountryId}
+          className="mt-4 w-full cursor-pointer rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Simpan & buka Document Center
+          {countrySelectionLoading ? "Menyimpan..." : "Simpan & buka Document Center"}
         </button>
       </Modal>
 
@@ -279,7 +312,7 @@ const DashboardPage = () => {
           value={selectedCatalogProductId}
           onChange={(event) => setSelectedCatalogProductId(event.target.value)}
           className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-          disabled={productsLoading || addProductOptions.length === 0}
+          disabled={productsLoading || addProductOptions.length === 0 || addProductLoading}
         >
           {addProductOptions.length === 0 ? (
             <option value="">Semua produk sudah ditambahkan</option>
@@ -294,10 +327,10 @@ const DashboardPage = () => {
         <button
           type="button"
           onClick={actions.submitAddProduct}
-          disabled={!selectedCatalogProductId}
-          className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={!selectedCatalogProductId || addProductLoading}
+          className="mt-4 w-full cursor-pointer rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Tambahkan produk
+          {addProductLoading ? "Menambahkan..." : "Tambahkan produk"}
         </button>
       </Modal>
 
@@ -315,9 +348,10 @@ const DashboardPage = () => {
           <button
             type="button"
             onClick={actions.confirmRemoveProduct}
-            className="flex-1 rounded-2xl bg-destructive px-4 py-2 text-sm font-semibold text-white transition hover:bg-destructive/90"
+            disabled={removeProductLoading}
+            className="flex-1 cursor-pointer rounded-2xl bg-destructive px-4 py-2 text-sm font-semibold text-white transition hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Ya, hapus
+            {removeProductLoading ? "Menghapus..." : "Ya, hapus"}
           </button>
           <button
             type="button"

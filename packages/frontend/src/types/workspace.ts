@@ -1,5 +1,14 @@
 export type WorkspaceProduct = {
-  id: string;
+  id: string; // Base catalog product ID
+  userProductId: string;
+  name: string;
+  description?: string;
+  category?: string;
+  hsCode?: string;
   targetCountryId?: string;
-  customName?: string;
+  targetCountryName?: string;
+  status?: string;
+  metadata?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
 };
