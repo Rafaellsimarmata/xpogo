@@ -5,7 +5,15 @@ import { DocumentTable } from "@/src/components/workspace/DocumentTable";
 import { RecommendationList } from "@/src/components/workspace/RecommendationList";
 
 export const DocumentCenterContent = () => {
-  const { product, country, documents, grouped, serviceProviders } = useDocumentCenterController();
+  const {
+    product,
+    country,
+    documents,
+    grouped,
+    serviceProviders,
+    complianceLoading,
+    complianceError,
+  } = useDocumentCenterController();
 
   return (
     <section className="bg-background py-12">
@@ -55,7 +63,29 @@ export const DocumentCenterContent = () => {
               </div>
 
               {country ? (
-                <DocumentTable documents={documents} />
+                <>
+                  {complianceLoading && (
+                    <div className="mt-4 rounded-2xl border border-border/60 bg-background/70 p-6">
+                      <div className="flex items-center gap-3">
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        <p className="text-sm text-muted-foreground">
+                          Memuat daftar dokumen kepatuhan dari AI...
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {complianceError && (
+                    <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-sm text-amber-700">
+                      <p className="font-semibold">Gagal memuat daftar kepatuhan</p>
+                      <p className="mt-1 text-xs">
+                        Menampilkan daftar dokumen standar. {complianceError instanceof Error ? complianceError.message : "Silakan coba lagi nanti."}
+                      </p>
+                    </div>
+                  )}
+                  {!complianceLoading && (
+                    <DocumentTable documents={documents} />
+                  )}
+                </>
               ) : (
                 <div className="mt-4 rounded-2xl border border-dashed border-border/60 bg-background/60 p-6 text-sm text-muted-foreground">
                   Pilih negara tujuan terlebih dahulu dari halaman Dashboard → Market Analysis agar checklist dapat
