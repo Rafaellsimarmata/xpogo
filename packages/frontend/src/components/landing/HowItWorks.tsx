@@ -64,20 +64,20 @@ const HowItWorks = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-2"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-2"
           >
-            <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-            <p className="text-sm font-semibold uppercase tracking-widest text-accent">Workflow</p>
+            <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+            <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">Workflow</p>
           </motion.div>
 
-          <h2 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">
+          <h2 className="mt-6 text-3xl font-bold text-gray-900 sm:text-4xl md:text-5xl">
             Alur kerja yang
-            <span className="mx-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="mx-2 bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
               sama dengan tim ekspor profesional
             </span>
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
             Setiap langkah dihubungkan otomatis. Tim tinggal mengikuti urutan yang jelas tanpa perlu mengulang pekerjaan manual.
           </p>
         </div>
