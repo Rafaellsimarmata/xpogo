@@ -24,24 +24,24 @@ class DocumentAssistantService {
       specifications,
     } = productData;
 
-    const prompt = `You are an expert export documentation specialist for small enterprises.
+    const prompt = `Anda adalah spesialis dokumentasi ekspor ahli untuk usaha kecil.
     
-Generate a professional, export-ready product description for the following product:
+Buatkan deskripsi produk yang profesional dan siap ekspor untuk produk berikut:
 
-Product Name: ${productName}
-Category: ${category}
-Key Features: ${features || 'Not specified'}
-Target Market: ${targetMarket || 'International'}
-Specifications: ${specifications || 'Not specified'}
+Nama Produk: ${productName}
+Kategori: ${category}
+Fitur Utama: ${features || 'Tidak ditentukan'}
+Pasar Sasaran: ${targetMarket || 'Internasional'}
+Spesifikasi: ${specifications || 'Tidak ditentukan'}
 
-Please provide:
-1. Executive Summary (2-3 sentences)
-2. Detailed Product Description (highlighting export benefits)
-3. Key Selling Points (3-5 bullet points)
-4. Compliance & Certifications (recommended standards for export)
-5. Packaging & Shipping Information
+Tolong berikan:
+1. Ringkasan Eksekutif (2-3 kalimat)
+2. Deskripsi Produk Detail (menyoroti manfaat ekspor)
+3. Poin Penjualan Utama (3-5 poin)
+4. Kepatuhan & Sertifikasi (standar yang direkomendasikan untuk ekspor)
+5. Informasi Pengemasan & Pengiriman
 
-Format the response in a clear, professional manner suitable for export documentation.`;
+Format respons dengan cara yang jelas dan profesional sesuai untuk dokumentasi ekspor.`;
 
     try {
       const response = await axios.post(
@@ -89,25 +89,25 @@ Format the response in a clear, professional manner suitable for export document
       productType,
     } = productData;
 
-    const prompt = `You are an expert in international trade compliance.
+    const prompt = `Anda adalah ahli dalam kepatuhan perdagangan internasional.
 
-Generate an export compliance checklist for the following product:
+Buatkan daftar periksa kepatuhan ekspor untuk produk berikut:
 
-Product Name: ${productName}
-Country of Origin: ${origin}
-Destination Countries: ${destinationCountries || 'Multiple'}
-Product Type: ${productType}
+Nama Produk: ${productName}
+Negara Asal: ${origin}
+Negara Tujuan: ${destinationCountries || 'Beberapa'}
+Jenis Produk: ${productType}
 
-Please provide a comprehensive compliance document including:
-1. Documentation Requirements (HS Code, Certificate of Origin, etc.)
-2. Import Regulations by Destination
-3. Required Certifications (CE, FDA, ISO, etc.)
-4. Labeling & Packaging Requirements
-5. Quality Standards
-6. Payment & Incoterms Options
-7. Insurance & Risk Management
+Tolong berikan dokumen kepatuhan komprehensif termasuk:
+1. Persyaratan Dokumentasi (Kode HS, Sertifikat Asal, dll.)
+2. Regulasi Impor berdasarkan Tujuan
+3. Sertifikasi yang Diperlukan (CE, FDA, ISO, dll.)
+4. Persyaratan Pelabelan & Pengemasan
+5. Standar Kualitas
+6. Opsi Pembayaran & Incoterms
+7. Asuransi & Manajemen Risiko
 
-Format as a professional checklist suitable for export operations.`;
+Format sebagai daftar periksa profesional yang sesuai untuk operasi ekspor.`;
 
     try {
       const response = await axios.post(
@@ -156,26 +156,26 @@ Format as a professional checklist suitable for export operations.`;
       invoiceTerms,
     } = companyData;
 
-    const prompt = `You are an expert in international commerce documentation.
+    const prompt = `Anda adalah ahli dalam dokumentasi perdagangan internasional.
 
-Create a professional export invoice template for:
+Buatkan template faktur ekspor profesional untuk:
 
-Company: ${companyName}
-Address: ${companyAddress}
-Contact: ${companyPhone} / ${companyEmail}
-Payment Terms: ${invoiceTerms || 'NET 30'}
+Perusahaan: ${companyName}
+Alamat: ${companyAddress}
+Kontak: ${companyPhone} / ${companyEmail}
+Syarat Pembayaran: ${invoiceTerms || 'NET 30'}
 
-Please generate:
-1. Professional Invoice Header Section
-2. Company Details Format
-3. Buyer Information Section
-4. Item/Product Line Items Table Structure
-5. Tax & Duties Calculation Section
-6. Incoterms & Shipping Terms Section
-7. Payment Terms & Bank Details Section
-8. Footer with Legal Terms
+Tolong buatkan:
+1. Bagian Header Faktur Profesional
+2. Format Detail Perusahaan
+3. Bagian Informasi Pembeli
+4. Struktur Tabel Item/Baris Produk
+5. Bagian Perhitungan Pajak & Bea
+6. Bagian Incoterms & Syarat Pengiriman
+7. Bagian Syarat Pembayaran & Detail Bank
+8. Footer dengan Ketentuan Hukum
 
-Provide it as a structured JSON-like format that can be used as a template for invoices.`;
+Berikan dalam format seperti JSON terstruktur yang dapat digunakan sebagai template untuk faktur.`;
 
     try {
       const response = await axios.post(
@@ -225,28 +225,28 @@ Provide it as a structured JSON-like format that can be used as a template for i
       packagingType,
     } = shipmentData;
 
-    const prompt = `You are an expert in international shipping documentation.
+    const prompt = `Anda adalah ahli dalam dokumentasi pengiriman internasional.
 
-Create a professional packing list for export shipment:
+Buatkan daftar pengepakan profesional untuk pengiriman ekspor:
 
-Products: ${productNames}
-Quantities: ${quantities}
-Total Weight: ${totalWeight}
-Destination: ${destination}
-Shipment Date: ${shipmentDate}
-Packaging Type: ${packagingType}
+Produk: ${productNames}
+Jumlah: ${quantities}
+Berat Total: ${totalWeight}
+Tujuan: ${destination}
+Tanggal Pengiriman: ${shipmentDate}
+Jenis Kemasan: ${packagingType}
 
-Please generate a comprehensive packing list including:
-1. Shipment Header (reference numbers, dates)
-2. Shipper & Consignee Information
-3. Product Details Table (with descriptions, quantities, weights)
-4. Total Weight & Dimensions
-5. Special Handling Instructions
-6. Customs Declarations Section
-7. Carrier Information Section
-8. Signature & Certification Lines
+Tolong buatkan daftar pengepakan komprehensif termasuk:
+1. Header Pengiriman (nomor referensi, tanggal)
+2. Informasi Pengirim & Penerima
+3. Tabel Detail Produk (dengan deskripsi, jumlah, berat)
+4. Berat & Dimensi Total
+5. Instruksi Penanganan Khusus
+6. Bagian Deklarasi Bea Cukai
+7. Bagian Informasi Pengangkut
+8. Baris Tanda Tangan & Sertifikasi
 
-Format it as professional documentation suitable for customs clearance.`;
+Format sebagai dokumentasi profesional yang sesuai untuk clearance bea cukai.`;
 
     try {
       const response = await axios.post(
@@ -297,31 +297,31 @@ Format it as professional documentation suitable for customs clearance.`;
       shipmentDate,
     } = shippingData;
 
-    const prompt = `You are an expert in international maritime/shipping documentation.
+    const prompt = `Anda adalah ahli dalam dokumentasi maritim/pengiriman internasional.
 
-Create a professional Bill of Lading (B/L) for:
+Buatkan Bill of Lading (B/L) profesional untuk:
 
-Shipper: ${shipperName}
-Consignee: ${consigneeName}
-Notify Party: ${notifyParty || 'As per consignee'}
-Port of Loading: ${portOfLoading}
-Port of Discharge: ${portOfDischarge}
-Carrier: ${carrierName}
-Shipment Date: ${shipmentDate}
+Pengirim: ${shipperName}
+Penerima: ${consigneeName}
+Pihak yang Diberitahu: ${notifyParty || 'Sesuai penerima'}
+Pelabuhan Muat: ${portOfLoading}
+Pelabuhan Bongkar: ${portOfDischarge}
+Pengangkut: ${carrierName}
+Tanggal Pengiriman: ${shipmentDate}
 
-Please generate a complete Bill of Lading with:
-1. B/L Header & Reference Numbers
-2. Shipper, Consignee, Notify Party Details
-3. Port of Loading & Discharge
-4. Shipping Vessel Information
-5. Goods Description Section
-6. Weight & Volume Details
-7. Freight & Charges Terms
-8. Incoterms & Responsibility Clauses
-9. Terms & Conditions
-10. Signature Blocks
+Tolong buatkan Bill of Lading lengkap dengan:
+1. Header B/L & Nomor Referensi
+2. Detail Pengirim, Penerima, Pihak yang Diberitahu
+3. Pelabuhan Muat & Bongkar
+4. Informasi Kapal Pengiriman
+5. Bagian Deskripsi Barang
+6. Detail Berat & Volume
+7. Syarat Freight & Biaya
+8. Incoterms & Klausul Tanggung Jawab
+9. Syarat & Ketentuan
+10. Blok Tanda Tangan
 
-Format as professional maritime documentation.`;
+Format sebagai dokumentasi maritim profesional.`;
 
     try {
       const response = await axios.post(
@@ -372,31 +372,31 @@ Format as professional maritime documentation.`;
       validityPeriod,
     } = quoteData;
 
-    const prompt = `You are an expert in international trade documentation and quotations.
+    const prompt = `Anda adalah ahli dalam dokumentasi perdagangan internasional dan penawaran harga.
 
-Create a professional Proforma Invoice for export quotation:
+Buatkan Proforma Invoice profesional untuk penawaran ekspor:
 
-Seller: ${companyName}
-Buyer: ${buyerName}
-Products: ${products}
-Quantities: ${quantities}
-Unit Prices: ${unitPrices}
-Payment Terms: ${paymentTerms}
-Valid Until: ${validityPeriod}
+Penjual: ${companyName}
+Pembeli: ${buyerName}
+Produk: ${products}
+Jumlah: ${quantities}
+Harga Satuan: ${unitPrices}
+Syarat Pembayaran: ${paymentTerms}
+Berlaku Hingga: ${validityPeriod}
 
-Please generate a complete Proforma Invoice including:
-1. Professional Header with Company Details
-2. Proforma Invoice Number & Date
-3. Buyer & Seller Information
-4. Detailed Item Description Table (products, quantities, prices)
-5. Subtotal, Taxes, & Total Amount
-6. Payment Terms & Methods
-7. Delivery Terms (Incoterms)
-8. Validity Period
-9. Terms & Conditions
-10. Notes & Special Instructions
+Tolong buatkan Proforma Invoice lengkap termasuk:
+1. Header Profesional dengan Detail Perusahaan
+2. Nomor & Tanggal Proforma Invoice
+3. Informasi Pembeli & Penjual
+4. Tabel Deskripsi Item Detail (produk, jumlah, harga)
+5. Subtotal, Pajak, & Jumlah Total
+6. Syarat & Metode Pembayaran
+7. Syarat Pengiriman (Incoterms)
+8. Masa Berlaku
+9. Syarat & Ketentuan
+10. Catatan & Instruksi Khusus
 
-Format as professional international commerce document.`;
+Format sebagai dokumen perdagangan internasional profesional.`;
 
     try {
       const response = await axios.post(
@@ -444,28 +444,28 @@ Format as professional international commerce document.`;
       competitorInfo,
     } = marketData;
 
-    const prompt = `You are an expert in international market research and export strategies.
+    const prompt = `Anda adalah ahli dalam riset pasar internasional dan strategi ekspor.
 
-Provide a market analysis for export:
+Berikan analisis pasar untuk ekspor:
 
-Product Type: ${productType}
-Target Countries: ${targetCountries}
-Current Market Position: ${currentMarketShare || 'New entrant'}
-Competitors: ${competitorInfo || 'Not specified'}
+Jenis Produk: ${productType}
+Negara Sasaran: ${targetCountries}
+Posisi Pasar Saat Ini: ${currentMarketShare || 'Pendatang baru'}
+Pesaing: ${competitorInfo || 'Tidak ditentukan'}
 
-Please provide a comprehensive market analysis including:
-1. Market Overview & Size Estimation
-2. Target Country Market Potential
-3. Competitor Analysis
-4. Market Entry Strategy
-5. Pricing Strategy for Export Markets
-6. Distribution Channels & Logistics
-7. Marketing & Promotion Recommendations
-8. Risk Assessment & Mitigation
-9. Growth Opportunities
-10. Timeline & Implementation Plan
+Tolong berikan analisis pasar komprehensif termasuk:
+1. Gambaran Pasar & Estimasi Ukuran
+2. Potensi Pasar Negara Sasaran
+3. Analisis Pesaing
+4. Strategi Masuk Pasar
+5. Strategi Penetapan Harga untuk Pasar Ekspor
+6. Saluran Distribusi & Logistik
+7. Rekomendasi Pemasaran & Promosi
+8. Penilaian Risiko & Mitigasi
+9. Peluang Pertumbuhan
+10. Timeline & Rencana Implementasi
 
-Make recommendations specific to small enterprises.`;
+Buat rekomendasi spesifik untuk usaha kecil.`;
 
     try {
       const response = await axios.post(
