@@ -74,8 +74,8 @@ const Navbar = () => {
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
       className="fixed left-0 right-0 top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-lg"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-        <div className="flex h-16 items-center justify-between">
+      <div className="w-full mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        <div className="flex h-16 items-center justify-between min-w-0">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3" aria-label="Beranda XPOGO">
             <div className="relative h-8 w-8">
@@ -87,7 +87,7 @@ const Navbar = () => {
                 priority
               />
             </div>
-            <span className="text-xl font-bold text-foreground">
+            <span className="text-lg sm:text-xl font-bold text-foreground">
               XPO<span className="text-primary">GO</span>
             </span>
           </Link>
@@ -111,7 +111,7 @@ const Navbar = () => {
                   
                   {/* Animated underline on hover - only show when NOT active */}
                   {!isActive && (
-                    <span className="absolute bottom-1 left-1/2 h-0.5 w-0 -translate-x-1/2 bg-linear-to-r from-primary via-accent to-primary transition-all duration-300 ease-out group-hover:w-3/4 dark:from-primary dark:via-blue-400 dark:to-primary"></span>
+                    <span className="hidden md:block absolute bottom-1 left-1/2 h-0.5 w-0 -translate-x-1/2 bg-linear-to-r from-primary via-accent to-primary transition-all duration-300 ease-out group-hover:w-3/4 dark:from-primary dark:via-blue-400 dark:to-primary"></span>
                   )}
                 </button>
               );

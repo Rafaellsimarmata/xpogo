@@ -1,194 +1,166 @@
 'use client';
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Globe2 } from "lucide-react";
-import { Button } from "@/src/components/ui/Button";
+import { Sparkles, ArrowRight, Target, Globe, CheckCircle } from "lucide-react";
 
-const heroStats = [
-  { label: "Negara siap ekspor", value: "35+" },
-  { label: "Checklist akurat", value: "96%" },
-  { label: "Analisis pasar", value: "< 5 menit" },
+const stats = [
+  { 
+    value: "300+", 
+    label: "UMKM Telah Dibantu",
+    icon: Target,
+    color: "text-blue-400"
+  },
+  { 
+    value: "35", 
+    label: "Negara Tujuan",
+    icon: Globe,
+    color: "text-cyan-400"
+  },
+  { 
+    value: "96%", 
+    label: "Checklist Dokumen",
+    icon: CheckCircle,
+    color: "text-emerald-400"
+  }
 ];
 
-const Hero = () => (
-  <section
-    id="hero"
-    className="relative overflow-hidden bg-gradient-to-b from-background via-secondary/20 to-background"
-  >
-    <div className="absolute inset-0 overflow-hidden">
-      <motion.div
-        animate={{ x: [0, 80, 0], y: [0, -40, 0] }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-32 -left-32 h-72 w-72 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 blur-3xl"
-      />
-      <motion.div
-        animate={{ x: [0, -80, 0], y: [0, 50, 0] }}
-        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -bottom-32 -right-32 h-72 w-72 rounded-full bg-gradient-to-r from-primary/15 to-accent/15 blur-3xl"
-      />
-    </div>
+const Hero = () => {
+  return (
+    <section id="hero" className="relative min-h-screen bg-gray-950 pt-16">
 
-    <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:gap-12 md:px-8 md:py-20 lg:grid-cols-2 lg:items-center">
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        className="space-y-8"
-      >
-        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card/80 px-4 py-2.5 text-sm font-semibold tracking-wide text-primary shadow-lg shadow-primary/10 backdrop-blur-sm">
-          <Sparkles className="h-4 w-4 animate-pulse text-primary" />
-          <span>Workspace XPOGO</span>
-        </div>
-
-        <div className="space-y-4">
-          <h1 className="text-4xl font-bold leading-tight text-foreground sm:text-5xl md:text-6xl">
-            Semua tahapan ekspor
-            <br />
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              di satu workspace
-            </span>
-          </h1>
-
-          <p className="text-lg text-muted-foreground md:text-xl">
-            Mulai dari pemilihan produk, analisis negara tujuan, sampai checklist dokumen dan Export Assistant berbasis AI.
-            XPOGO memandu UMKM mengikuti alur yang sama dengan tim ekspor profesional.
-          </p>
-
-          <div className="flex flex-wrap gap-2 text-sm text-primary">
-            <span className="rounded-full bg-primary/10 px-4 py-1">Market Intelligence</span>
-            <span className="rounded-full bg-primary/10 px-4 py-1">Document Center</span>
-            <span className="rounded-full bg-primary/10 px-4 py-1">Export Assistant</span>
-            <span className="rounded-full bg-primary/10 px-4 py-1">Dashboard & News</span>
+      {/* Main Container */}
+      <div className="relative mx-auto max-w-full h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8">
+        {/* Image Card Container */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-4 sm:inset-6 lg:inset-8 rounded-3xl overflow-hidden border border-gray-800 bg-gray-900/50"
+        >
+          {/* Image with Overlay */}
+          <div className="absolute inset-0">
+            <Image
+              src="/img/logistics.jpg"
+              alt="Logistics Network"
+              fill
+              className="object-cover opacity-30"
+              priority
+              quality={100}
+            />
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-linear-to-br from-gray-950/10 via-gray-900/10 to-gray-950/10" />
           </div>
-        </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <Button size="lg" asChild className="group bg-gradient-to-r from-primary to-accent text-primary-foreground">
-            <Link href="/signin" className="flex items-center gap-2">
-              <span>Masuk Workspace</span>
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-          </Button>
+          {/* Content Overlay */}
+          <div className="relative h-full flex flex-col">
+            {/* Left Content - Rata Kiri Bawah */}
+            <div className="flex-1 flex items-end pb-6 sm:pb-8 lg:pb-12 pl-4 sm:pl-6 lg:pl-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="space-y-4 max-w-md sm:max-w-lg"
+              >
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2">
+                  <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-secondary animate-pulse" />
+                  <span className="text-xs sm:text-sm font-medium tracking-wider text-accent">
+                    #1 Market Analysis and Document Assistant AI
+                  </span>
+                </div>
 
-          <Button variant="outline" size="lg" asChild className="border-primary/30 text-primary hover:bg-primary/5">
-            <Link
-              href="https://youtu.be/dQw4w9WgXcQ?si=-iFSVY8XkRnYJih_"
-              target="_blank"
-              className="flex items-center gap-2"
-            >
-              <Globe2 className="h-4 w-4" />
-              <span>Lihat demo Market Intelligence</span>
-            </Link>
-          </Button>
-        </div>
+                {/* Main Heading */}
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+                  <span className="block text-white">Ekspor Jadi</span>
+                  <span className="block bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
+                    Mudah dengan XPOGO
+                  </span>
+                </h1>
 
-        <div className="flex flex-wrap gap-4 pt-4">
-          {heroStats.map((stat) => (
-            <div
-              key={stat.label}
-              className="rounded-2xl border border-border/60 bg-card/80 px-5 py-4 shadow-card"
-            >
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
+                {/* CTA Buttons */}
+                <div className="flex flex-wrap items-center gap-8 pt-6">
+                  <motion.div
+                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link 
+                      href="/signin" 
+                      className="group relative flex items-center gap-3 text-gray-300 hover:text-secondary transition-colors py-1"
+                    >
+                      <span className="text-md font-medium tracking-wide relative overflow-hidden">
+                        <span className="relative z-10">Mulai Sekarang</span>
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-linear-to-r from-blue-400 to-secondary group-hover:w-full transition-all duration-500 ease-out"></span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </Link>
+                  </motion.div>
+                  
+                  <motion.div
+                    whileHover={{ x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Link 
+                      href="/demo" 
+                      className="group relative flex items-center gap-3 text-gray-300 hover:text-white transition-colors py-1"
+                    >
+                      <span className="text-md font-medium tracking-wide relative overflow-hidden">
+                        <span className="relative z-10">Pelajari Lebih Lanjut</span>
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-linear-to-r from-gray-400 to-gray-300 group-hover:w-full transition-all duration-500 ease-out"></span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                    </Link>
+                  </motion.div>
+                </div>
+              </motion.div>
             </div>
-          ))}
+
+            {/* Right Statistics - Rata Kanan Bawah */}
+            <div className="pb-4 sm:pb-6 lg:pb-8 pr-4 sm:pr-6 lg:pr-8">
+              <div className="flex justify-end">
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xs sm:max-w-sm"
+                >
+                  {stats.map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 + index * 0.1 }}
+                      className="text-center space-y-1"
+                    >
+                      <div className={`text-xl sm:text-2xl md:text-3xl font-bold ${stat.color}`}>
+                        {stat.value}
+                      </div>
+                      <p className="text-xs text-gray-400 tracking-wide leading-tight">
+                        {stat.label}
+                      </p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Scroll Indicator - Center Bottom */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="absolute bottom-4 left-1/2 transform -translate-x-1/2"
+      >
+        <div className="flex flex-col items-center">
+          <div className="h-6 w-px bg-linear-to-b from-blue-400 to-transparent" />
         </div>
       </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-        className="relative"
-      >
-        <div className="relative grid gap-5 rounded-[32px] bg-card/90 p-6 shadow-[0_30px_80px_rgba(15,23,42,0.2)] backdrop-blur-md">
-          <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-secondary/30 to-card/60 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Market Intelligence</p>
-                <p className="text-lg font-semibold text-foreground">Produk Kopi</p>
-              </div>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary">Live</span>
-            </div>
-
-            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <div className="rounded-2xl border border-border/60 bg-background/70 p-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-base font-semibold text-foreground">Jepang</p>
-                    <p className="text-xs text-muted-foreground">Premium demand • Stable price</p>
-                  </div>
-                  <p className="text-2xl font-bold text-primary">92</p>
-                </div>
-              </div>
-
-              {[{ label: "UAE", score: 90 }, { label: "Australia", score: 88 }].map((country, idx) => (
-                <div key={country.label}>
-                  <div className="flex items-center justify-between text-xs">
-                    <span>{country.label}</span>
-                    <span className="font-semibold text-primary">{country.score}/100</span>
-                  </div>
-
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-border/50">
-                    <motion.span
-                      initial={{ width: 0 }}
-                      animate={{ width: `${country.score}%` }}
-                      transition={{ delay: 0.6 + idx * 0.2, duration: 1 }}
-                      className="block h-full rounded-full bg-gradient-to-r from-primary to-accent"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-border/60 bg-gradient-to-r from-primary/15 to-accent/10 p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Document Center</p>
-                <p className="text-lg font-semibold text-foreground">Checklist Jepang</p>
-              </div>
-              <span className="text-xs text-primary">8/11 selesai</span>
-            </div>
-
-            <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <div className="flex items-center justify-between rounded-2xl bg-card/60 px-3 py-2">
-                <span>Certificate of Origin</span>
-                <span className="text-xs text-emerald-500">Approved</span>
-              </div>
-
-              <div className="flex items-center justify-between rounded-2xl bg-card/60 px-3 py-2">
-                <span>Label Bahasa Jepang</span>
-                <span className="text-xs text-primary">Dalam review</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-border/60 bg-card/90 p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Export Assistant</p>
-              <span className="text-xs text-muted-foreground">Chat aktif</span>
-            </div>
-
-            <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <div className="rounded-2xl bg-card/70 p-3">
-                <p className="text-xs uppercase tracking-widest text-primary">Assistant</p>
-                <p className="text-sm text-foreground">
-                  “Buyer Jepang meminta contoh produk minggu depan. Pastikan COO selesai terlebih dulu.”
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-card/70 p-3">
-                <p className="text-xs uppercase tracking-widest text-muted-foreground">Kamu</p>
-                <p className="text-sm text-foreground">“Tolong susun daftar dokumen yang masih pending.”</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default Hero;

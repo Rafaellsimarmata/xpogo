@@ -5,7 +5,7 @@ import Testimonials from "@/src/components/landing/Testimonials";
 import FAQ from "@/src/components/landing/FAQ";
 
 const LandingPage = () => (
-  <div className="bg-gradient-to-b from-blue-50/20 via-white to-blue-50/10">
+  <div className="min-h-screen bg-linear-to-b from-gray-950 via-gray-900 to-gray-950">
     <Hero />
     <Features />
     <HowItWorks />
