@@ -92,10 +92,10 @@ router.post('/clear', authMiddleware, async (req, res) => {
 router.post('/analyze-product', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const productInfo = req.body;
+    const { productInfo } = req.body;
 
-    if (!productInfo.productName) {
-      return res.status(400).json({ error: 'productName is required' });
+    if (!productInfo || typeof productInfo !== 'string') {
+      return res.status(400).json({ error: 'productInfo is required and must be a string' });
     }
 
     const result = await chatbotHandler.handleAnalyzeProduct(userId, productInfo);
@@ -114,10 +114,10 @@ router.post('/analyze-product', authMiddleware, async (req, res) => {
 router.post('/market-strategy', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const marketInfo = req.body;
+    const { marketInfo } = req.body;
 
-    if (!marketInfo.country) {
-      return res.status(400).json({ error: 'country is required' });
+    if (!marketInfo || typeof marketInfo !== 'string') {
+      return res.status(400).json({ error: 'marketInfo is required and must be a string' });
     }
 
     const result = await chatbotHandler.handleMarketStrategy(userId, marketInfo);
@@ -136,10 +136,10 @@ router.post('/market-strategy', authMiddleware, async (req, res) => {
 router.post('/compliance-guidance', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const complianceQuery = req.body;
+    const { complianceQuery } = req.body;
 
-    if (!complianceQuery.productType) {
-      return res.status(400).json({ error: 'productType is required' });
+    if (!complianceQuery || typeof complianceQuery !== 'string') {
+      return res.status(400).json({ error: 'complianceQuery is required and must be a string' });
     }
 
     const result = await chatbotHandler.handleComplianceGuidance(userId, complianceQuery);
@@ -158,10 +158,10 @@ router.post('/compliance-guidance', authMiddleware, async (req, res) => {
 router.post('/shipping-guidance', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const shippingInfo = req.body;
+    const { shippingInfo } = req.body;
 
-    if (!shippingInfo.destination) {
-      return res.status(400).json({ error: 'destination is required' });
+    if (!shippingInfo || typeof shippingInfo !== 'string') {
+      return res.status(400).json({ error: 'shippingInfo is required and must be a string' });
     }
 
     const result = await chatbotHandler.handleShippingGuidance(userId, shippingInfo);
