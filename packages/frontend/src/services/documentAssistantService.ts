@@ -1,6 +1,6 @@
 import { apiFetch } from "@/src/services/apiClient";
 
-export interface ComplianceRequest {
+export interface ComplianceRequest extends Record<string, unknown> {
   productName: string;
   origin?: string;
   destinationCountries?: string;
