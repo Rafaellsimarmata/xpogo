@@ -23,3 +23,14 @@ export interface ParsedCountryRow {
   marketGrowthRate: string;
   keyTradePartners: string;
 }
+
+export interface MarketAnalysisResponse {
+  product: string;
+  marketIntelligence: string;
+}
+
+export interface MarketParseResponse {
+  parsedData: ParsedCountryRow[];
+}
+
+export type LookupState = "idle" | "loading" | "not-found" | "empty";

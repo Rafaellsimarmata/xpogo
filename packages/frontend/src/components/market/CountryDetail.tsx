@@ -5,7 +5,7 @@ import { CheckCircle, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/src/components/ui/Button";
 import { CountryMatch } from "@/src/types/countries";
-import { formatCurrency, getScoreTone, readinessColor } from "@/src/lib/utils";
+import { getScoreTone, readinessColor } from "@/src/lib/utils";
 
 type CountryDetailProps = {
   country: CountryMatch;

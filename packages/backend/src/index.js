@@ -23,6 +23,7 @@ const authRoutes = require('./routes/auth');
 const marketIntelligenceRoutes = require('./routes/marketIntelligence');
 const documentAssistantRoutes = require('./routes/documentAssistant');
 const chatbotRoutes = require('./routes/chatbot');
+const countriesRoutes = require('./routes/countries');
 const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 
 const app = express();
@@ -895,6 +896,123 @@ const swaggerSpec = {
           }
         }
       }
+    },
+    '/api/countries': {
+      get: {
+        tags: ['Countries'],
+        summary: 'Get all countries',
+        description: 'Retrieve a list of all countries in the world with optional filtering by region or search query. Perfect for export market selection.',
+        parameters: [
+          {
+            name: 'region',
+            in: 'query',
+            description: 'Filter countries by region',
+            schema: {
+              type: 'string',
+              enum: ['Africa', 'Americas', 'Asia', 'Europe', 'Oceania']
+            },
+            example: 'Asia'
+          },
+          {
+            name: 'search',
+            in: 'query',
+            description: 'Search countries by name (partial match, case-insensitive)',
+            schema: {
+              type: 'string'
+            },
+            example: 'coffee'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'List of countries retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    count: { type: 'integer', example: 5 },
+                    data: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          name: { type: 'string', example: 'United States' },
+                          code: { type: 'string', example: 'US' },
+                          region: { type: 'string', example: 'Americas' }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error retrieving countries'
+          }
+        }
+      }
+    },
+    '/api/countries/{code}': {
+      get: {
+        tags: ['Countries'],
+        summary: 'Get country by code',
+        description: 'Retrieve detailed information about a specific country using its ISO 3166-1 alpha-2 country code.',
+        parameters: [
+          {
+            name: 'code',
+            in: 'path',
+            required: true,
+            description: 'ISO 3166-1 alpha-2 country code (e.g., US, CN, IN)',
+            schema: {
+              type: 'string'
+            },
+            example: 'US'
+          }
+        ],
+        responses: {
+          '200': {
+            description: 'Country information retrieved successfully',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: true },
+                    data: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string', example: 'United States' },
+                        code: { type: 'string', example: 'US' },
+                        region: { type: 'string', example: 'Americas' }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          '404': {
+            description: 'Country with the specified code not found',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    success: { type: 'boolean', example: false },
+                    error: { type: 'string', example: 'Country with code XY not found' }
+                  }
+                }
+              }
+            }
+          },
+          '500': {
+            description: 'Server error retrieving country'
+          }
+        }
+      }
     }
   }
 };
@@ -918,6 +1036,9 @@ app.use('/document-assistant', documentAssistantRoutes);
 
 // Chatbot routes - works with both Socket.io (dev) and Supabase Realtime (prod)
 app.use('/api/chatbot', chatbotRoutes);
+
+// Countries routes
+app.use('/api/countries', countriesRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });

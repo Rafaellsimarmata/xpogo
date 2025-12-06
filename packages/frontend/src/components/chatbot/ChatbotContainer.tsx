@@ -9,7 +9,8 @@ import { useChatbot } from "@/src/hooks/useChatbot";
 
 export default function ChatbotContainer() {
   const { user } = useAuth();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
   const {
     messages,
     isLoading,
@@ -23,51 +24,55 @@ export default function ChatbotContainer() {
     clearChat,
   } = useChatbot();
 
-  // Initialize chat on component mount
+  // init chat
   useEffect(() => {
     if (user?.id) {
-      joinChat(user.name || "User");
+      joinChat(user.name || "User").catch(() => {});
     }
   }, [user?.id, user?.name, joinChat]);
 
-  // Auto-scroll to latest message
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, []);
+
+  // scroll ketika ada pesan baru
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
 
   const handleSendMessage = useCallback(
     async (message: string) => {
       await sendMessage(message);
     },
-    [sendMessage]
+    [sendMessage],
   );
 
   const handleAnalyzeProduct = useCallback(
     async (productInfo: string) => {
       await analyzeProduct(productInfo);
     },
-    [analyzeProduct]
+    [analyzeProduct],
   );
 
   const handleGetMarketStrategy = useCallback(
     async (marketInfo: string) => {
       await getMarketStrategy(marketInfo);
     },
-    [getMarketStrategy]
+    [getMarketStrategy],
   );
 
   const handleGetComplianceGuidance = useCallback(
     async (complianceQuery: string) => {
       await getComplianceGuidance(complianceQuery);
     },
-    [getComplianceGuidance]
+    [getComplianceGuidance],
   );
 
   const handleGetShippingGuidance = useCallback(
     async (shippingInfo: string) => {
       await getShippingGuidance(shippingInfo);
     },
-    [getShippingGuidance]
+    [getShippingGuidance],
   );
 
   const handleClearChat = useCallback(async () => {
@@ -77,14 +82,18 @@ export default function ChatbotContainer() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2">
-        <div className="flex h-[600px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
+        <div className="flex h-[70vh] max-h-[600px] flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6">
-            <ChatbotMessages messages={messages} isLoading={isLoading} />
+            <ChatbotMessages
+              messages={messages}
+              isLoading={isLoading}
+              onBotTyping={scrollToBottom}
+            />
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Error Display */}
+          {/* Error */}
           {error && (
             <div className="border-t border-border/60 bg-destructive/10 p-4">
               <p className="text-sm text-destructive">{error}</p>
@@ -98,7 +107,7 @@ export default function ChatbotContainer() {
         </div>
       </div>
 
-      {/* Actions Sidebar */}
+      {/* Sidebar */}
       <div className="flex flex-col gap-4">
         <ChatbotActions
           onAnalyzeProduct={handleAnalyzeProduct}

@@ -1,120 +1,25 @@
 'use client';
 
-import { useMemo } from "react";
-import { Globe2, FileCheck2, Users2, ClipboardList } from "lucide-react";
-import StatsCard from "@/src/components/dashboard/StatsCard";
-import QuickActions, { type QuickActionItem } from "@/src/components/dashboard/QuickActions";
-import RecentActivity, { type ActivityItem } from "@/src/components/dashboard/RecentActivity";
-import { useUser } from "@/src/context/UserContext";
-import { countries } from "@/src/lib/data/countries";
-import { products } from "@/src/lib/data/products";
-import { generateChecklist, checklistCompletion } from "@/src/lib/data/documents";
-
-const statusBadge: Record<string, string> = {
-  complete: "border border-emerald-200 bg-emerald-50/80 text-emerald-700",
-  "in-progress": "border border-amber-200 bg-amber-50/80 text-amber-700",
-  pending: "border border-slate-200 bg-slate-50/80 text-slate-600",
-};
-
-const levelBadge: Record<string, string> = {
-  basic: "bg-slate-100 text-slate-700",
-  "advanced": "bg-indigo-100 text-indigo-700",
-};
+import Modal from "@/src/components/ui/Modal";
+import { ProductCard } from "@/src/components/workspace/ProductCard";
+import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
 
 const DashboardPage = () => {
-  const { profile } = useUser();
-  const focusProductId = profile.focusProduct ?? "kerajinan";
-  const focusProduct = products.find((product) => product.id === focusProductId) ?? products[0];
-
-  const countryMatches = useMemo(
-    () => [...countries].sort((a, b) => b.matchScore - a.matchScore).slice(0, 4),
-    [],
-  );
-  const primaryCountry = profile.targetCountry
-    ? countries.find((country) => country.id === profile.targetCountry) ?? countryMatches[0]
-    : countryMatches[0];
-
-  const checklist = useMemo(
-    () => generateChecklist(focusProduct.id, primaryCountry?.id ?? "japan"),
-    [focusProduct.id, primaryCountry?.id],
-  );
-  const completion = checklistCompletion(checklist);
-  const completedDocs = checklist.filter((doc) => doc.status === "complete").length;
-  const pendingDocs = checklist.filter((doc) => doc.status !== "complete").length;
-  const readyBuyers = primaryCountry?.stores?.filter((store) => store.ready).length ?? 0;
-  const visibleDocs = checklist.slice(0, 6);
-
-  const stats = [
-    {
-      label: "Kelengkapan Dokumen",
-      value: `${completion}%`,
-      subtext: `${completedDocs}/${checklist.length} checklist DocuAssist`,
-      icon: <FileCheck2 className="h-5 w-5" />,
-      footnote: "Update otomatis setiap kali upload dokumen",
-    },
-    {
-      label: "Negara Prioritas",
-      value: `${countryMatches.length}`,
-      subtext: `${primaryCountry?.name ?? "Negara"} berada di posisi teratas`,
-      icon: <Globe2 className="h-5 w-5" />,
-      footnote: "Berdasarkan skor Market Analysis minggu ini",
-    },
-    {
-      label: "Buyer Siap Dihubungi",
-      value: `${readyBuyers}`,
-      subtext: `${primaryCountry?.name ?? "Negara"} verified`,
-      icon: <Users2 className="h-5 w-5" />,
-      footnote: "Data diambil dari modul Smart Matching",
-    },
-  ];
-
-  const quickActions: QuickActionItem[] = [
-    {
-      label: "DocuAssist",
-      description: "Atur checklist & reminder dokumen",
-      status: `${pendingDocs} belum selesai`,
-      icon: FileCheck2,
-    },
-    {
-      label: "Market Analysis",
-      description: "Pantau ranking negara dan biaya masuk",
-      status: `${countryMatches.length} negara`,
-      icon: Globe2,
-    },
-    {
-      label: "Buyer Pipeline",
-      description: "Catat follow-up prospek dari ITPC",
-      status: `${readyBuyers} buyer`,
-      icon: Users2,
-    },
-    {
-      label: "Task Board",
-      description: "Koordinasikan tim operasional",
-      status: "3 tugas aktif",
-      icon: ClipboardList,
-    },
-  ];
-
-  const activities: ActivityItem[] = [
-    {
-      title: "Review label Jepang",
-      detail: "DocuAssist menunggu approve QA",
-      time: "09:20",
-      status: "progress",
-    },
-    {
-      title: "Sinkron data market",
-      detail: "Skor negara diperbarui otomatis",
-      time: "08:05",
-      status: "done",
-    },
-    {
-      title: "Input buyer baru",
-      detail: "3 kontak menunggu jadwal meeting",
-      time: "Kemarin",
-      status: "waiting",
-    },
-  ];
+  const {
+    profile,
+    productCards,
+    newsItems,
+    countryMatches,
+    primaryCountry,
+    countryOptions,
+    newProductName,
+    setNewProductName,
+    modals,
+    selectedCountryId,
+    setSelectedCountryId,
+    actions,
+    messages,
+  } = useDashboardController();
 
   return (
     <section className="bg-background py-12">
@@ -127,131 +32,175 @@ const DashboardPage = () => {
               </p>
               <h1 className="mt-2 text-3xl font-bold text-foreground">Halo, {profile.businessName}</h1>
               <p className="text-sm text-muted-foreground">
-                Progress ekspor untuk {profile.company} terlihat di sini.
+                Pantau produk ekspor dan temukan insight terbaru tiap hari.
               </p>
             </div>
-            <div className="flex flex-col gap-2 text-xs">
-              <span className="rounded-full border border-border/80 px-3 py-1 text-foreground">
-                Fokus produk: <span className="font-semibold">{focusProduct.name}</span> (HS {focusProduct.hsCode})
-              </span>
-              {primaryCountry && (
-                <span className="rounded-full border border-border/80 px-3 py-1 text-foreground">
-                  Target negara: <span className="font-semibold">{primaryCountry.name}</span>
-                </span>
-              )}
+            <div className="rounded-2xl border border-border/60 bg-background/70 px-5 py-3 text-sm text-foreground">
+              Fokus produk: {productCards[0]?.meta.name ?? "Belum dipilih"}
             </div>
+          </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {productCards.map((card) => (
+              <ProductCard
+                key={card.workspace.id}
+                title={card.meta.name}
+                description={card.meta.description}
+                countryName={card.targetCountry?.name}
+                onExport={() => actions.startExportFlow(card.workspace.id)}
+                onAnalyze={() => actions.startAnalysis(card.workspace.id)}
+              />
+            ))}
+
+            <button
+              type="button"
+              onClick={actions.openAddProductModal}
+              className="flex min-h-[220px] flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-background/70 p-6 text-center text-sm text-muted-foreground transition hover:border-primary/50 hover:text-primary"
+            >
+              <span className="text-lg font-semibold text-foreground">Add Product</span>
+              <p className="mt-2">Masukkan nama produk baru untuk dianalisis.</p>
+            </button>
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          {stats.map((stat) => (
-            <StatsCard key={stat.label} {...stat} />
-          ))}
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-12">
-          <div className="space-y-6 lg:col-span-8">
-            <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">Checklist Dokumen</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Urutkan dokumen yang harus dipenuhi sebelum pengiriman.
-                  </p>
-                </div>
-                <span className="rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-xs font-semibold text-primary">
-                  {completion}% lengkap
-                </span>
-              </div>
-              <div className="mt-4 divide-y divide-border/60">
-                {visibleDocs.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="grid gap-4 py-4 text-sm text-foreground sm:grid-cols-[2.2fr_0.6fr_0.8fr_0.6fr]"
-                  >
-                    <div>
-                      <p className="font-semibold">{doc.title}</p>
-                      <p className="text-xs text-muted-foreground">{doc.description}</p>
-                    </div>
-                    <span className={`self-start rounded-full px-3 py-1 text-xs font-semibold ${levelBadge[doc.level]}`}>
-                      {doc.level === "basic" ? "Dasar" : "Advanced"}
-                    </span>
-                    <span className={`self-start rounded-full px-3 py-1 text-xs font-semibold ${statusBadge[doc.status]}`}>
-                      {doc.status === "complete"
-                        ? "Selesai"
-                        : doc.status === "in-progress"
-                          ? "Sedang berjalan"
-                          : "Belum mulai"}
-                    </span>
-                    {doc.actionLabel ? (
-                      <button
-                        type="button"
-                        className="self-start text-xs font-semibold text-primary underline-offset-2 hover:underline"
-                      >
-                        {doc.actionLabel}
-                      </button>
-                    ) : (
-                      <span className="self-start text-xs text-muted-foreground">-</span>
-                    )}
+        <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                Market Highlight
+              </p>
+              <h2 className="text-lg font-semibold text-foreground">
+                Negara prioritas minggu ini: {primaryCountry?.name}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {primaryCountry?.readiness} • estimasi proses {primaryCountry?.estimatedTime} hari
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {countryMatches.map((country) => (
+              <div
+                key={country.id}
+                className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold">{country.name}</p>
+                    <p className="text-xs text-muted-foreground">{country.region}</p>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">Negara Prioritas</h2>
-                  <p className="text-sm text-muted-foreground">Data Market Analysis terbaru.</p>
+                  <span className="text-xs font-semibold text-primary">{country.matchScore}/100</span>
                 </div>
-                <span className="text-xs text-muted-foreground">Update harian</span>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {country.readiness} • estimasi {country.estimatedTime} hari
+                </p>
               </div>
-              <div className="mt-4 overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="text-xs uppercase tracking-wide text-muted-foreground">
-                    <tr>
-                      <th className="pb-2">Negara</th>
-                      <th className="pb-2">Skor</th>
-                      <th className="pb-2">Estimasi</th>
-                      <th className="pb-2">Catatan</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {countryMatches.map((country) => (
-                      <tr key={country.id} className="border-t border-border/40 text-foreground">
-                        <td className="py-3">
-                          <div>
-                            <p className="font-semibold">{country.name}</p>
-                            <p className="text-xs text-muted-foreground">{country.region}</p>
-                          </div>
-                        </td>
-                        <td className="py-3">
-                          <div className="flex items-center gap-3">
-                            <div className="h-1.5 flex-1 rounded-full bg-border/60">
-                              <div
-                                className="h-full rounded-full bg-gradient-to-r from-primary to-accent"
-                                style={{ width: `${country.matchScore}%` }}
-                              />
-                            </div>
-                            <span className="text-xs font-semibold">{country.matchScore}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 text-sm text-muted-foreground">{country.estimatedTime} hari</td>
-                        <td className="py-3 text-xs text-muted-foreground">{country.readiness}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            ))}
           </div>
+        </div>
 
-          <div className="space-y-6 lg:col-span-4">
-            <QuickActions items={quickActions} />
-            <RecentActivity items={activities} />
+        <div className="space-y-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+              News & Insight
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Update terbaru untuk eksportir</h2>
+            <p className="text-sm text-muted-foreground">
+              Placeholder news card untuk menampilkan berita resmi dari Kementerian Perdagangan, ITPC, dan partner.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {newsItems.map((news) => (
+              <article
+                key={news.title}
+                className="rounded-3xl border border-border/60 bg-card/90 p-5 shadow-sm transition hover:border-primary/40"
+              >
+                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                  {news.tag}
+                </span>
+                <h3 className="mt-2 text-xl font-semibold text-foreground">{news.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{news.summary}</p>
+                <p className="mt-4 text-xs text-muted-foreground">{news.date}</p>
+              </article>
+            ))}
           </div>
         </div>
       </div>
+
+      <Modal
+        open={modals.export}
+        onClose={actions.closeExportModal}
+        title="Konfirmasi Export"
+      >
+        <p className="text-sm text-slate-600">{messages.exportConfirmation}</p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => actions.handleExportDecision(true)}
+            className="flex-1 rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+          >
+            Ya, lanjutkan
+          </button>
+          <button
+            type="button"
+            onClick={() => actions.handleExportDecision(false)}
+            className="flex-1 rounded-2xl border border-border/60 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/40"
+          >
+            Tidak, analisa dulu
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={modals.countrySelect}
+        onClose={actions.closeCountryModal}
+        title="Pilih Negara Tujuan"
+      >
+        <p className="text-sm text-slate-600">
+          Tentukan negara tujuan sebelum melanjutkan ke Document Center.
+        </p>
+        <select
+          value={selectedCountryId}
+          onChange={(event) => setSelectedCountryId(event.target.value)}
+          className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        >
+          {countryOptions.map((country) => (
+            <option key={country.id} value={country.id}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          onClick={actions.submitCountrySelection}
+          className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+        >
+          Simpan & buka Document Center
+        </button>
+      </Modal>
+
+      <Modal
+        open={modals.addProduct}
+        onClose={actions.closeAddProductModal}
+        title="Tambah Produk"
+      >
+        <p className="text-sm text-slate-600">
+          Masukkan nama produk yang ingin dianalisis. Sistem akan membuka Market Intelligence dengan input
+          tersebut secara otomatis.
+        </p>
+        <input
+          type="text"
+          value={newProductName}
+          onChange={(event) => setNewProductName(event.target.value)}
+          placeholder="contoh: Kopi Arabika"
+          className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
+        <button
+          type="button"
+          onClick={actions.submitAddProduct}
+          className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+        >
+          Analisa produk
+        </button>
+      </Modal>
     </section>
   );
 };

@@ -3,21 +3,21 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
+import { register as registerAccount } from "@/src/services/authService";
+import type { SignUpPayload } from "@/src/types/auth";
 
-type SignUpValues = {
-  email: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
+type SignUpValues = Omit<SignUpPayload, "business_name"> & {
   businessName: string;
+  confirmPassword: string;
 };
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const SignUpForm = () => {
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const mutation = useMutation({ mutationFn: registerAccount });
   const {
     register,
     handleSubmit,
@@ -35,27 +35,27 @@ const SignUpForm = () => {
   });
 
   const onSubmit = handleSubmit(async (data) => {
-  const payload = {
-    email: data.email,
-    username: data.username,
-    business_name: data.businessName,
-    password: data.password,
-  };
+    setError("");
 
-  const res = await fetch(`${BACKEND_URL}auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    try {
+      await mutation.mutateAsync({
+        email: data.email,
+        username: data.username,
+        password: data.password,
+        business_name: data.businessName,
+      });
+
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        reset();
+      }, 1500);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Registrasi gagal, coba lagi.",
+      );
+    }
   });
-
-  if (res.ok) {
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-      reset();
-    }, 1500);
-  }
-});
 
 
   return (
@@ -114,6 +114,11 @@ const SignUpForm = () => {
           error={errors.confirmPassword?.message}
         />
       </div>      
+      {error && (
+        <div className="rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
       {success && (
         <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-600">
           Registrasi berhasil! Silakan cek email untuk aktivasi akun.
@@ -122,8 +127,9 @@ const SignUpForm = () => {
       <Button
         type="submit"
         className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+        disabled={mutation.isPending}
       >
-        Buat Akun
+        {mutation.isPending ? "Memproses..." : "Buat Akun"}
       </Button>
       <p className="text-center text-sm text-slate-500">
         Sudah punya akun?{" "}

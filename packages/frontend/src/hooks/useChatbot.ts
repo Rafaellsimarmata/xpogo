@@ -1,252 +1,238 @@
-import { useState, useCallback } from "react";
+"use client";
+
+import { useCallback, useMemo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/src/context/AuthContext";
+import type { ChatMessage } from "@/src/types/chat";
+import {
+  analyzeChatProduct,
+  clearChatSession,
+  fetchComplianceGuidance,
+  fetchMarketStrategy,
+  fetchShippingGuidance,
+  joinChat,
+  sendChatMessage,
+} from "@/src/services/chatbotService";
 
-export type Message = {
-  id: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  timestamp: string;
+const createMessage = (
+  role: ChatMessage["role"],
+  content: string,
+): ChatMessage => ({
+  id:
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : `${Date.now()}`,
+  role,
+  content,
+  timestamp: new Date().toISOString(),
+});
+
+const formatAssistantMarkdown = (content?: string) => {
+  const trimmed = content?.trim();
+  if (!trimmed) {
+    return "_Maaf, saya belum menemukan jawaban untuk pertanyaan itu._";
+  }
+  return trimmed;
 };
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export function useChatbot() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const getAuthToken = useCallback(() => {
-    return localStorage.getItem("auth_token") || "";
-  }, []);
+  const handleError = (err: unknown) => {
+    const message =
+      err instanceof Error ? err.message : "Terjadi kesalahan pada chatbot.";
+    setError(message);
+    return message;
+  };
 
-  const fetchAPI = useCallback(
-    async (endpoint: string, method: string = "POST", body?: unknown) => {
-      try {
-        const token = getAuthToken();
-        const response = await fetch(`${BACKEND_URL}${endpoint}`, {
-          method,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: body ? JSON.stringify(body) : undefined,
-        });
+  const {
+    mutateAsync: joinRequest,
+    isPending: joinPending,
+  } = useMutation({
+    mutationFn: joinChat,
+    onError: handleError,
+  });
 
-        console.log("body:", body);
+  const {
+    mutateAsync: sendRequest,
+    isPending: sendPending,
+  } = useMutation({
+    mutationFn: sendChatMessage,
+    onError: handleError,
+  });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(
-            errorData.error || errorData.message || "API request failed"
-          );
-        }
+  const {
+    mutateAsync: analyzeRequest,
+    isPending: analyzePending,
+  } = useMutation({
+    mutationFn: analyzeChatProduct,
+    onError: handleError,
+  });
 
-        return await response.json();
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An error occurred";
-        setError(errorMessage);
-        throw err;
-      }
-    },
-    [getAuthToken]
+  const {
+    mutateAsync: strategyRequest,
+    isPending: strategyPending,
+  } = useMutation({
+    mutationFn: fetchMarketStrategy,
+    onError: handleError,
+  });
+
+  const {
+    mutateAsync: complianceRequest,
+    isPending: compliancePending,
+  } = useMutation({
+    mutationFn: fetchComplianceGuidance,
+    onError: handleError,
+  });
+
+  const {
+    mutateAsync: shippingRequest,
+    isPending: shippingPending,
+  } = useMutation({
+    mutationFn: fetchShippingGuidance,
+    onError: handleError,
+  });
+
+  const {
+    mutateAsync: clearRequest,
+    isPending: clearPending,
+  } = useMutation({
+    mutationFn: clearChatSession,
+    onError: handleError,
+  });
+
+  const isLoading = useMemo(
+    () =>
+      joinPending ||
+      sendPending ||
+      analyzePending ||
+      strategyPending ||
+      compliancePending ||
+      shippingPending ||
+      clearPending,
+    [
+      analyzePending,
+      clearPending,
+      compliancePending,
+      joinPending,
+      sendPending,
+      shippingPending,
+      strategyPending,
+    ],
   );
 
-  const joinChat = useCallback(
-    async (userName: string) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        await fetchAPI("api/chatbot/join", "POST", { userName });
-        setMessages([]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchAPI]
-  );
-
-  const sendMessage = useCallback(
-    async (message: string) => {
-      if (!message.trim()) return;
-
-      // Add user message to UI
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: message,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetchAPI("api/chatbot/send-message", "POST", {
-          message,
-        });
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: response.response || response.message || "",
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchAPI]
-  );
-
-  const analyzeProduct = useCallback(
-    async (productInfo: string) => {
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: `Analyze this product for export: ${productInfo}`,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetchAPI("api/chatbot/analyze-product", "POST", {
-          productInfo,
-        });
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: response.analysis || response.response || "",
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchAPI]
-  );
-
-  const getMarketStrategy = useCallback(
-    async (marketInfo: string) => {
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: `Get market strategy: ${marketInfo}`,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetchAPI(
-          "api/chatbot/market-strategy",
-          "POST",
-          { marketInfo }
-        );
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: response.strategy || response.response || "",
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchAPI]
-  );
-
-  const getComplianceGuidance = useCallback(
-    async (complianceQuery: string) => {
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: `Compliance question: ${complianceQuery}`,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetchAPI(
-          "api/chatbot/compliance-guidance",
-          "POST",
-          { complianceQuery }
-        );
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: response.guidance || response.response || "",
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchAPI]
-  );
-
-  const getShippingGuidance = useCallback(
-    async (shippingInfo: string) => {
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        role: "user",
-        content: `Shipping question: ${shippingInfo}`,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetchAPI(
-          "api/chatbot/shipping-guidance",
-          "POST",
-          { shippingInfo }
-        );
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: response.guidance || response.response || "",
-          timestamp: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchAPI]
-  );
-
-  const clearChat = useCallback(async () => {
-    setIsLoading(true);
+  const join = useCallback(async (userName: string) => {
     setError(null);
     try {
-      await fetchAPI("api/chatbot/clear", "POST");
+      await joinRequest(userName);
       setMessages([]);
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      throw new Error(handleError(err));
     }
-  }, [fetchAPI]);
+  }, [joinRequest]);
+
+  const appendAssistantMessage = (content?: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("assistant", formatAssistantMarkdown(content)),
+    ]);
+  };
+
+  const sendMessage = useCallback(async (message: string) => {
+    if (!message.trim()) return;
+    const senderName = user?.name ?? "User";
+
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `[${senderName}]: ${message}`),
+    ]);
+    setError(null);
+
+    try {
+      const response = await sendRequest(message);
+      appendAssistantMessage(response.response ?? response.message);
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, [sendRequest, user?.name]);
+
+  const analyzeProduct = useCallback(async (productInfo: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `Analyze this product: ${productInfo}`),
+    ]);
+    setError(null);
+
+    try {
+      const response = await analyzeRequest(productInfo);
+      appendAssistantMessage(response.analysis ?? response.response);
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, [analyzeRequest]);
+
+  const getMarketStrategy = useCallback(async (marketInfo: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `Market strategy request: ${marketInfo}`),
+    ]);
+    setError(null);
+
+    try {
+      const response = await strategyRequest(marketInfo);
+      appendAssistantMessage(response.strategy ?? response.response);
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, [strategyRequest]);
+
+  const getComplianceGuidance = useCallback(async (complianceQuery: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `Compliance question: ${complianceQuery}`),
+    ]);
+    setError(null);
+
+    try {
+      const response = await complianceRequest(complianceQuery);
+      appendAssistantMessage(response.guidance ?? response.response);
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, [complianceRequest]);
+
+  const getShippingGuidance = useCallback(async (shippingInfo: string) => {
+    setMessages((prev) => [
+      ...prev,
+      createMessage("user", `Shipping info: ${shippingInfo}`),
+    ]);
+    setError(null);
+
+    try {
+      const response = await shippingRequest(shippingInfo);
+      appendAssistantMessage(response.guidance ?? response.response);
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, [shippingRequest]);
+
+  const clearChat = useCallback(async () => {
+    setError(null);
+    try {
+      await clearRequest();
+      setMessages([]);
+    } catch (err) {
+      throw new Error(handleError(err));
+    }
+  }, [clearRequest]);
 
   return {
     messages,
     isLoading,
     error,
-    joinChat,
+    joinChat: join,
     sendMessage,
     analyzeProduct,
     getMarketStrategy,
