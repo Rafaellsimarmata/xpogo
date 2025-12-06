@@ -74,16 +74,49 @@ class MarketIntelligenceService {
 
     while ((match = tablePattern.exec(aiResponse)) !== null) {
       const [, country, production, imports, exports, growth, partners] = match;
-      if (country.trim() !== 'Country') { // Skip header
-        rows.push({
-          country: country.trim(),
-          productionVolume: production.trim(),
-          importVolume: imports.trim(),
-          exportVolume: exports.trim(),
-          marketGrowthRate: growth.trim(),
-          keyTradePartners: partners.trim()
-        });
+      const countryTrimmed = country.trim();
+      const productionTrimmed = production.trim();
+      
+      // Skip header rows (English or Indonesian)
+      if (countryTrimmed === 'Country' || countryTrimmed === 'Negara') {
+        continue;
       }
+      
+      // Skip separator rows (rows with only dashes or similar separators)
+      const isSeparatorRow = 
+        countryTrimmed.match(/^[-=]+$/) || 
+        productionTrimmed.match(/^[-=]+$/) ||
+        countryTrimmed === '--------' ||
+        countryTrimmed === '---------' ||
+        countryTrimmed === '----------';
+      
+      if (isSeparatorRow) {
+        continue;
+      }
+      
+      // Skip rows where country field looks like a header/description
+      const isHeaderLike = 
+        countryTrimmed.toLowerCase().includes('volume') ||
+        countryTrimmed.toLowerCase().includes('produksi') ||
+        countryTrimmed.toLowerCase().includes('impor') ||
+        countryTrimmed.toLowerCase().includes('ekspor') ||
+        countryTrimmed.toLowerCase().includes('pertumbuhan') ||
+        countryTrimmed.toLowerCase().includes('mitra') ||
+        countryTrimmed.toLowerCase().includes('dagang');
+      
+      if (isHeaderLike) {
+        continue;
+      }
+      
+      // Only add valid data rows
+      rows.push({
+        country: countryTrimmed,
+        productionVolume: productionTrimmed,
+        importVolume: imports.trim(),
+        exportVolume: exports.trim(),
+        marketGrowthRate: growth.trim(),
+        keyTradePartners: partners.trim()
+      });
     }
 
     return rows;
