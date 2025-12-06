@@ -74,7 +74,6 @@ export const DocumentTable = ({ documents: initialDocuments, onStatusChange, cou
           <tr key={doc.id} className="border-t border-border/40">
             <td className="py-3">
               <p className="font-semibold text-foreground">{doc.title}</p>
-              <p className="text-xs text-muted-foreground">{doc.description}</p>
             </td>
             <td className="py-3">
               <span className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap ${statusBadge[doc.status]}`}>
