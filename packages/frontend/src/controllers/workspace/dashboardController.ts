@@ -25,11 +25,22 @@ const fallbackProductMeta: Product = {
 
 const resolveProductMeta = (workspaceProduct: WorkspaceProduct, catalog: Product[]) => {
   const product = catalog.find((item) => item.id === workspaceProduct.id);
-  if (product) return product;
+  if (product) {
+    return {
+      ...product,
+      name: workspaceProduct.name ?? product.name,
+      description: workspaceProduct.description ?? product.description,
+      category: workspaceProduct.category ?? product.category,
+      hsCode: workspaceProduct.hsCode ?? product.hsCode,
+    };
+  }
   return {
     ...fallbackProductMeta,
     id: workspaceProduct.id,
-    name: workspaceProduct.customName ?? workspaceProduct.id,
+    name: workspaceProduct.name ?? workspaceProduct.id,
+    description: workspaceProduct.description ?? fallbackProductMeta.description,
+    category: workspaceProduct.category ?? fallbackProductMeta.category,
+    hsCode: workspaceProduct.hsCode ?? fallbackProductMeta.hsCode,
   };
 };
 
@@ -64,10 +75,21 @@ export const useDashboardController = () => {
   const [selectedCountryId, setSelectedCountryId] = useState<string>("");
   const [selectedCatalogProductId, setSelectedCatalogProductId] = useState("");
   const [productToRemove, setProductToRemove] = useState<WorkspaceProduct | null>(null);
+  const [addingProduct, setAddingProduct] = useState(false);
+  const [savingCountry, setSavingCountry] = useState(false);
+  const [removingProduct, setRemovingProduct] = useState(false);
+
+  const workspaceLoading = state.isLoading;
+  const workspaceError = state.error;
 
   const trackedProducts = state.products;
   const focusProductId =
-    profile.focusProduct ?? trackedProducts[0]?.id ?? productCatalog[0]?.id ?? DEFAULT_PRODUCT_ID;
+    state.activeProductId ??
+    profile.focusProduct ??
+    trackedProducts[0]?.id ??
+    productCatalog[0]?.id ??
+    DEFAULT_PRODUCT_ID;
+
   const orderedProducts = useMemo(() => {
     if (!focusProductId) return trackedProducts;
     const index = trackedProducts.findIndex((product) => product.id === focusProductId);
@@ -94,7 +116,7 @@ export const useDashboardController = () => {
     }
   }, [countryOptions, selectedCountryId]);
 
-  const productCards = orderedProducts.map((workspaceProduct, index) => {
+  const productCards = orderedProducts.map((workspaceProduct) => {
     const meta = resolveProductMeta(workspaceProduct, productCatalog);
     const targetCountry = workspaceProduct.targetCountryId
       ? countries.find((country) => country.id === workspaceProduct.targetCountryId)
@@ -103,13 +125,15 @@ export const useDashboardController = () => {
       workspace: workspaceProduct,
       meta,
       targetCountry,
-      isFocus: index === 0,
     };
   });
 
-  const defaultWorkspaceProduct: WorkspaceProduct = orderedProducts[0] ?? {
-    id: productCatalog[0]?.id ?? DEFAULT_PRODUCT_ID,
-  };
+  const defaultWorkspaceProduct: WorkspaceProduct =
+    trackedProducts[0] ?? {
+      id: productCatalog[0]?.id ?? DEFAULT_PRODUCT_ID,
+      userProductId: "fallback",
+      name: productCatalog[0]?.name ?? DEFAULT_PRODUCT_NAME,
+    };
 
   const focusProduct = productCards[0] ?? {
     workspace: defaultWorkspaceProduct,
@@ -129,6 +153,8 @@ export const useDashboardController = () => {
   const primaryCountry = focusCountryId
     ? countries.find((country) => country.id === focusCountryId) ?? countryMatches[0]
     : countryMatches[0];
+
+  const canRemoveProducts = trackedProducts.length > 1;
 
   const startExportFlow = (productId: string) => {
     const tracked = trackedProducts.find((product) => product.id === productId);
@@ -154,11 +180,24 @@ export const useDashboardController = () => {
     router.push(`${ROUTES.workspace.marketAnalysis}?product=${pendingProductId}`);
   };
 
-  const submitCountrySelection = () => {
+  const submitCountrySelection = async () => {
     if (!pendingProductId || !selectedCountryId) return;
-    assignCountry(pendingProductId, selectedCountryId);
-    setCountryModalOpen(false);
-    router.push(`${ROUTES.workspace.documents}?product=${pendingProductId}`);
+    const workspaceProduct = trackedProducts.find((product) => product.id === pendingProductId);
+    if (!workspaceProduct) return;
+    const selectedCountry = countryOptions.find((country) => country.id === selectedCountryId);
+    if (!selectedCountry) return;
+    setSavingCountry(true);
+    try {
+      await assignCountry({
+        userProductId: workspaceProduct.userProductId,
+        countryId: selectedCountry.id,
+        countryName: selectedCountry.name,
+      });
+      setCountryModalOpen(false);
+      router.push(`${ROUTES.workspace.documents}?product=${pendingProductId}`);
+    } finally {
+      setSavingCountry(false);
+    }
   };
 
   const startAnalysis = (productId: string, productName?: string) => {
@@ -193,30 +232,47 @@ export const useDashboardController = () => {
     setSelectedCatalogProductId("");
   };
 
-  const submitAddProduct = () => {
+  const submitAddProduct = async () => {
     if (!selectedCatalogProductId) return;
     const product = productCatalog.find((item) => item.id === selectedCatalogProductId);
     if (!product) return;
-    addProduct(product.id, product.name);
-    setAddProductModalOpen(false);
-    setSelectedCatalogProductId("");
+    setAddingProduct(true);
+    try {
+      await addProduct({
+        baseProductId: product.id,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        hsCode: product.hsCode,
+        metadata: {
+          difficultyLevel: product.difficultyLevel,
+        },
+      });
+      setAddProductModalOpen(false);
+      setSelectedCatalogProductId("");
+    } finally {
+      setAddingProduct(false);
+    }
   };
 
   const requestRemoveProduct = (productId: string) => {
-    if (trackedProducts.length <= 1) {
-      return;
-    }
+    if (!canRemoveProducts) return;
     const workspaceProduct = trackedProducts.find((product) => product.id === productId);
     if (!workspaceProduct) return;
     setProductToRemove(workspaceProduct);
     setRemoveProductModalOpen(true);
   };
 
-  const confirmRemoveProduct = () => {
+  const confirmRemoveProduct = async () => {
     if (!productToRemove) return;
-    removeProduct(productToRemove.id);
-    setRemoveProductModalOpen(false);
-    setProductToRemove(null);
+    setRemovingProduct(true);
+    try {
+      await removeProduct(productToRemove.userProductId);
+      setRemoveProductModalOpen(false);
+      setProductToRemove(null);
+    } finally {
+      setRemovingProduct(false);
+    }
   };
 
   const closeRemoveProductModal = () => {
@@ -224,19 +280,19 @@ export const useDashboardController = () => {
     setProductToRemove(null);
   };
 
-const productToRemoveMeta = productToRemove
-  ? resolveProductMeta(productToRemove, productCatalog)
-  : null;
+  const productToRemoveMeta = productToRemove
+    ? resolveProductMeta(productToRemove, productCatalog)
+    : null;
 
-const newsProductOptions = useMemo(() => {
-  const seen = new Map<string, string>();
-  productCatalog.forEach((product) => {
-    if (!seen.has(product.id)) {
-      seen.set(product.id, product.name);
-    }
-  });
-  return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
-}, [productCatalog]);
+  const newsProductOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    productCatalog.forEach((product) => {
+      if (!seen.has(product.id)) {
+        seen.set(product.id, product.name);
+      }
+    });
+    return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
+  }, [productCatalog]);
 
   const resolvedNewsPayload = newsPayload as NewsListResponse | undefined;
   const newsItems = (resolvedNewsPayload?.data ?? []) as NewsArticle[];
@@ -270,6 +326,8 @@ const newsProductOptions = useMemo(() => {
     profile,
     productCards,
     countryMatches,
+    workspaceLoading,
+    workspaceError: workspaceError,
     countriesLoading,
     countriesError: countriesError instanceof Error ? countriesError.message : null,
     primaryCountry,
@@ -281,9 +339,12 @@ const newsProductOptions = useMemo(() => {
     countryOptions,
     productsLoading,
     productsError: productsError instanceof Error ? productsError.message : null,
-    canRemoveProducts: trackedProducts.length > 1,
+    canRemoveProducts,
     addProductOptions,
     newsFilters,
+    addProductLoading: addingProduct,
+    countrySelectionLoading: savingCountry,
+    removeProductLoading: removingProduct,
     newsProductOptions,
     modals: {
       export: exportModalOpen,

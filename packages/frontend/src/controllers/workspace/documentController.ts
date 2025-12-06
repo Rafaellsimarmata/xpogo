@@ -30,14 +30,15 @@ export const useDocumentCenterController = () => {
       (fetchedProduct
         ? {
             ...fetchedProduct,
-            name: trackedProduct.customName ?? fetchedProduct.name,
+            name: trackedProduct.name ?? fetchedProduct.name,
+            description: trackedProduct.description ?? fetchedProduct.description,
           }
         : {
             id: trackedProduct.id,
-            name: trackedProduct.customName ?? trackedProduct.id,
-            description: "Produk kustom dari pengguna.",
-            hsCode: "-",
-            category: "Kustom",
+            name: trackedProduct.name ?? trackedProduct.id,
+            description: trackedProduct.description ?? "Produk kustom dari pengguna.",
+            hsCode: trackedProduct.hsCode ?? "-",
+            category: trackedProduct.category ?? "Kustom",
             difficultyLevel: "Data belum tersedia",
             majorMarkets: [],
           })) ??
@@ -50,9 +51,37 @@ export const useDocumentCenterController = () => {
       majorMarkets: [],
     });
 
-  const countryMeta = trackedProduct?.targetCountryId
-    ? countries.find((country) => country.id === trackedProduct.targetCountryId)
-    : undefined;
+  const countryMeta = useMemo(() => {
+    if (!trackedProduct) return undefined;
+    if (trackedProduct.targetCountryId) {
+      const matched = countries.find((country) => country.id === trackedProduct.targetCountryId);
+      if (matched) {
+        return matched;
+      }
+      if (trackedProduct.targetCountryName) {
+        return {
+          id: trackedProduct.targetCountryId,
+          name: trackedProduct.targetCountryName,
+          matchScore: 0,
+          score: 0,
+          readiness: "-",
+          importValue: "-",
+          gdp: "-",
+          population: "-",
+          estimatedTime: 0,
+          easeOfLogistics: "-",
+          tradeAgreements: [],
+          topImports: [],
+          businessTips: [],
+          contacts: [],
+          code: trackedProduct.targetCountryId,
+          region: "-",
+          stores: [],
+        };
+      }
+    }
+    return undefined;
+  }, [trackedProduct, countries]);
 
   // Fetch compliance checklist from API when product and country are available
   const { data: complianceData, isLoading: complianceLoading, error: complianceError } = useQuery({
