@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { HelpCircle } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -45,35 +44,30 @@ const faqData = [
 ];
 
 const FAQ = () => (
-  <section id="faq" className="relative overflow-hidden py-20">
+  <section id="faq" className="relative py-24 bg-gray-950">
     {/* Background */}
-    <div className="absolute inset-0 bg-gradient-to-b from-background via-secondary/5 to-background" />
-    <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-r from-primary/5 to-accent/5 blur-3xl" />
+    <div className="absolute inset-0 bg-linear-to-b from-gray-950 via-gray-900 to-gray-950" />
+    <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-linear-to-r from-blue-500/5 to-cyan-500/5 blur-3xl" />
 
-    <div className="relative mx-auto max-w-4xl px-4 sm:px-6 md:px-8">
+    <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className="mb-12 text-center">
+      <div className="mb-16 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-2"
+          className="mb-8"
         >
-          <HelpCircle className="h-4 w-4 text-primary" />
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">
-            FAQ
+          <h2 className="mb-4 text-4xl md:text-5xl font-bold text-white">
+            Pertanyaan Umum
+            <span className="block bg-linear-to-r from-blue-400 to-secondary bg-clip-text text-transparent">
+              tentang XPOGO
+            </span>
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-400">
+            Cari jawaban untuk pertanyaan yang paling sering diajukan.
           </p>
         </motion.div>
-
-        <h2 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">
-          Pertanyaan yang Sering
-          <span className="mx-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Ditanyakan
-          </span>
-        </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Belum yakin? Cek jawaban dari pertanyaan yang paling sering muncul.
-        </p>
       </div>
 
       {/* FAQ Accordion */}
@@ -81,45 +75,63 @@ const FAQ = () => (
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="rounded-3xl border border-border/50 bg-card/80 p-6 shadow-card backdrop-blur-sm"
+        className="bg-linear-to-b from-gray-900/40 to-gray-950/40 rounded-3xl p-6 border border-gray-800 backdrop-blur-sm"
       >
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion type="single" collapsible className="w-full space-y-4">
           {faqData.map((faq, index) => (
             <AccordionItem
               key={index}
               value={`item-${index}`}
-              className="border-border/50"
+              className="border border-gray-800 rounded-2xl overflow-hidden hover:border-blue-500/30 transition-colors duration-300"
             >
-              <AccordionTrigger className="text-left text-foreground hover:text-primary hover:no-underline py-5">
-                <span className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 text-sm font-bold text-primary">
-                    {index + 1}
-                  </span>
-                  <span className="font-semibold">{faq.question}</span>
-                </span>
+              <AccordionTrigger className="text-left hover:no-underline px-6 py-5">
+                <div className="flex items-start gap-4 w-full">
+                  {/* Number Badge */}
+                  <div className="shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-linear-to-r from-blue-600/20 to-cyan-500/20 border border-blue-500/20 flex items-center justify-center">
+                      <span className="text-sm font-bold text-blue-400">{index + 1}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Question */}
+                  <div className="flex-1 text-left">
+                    <h3 className="font-semibold text-white text-lg">
+                      {faq.question}
+                    </h3>
+                  </div>
+                </div>
               </AccordionTrigger>
-              <AccordionContent className="pl-11 pr-4 text-muted-foreground leading-relaxed">
-                {faq.answer}
+              
+              <AccordionContent className="px-6 pb-5 pt-0">
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="pl-14"
+                >
+                  <div className="pt-4 border-t border-gray-800/50">
+                    <p className="text-gray-400 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </motion.div>
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       </motion.div>
 
-      {/* CTA */}
+      {/* Simple CTA */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mt-12 rounded-2xl bg-gradient-to-r from-secondary/50 to-accent/10 p-8 text-center"
+        className="mt-16 text-center"
       >
-        <p className="text-lg text-foreground">
-          Masih punya pertanyaan?{" "}
-          <a href="mailto:support@xpogo.id" className="font-semibold text-primary hover:underline">
-            Hubungi tim kami
-          </a>{" "}
-          atau chat langsung via WhatsApp.
-        </p>
+        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-linear-to-r from-blue-500/10 to-secondary/10 border border-blue-500/20 backdrop-blur-sm">
+          <span className="text-sm text-blue-300">Masih ada pertanyaan? Hubungi kami kapan saja</span>
+        </div>
       </motion.div>
     </div>
   </section>

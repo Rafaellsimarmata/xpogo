@@ -1,142 +1,121 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { Brain, FileCheck2, LayoutDashboard, MessageCircle, Zap, ShieldCheck } from "lucide-react";
+import { Brain, FileCheck2, MessageCircle } from "lucide-react";
 
-const featureData = [
+const features = [
   {
     title: "Market Intelligence",
-    description:
-      "Masukkan nama produk, dapatkan rekomendasi negara dengan skor kecocokan, estimasi harga, dan insight buyer resmi ITPC.",
+    description: "Analisis pasar real-time dengan AI untuk menemukan peluang ekspor terbaik.",
     icon: Brain,
-    gradient: "from-primary via-accent to-primary",
+    gradient: "from-blue-500 to-cyan-400",
   },
   {
     title: "Document Center",
-    description:
-      "Checklist dokumen otomatis berdasarkan produk & negara. Lengkap dengan status, template, dan reminder sebelum batas waktu.",
+    description: "Manajemen dokumen ekspor otomatis dengan checklist dan template lengkap.",
     icon: FileCheck2,
-    gradient: "from-emerald-500 via-teal-400 to-primary",
-  },
-  {
-    title: "Workspace Dashboard",
-    description:
-      "Pantau produk fokus, update negara prioritas, dan news regulasi ekspor setiap hari tanpa harus mencari manual.",
-    icon: LayoutDashboard,
-    gradient: "from-amber-500 via-orange-400 to-red-500",
+    gradient: "from-emerald-500 to-teal-400",
   },
   {
     title: "Export Assistant",
-    description:
-      "Chatbot yang memahami konteks workspace kamu. Tanya dokumen yang belum selesai, buyer potensial, atau tips negosiasi.",
+    description: "AI assistant yang membantu seluruh proses ekspor dari A sampai Z.",
     icon: MessageCircle,
-    gradient: "from-indigo-500 via-purple-400 to-pink-500",
-  },
-  {
-    title: "Live Alerts & News",
-    description:
-      "Terima peringatan jika ada perubahan regulasi, kuota, atau kebijakan impor di negara tujuan sehingga tim bisa adaptif.",
-    icon: Zap,
-    gradient: "from-accent via-primary to-indigo-500",
-  },
-  {
-    title: "Security & Compliance",
-    description:
-      "Data UMKM disimpan di server Indonesia dengan enkripsi penuh. Siap audit LKPP dan tender kementerian.",
-    icon: ShieldCheck,
-    gradient: "from-violet-500 via-purple-400 to-fuchsia-500",
+    gradient: "from-purple-500 to-pink-400",
   },
 ];
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (index: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: index * 0.1,
-      type: "spring" as const,
-      stiffness: 100,
-      damping: 12,
-    },
-  }),
-};
 
 const Features = () => (
-  <section id="features" className="relative overflow-hidden py-20">
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/10 to-transparent" />
-    <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 blur-3xl" />
-    <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-r from-indigo-300/10 to-purple-400/10 blur-3xl" />
+  <section id="features" className="relative py-24 bg-gray-950">
+    {/* Background Elements */}
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-48 bg-linear-to-b from-blue-500/5 to-transparent blur-3xl" />
+    </div>
 
-    <div className="relative mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+    <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      {/* Section Header */}
       <div className="mb-16 text-center">
         <motion.div
-          initial={{ scale: 0.9 }}
-          whileInView={{ scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-2"
+          className="mb-6"
         >
-          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary">Connected Modules</p>
+          <h2 className="mb-4 text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+            Fitur Inti yang
+            <span className="block bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              Mengubah Ekspor Jadi Mudah
+            </span>
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-gray-400">
+            Tiga fitur utama yang menyederhanakan proses ekspor dalam satu platform terintegrasi.
+          </p>
         </motion.div>
-
-        <h2 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">
-          Semua modul terhubung
-          <br />
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            supaya tim ekspor tidak berpencar
-          </span>
-        </h2>
-
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-          Tidak perlu lagi berpindah antar spreadsheet, chat grup, dan email. XPOGO menyatukan seluruh proses ekspor
-          ke dalam satu workspace yang sinkron.
-        </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {featureData.map((feature, index) => (
+      {/* Features Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+        {features.map((feature, index) => (
           <motion.div
             key={feature.title}
-            custom={index}
-            variants={cardVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            whileHover={{
-              y: -8,
-              transition: { type: "spring", stiffness: 400, damping: 25 },
-            }}
-            className="group relative overflow-hidden rounded-[2rem] border border-card/70 bg-gradient-to-b from-card/90 to-card/50 p-6 shadow-card backdrop-blur-sm transition-all duration-300 hover:shadow-card-hover"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ y: -8 }}
+            className="group relative"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-accent/0 opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
-            <div className="absolute top-0 right-0 h-20 w-20 -translate-y-1/2 translate-x-1/2 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 blur-2xl" />
+            {/* Feature Number */}
+            <div className="absolute -top-10 -left-8">
+              <div className={`text-7xl font-bold bg-linear-to-r ${feature.gradient} bg-clip-text text-transparent select-none`}>
+                0{index + 1}
+              </div>
+            </div>
 
-            <motion.div
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              className={`relative mb-6 inline-flex rounded-2xl bg-gradient-to-br ${feature.gradient} p-3.5 text-primary-foreground shadow-lg`}
-            >
-              <feature.icon className="h-6 w-6" />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary-foreground/30 to-transparent blur-md" />
-            </motion.div>
+            {/* Feature Card */}
+            <div className="relative bg-linear-to-b from-gray-900/80 to-gray-950/90 rounded-3xl p-8 border border-gray-800 backdrop-blur-sm">
+              {/* Icon Circle */}
+              <div className="relative mb-8">
+                <div className="absolute inset-0">
+                  <div 
+                    className={`absolute inset-0 rounded-full bg-linear-to-r ${feature.gradient} blur-xl opacity-20 group-hover:opacity-30 transition-opacity duration-500`}
+                  />
+                </div>
+                <div className={`relative h-20 w-20 rounded-full bg-linear-to-r ${feature.gradient} flex items-center justify-center mx-auto`}>
+                  <div className="absolute inset-2 rounded-full bg-gray-950 flex items-center justify-center">
+                    <feature.icon className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                
+              </div>
 
-            <h3 className="mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
-            <p className="text-muted-foreground">{feature.description}</p>
+              {/* Content */}
+              <div className="text-center space-y-4">
+                <h3 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-400 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
 
-            <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-primary to-accent transition-all duration-500 group-hover:w-full" />
+              {/* Hover Line */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-linear-to-r from-transparent via-blue-500 to-transparent group-hover:w-3/4 transition-all duration-500" />
+            </div>
           </motion.div>
         ))}
       </div>
 
+      {/* Simple CTA Badge */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="mt-16 rounded-2xl bg-gradient-to-r from-secondary/50 to-accent/10 p-8 text-center"
+        className="mt-16 text-center"
       >
-        <p className="text-lg font-semibold text-foreground">
-          Daftar sekarang untuk mendapatkan analisis pasar pertama dan checklist dokumen percobaan secara gratis.
-        </p>
+        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-linear-to-r from-blue-500/10 to-secondary/10 border border-blue-500/20">
+          <span className="text-md text-primary">Mulai gratis dengan analisis pasar pertama</span>
+        </div>
       </motion.div>
     </div>
   </section>
