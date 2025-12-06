@@ -1,9 +1,24 @@
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import CountryDetail from "@/src/components/market/CountryDetail";
 import DocumentChecklist from "@/src/components/market/DocumentChecklist";
 import StoreSelector from "@/src/components/market/StoreSelector";
-import { countries, getCountryById } from "@/src/lib/data/countries";
 import { generateChecklist, checklistCompletion } from "@/src/lib/data/documents";
+import { fetchCountries } from "@/src/services/countryService";
+
+const getCountries = cache(async () => {
+  try {
+    return await fetchCountries();
+  } catch (error) {
+    console.error("Failed to fetch countries", error);
+    return [];
+  }
+});
+
+const getCountryBySlug = cache(async (slug: string) => {
+  const list = await getCountries();
+  return list.find((country) => country.id === slug);
+});
 
 type CountryPageProps = {
   params: {
@@ -11,13 +26,15 @@ type CountryPageProps = {
   };
 };
 
-export const generateStaticParams = async () =>
-  countries.map((country) => ({
+export const generateStaticParams = async () => {
+  const countryList = await getCountries();
+  return countryList.map((country) => ({
     country: country.id,
   }));
+};
 
-const CountryPage = ({ params }: CountryPageProps) => {
-  const country = getCountryById(params.country);
+const CountryPage = async ({ params }: CountryPageProps) => {
+  const country = await getCountryBySlug(params.country);
 
   if (!country) {
     notFound();

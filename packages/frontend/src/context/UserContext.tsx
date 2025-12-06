@@ -21,34 +21,81 @@ const defaultProfile: UserProfile = {
   onboardingComplete: false,
 };
 
+const STORAGE_PREFIX = "xpogo_profile_";
+
+const getStorageKey = (userId?: string | null) => `${STORAGE_PREFIX}${userId ?? "guest"}`;
+
+const parseProfile = (raw: string | null): UserProfile | null => {
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as UserProfile;
+  } catch (error) {
+    console.warn("Failed to parse stored profile", error);
+    return null;
+  }
+};
+
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
+  const storageKey = getStorageKey(user?.id);
   const [profile, setProfile] = useState<UserProfile>(defaultProfile);
 
-  // Sync user data from AuthContext to UserProfile
+  const persistProfile = useCallback(
+    (nextProfile: UserProfile) => {
+      if (typeof window === "undefined") return;
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(nextProfile));
+      } catch (error) {
+        console.warn("Failed to persist profile", error);
+      }
+    },
+    [storageKey],
+  );
+
+  // Sync user data from AuthContext to UserProfile / load from storage
   useEffect(() => {
-    if (user) {
+    if (typeof window === "undefined") return;
+    const storedProfile = parseProfile(localStorage.getItem(storageKey));
+    if (storedProfile) {
       startTransition(() => {
-        setProfile((prev) => ({
-          ...prev,
+        setProfile(storedProfile);
+      });
+      return;
+    }
+
+    const fallback = user
+      ? {
+          ...defaultProfile,
           fullName: user.name,
           username: user.name,
           company: user.company,
           businessName: user.company,
-        }));
-      });
-    }
-  }, [user]);
+        }
+      : defaultProfile;
+
+    startTransition(() => {
+      setProfile(fallback);
+    });
+    persistProfile(fallback);
+  }, [storageKey, user, persistProfile]);
 
   const updateProfile = useCallback((updates: Partial<UserProfile>) => {
-    setProfile((prev) => ({ ...prev, ...updates }));
-  }, []);
+    setProfile((prev) => {
+      const nextProfile = { ...prev, ...updates };
+      persistProfile(nextProfile);
+      return nextProfile;
+    });
+  }, [persistProfile]);
 
   const setOnboardingComplete = useCallback((status: boolean) => {
-    setProfile((prev) => ({ ...prev, onboardingComplete: status }));
-  }, []);
+    setProfile((prev) => {
+      const nextProfile = { ...prev, onboardingComplete: status };
+      persistProfile(nextProfile);
+      return nextProfile;
+    });
+  }, [persistProfile]);
 
   const value = useMemo(
     () => ({

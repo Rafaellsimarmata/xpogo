@@ -4,13 +4,14 @@ import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { generateChecklist } from "@/src/lib/data/documents";
 import { products } from "@/src/lib/data/products";
-import { countries } from "@/src/lib/data/countries";
 import { useWorkspaceStore } from "@/src/store/workspaceStore";
+import { useCountries } from "@/src/hooks/useCountries";
 
 export const useDocumentCenterController = () => {
   const searchParams = useSearchParams();
   const productQuery = searchParams?.get("product");
   const { state } = useWorkspaceStore();
+  const { countries, isLoading: countriesLoading } = useCountries();
 
   const trackedProduct = productQuery
     ? state.products.find((product) => product.id === productQuery)
@@ -55,5 +56,6 @@ export const useDocumentCenterController = () => {
     documents,
     grouped,
     serviceProviders,
+    countriesLoading,
   };
 };
