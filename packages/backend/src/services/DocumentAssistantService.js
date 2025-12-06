@@ -107,7 +107,7 @@ Tolong berikan dokumen kepatuhan komprehensif termasuk:
 6. Opsi Pembayaran & Incoterms
 7. Asuransi & Manajemen Risiko
 
-Format sebagai daftar periksa profesional yang sesuai untuk operasi ekspor.`;
+Format sebagai daftar periksa profesional yang sesuai untuk operasi ekspor. Hanya berikan daftar periksa, tidak perlu memberikan penjelasan lebih lanjut.`;
 
     try {
       const response = await axios.post(
