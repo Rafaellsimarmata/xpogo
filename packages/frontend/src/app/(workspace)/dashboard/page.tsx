@@ -19,6 +19,8 @@ const DashboardPage = () => {
     setSelectedCountryId,
     actions,
     messages,
+    countriesLoading,
+    countriesError,
   } = useDashboardController();
 
   return (
@@ -47,7 +49,7 @@ const DashboardPage = () => {
                 description={card.meta.description}
                 countryName={card.targetCountry?.name}
                 onExport={() => actions.startExportFlow(card.workspace.id)}
-                onAnalyze={() => actions.startAnalysis(card.workspace.id)}
+                onAnalyze={() => actions.startAnalysis(card.workspace.id, card.meta.name)}
               />
             ))}
 
@@ -72,28 +74,44 @@ const DashboardPage = () => {
                 Negara prioritas minggu ini: {primaryCountry?.name}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {primaryCountry?.readiness} • estimasi proses {primaryCountry?.estimatedTime} hari
+                {primaryCountry?.readiness} - estimasi proses {primaryCountry?.estimatedTime} hari
               </p>
             </div>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {countryMatches.map((country) => (
-              <div
-                key={country.id}
-                className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{country.name}</p>
-                    <p className="text-xs text-muted-foreground">{country.region}</p>
+            {countriesLoading &&
+              [1, 2, 3, 4].map((placeholder) => (
+                <div
+                  key={placeholder}
+                  className="h-24 animate-pulse rounded-2xl border border-border/60 bg-background/50"
+                />
+              ))}
+            {!countriesLoading && countryMatches.length > 0 && (
+              <>
+                {countryMatches.map((country) => (
+                  <div
+                    key={country.id}
+                    className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold">{country.name}</p>
+                        <p className="text-xs text-muted-foreground">{country.region}</p>
+                      </div>
+                      <span className="text-xs font-semibold text-primary">{country.matchScore}/100</span>
+                    </div>
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      {country.readiness} - estimasi {country.estimatedTime} hari
+                    </p>
                   </div>
-                  <span className="text-xs font-semibold text-primary">{country.matchScore}/100</span>
-                </div>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  {country.readiness} • estimasi {country.estimatedTime} hari
-                </p>
+                ))}
+              </>
+            )}
+            {!countriesLoading && countryMatches.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-border/60 bg-background/60 p-4 text-sm text-muted-foreground md:col-span-2">
+                {countriesError ?? "Belum ada data negara yang dapat ditampilkan saat ini."}
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -142,7 +160,7 @@ const DashboardPage = () => {
           <button
             type="button"
             onClick={() => actions.handleExportDecision(false)}
-            className="flex-1 rounded-2xl border border-border/60 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/40"
+            className="flex-1 rounded-2xl border border-secondary-foreground/60 px-4 py-2 text-sm font-semibold text-secondary transition hover:border-primary/40"
           >
             Tidak, analisa dulu
           </button>
@@ -160,7 +178,7 @@ const DashboardPage = () => {
         <select
           value={selectedCountryId}
           onChange={(event) => setSelectedCountryId(event.target.value)}
-          className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           {countryOptions.map((country) => (
             <option key={country.id} value={country.id}>
@@ -191,7 +209,7 @@ const DashboardPage = () => {
           value={newProductName}
           onChange={(event) => setNewProductName(event.target.value)}
           placeholder="contoh: Kopi Arabika"
-          className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
         <button
           type="button"

@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState, startTransition } from "react";
 import { useRouter } from "next/navigation";
-import { countries } from "@/src/lib/data/countries";
 import { products } from "@/src/lib/data/products";
 import { useUser } from "@/src/context/UserContext";
 import { useWorkspaceStore } from "@/src/store/workspaceStore";
 import type { WorkspaceProduct } from "@/src/types/workspace";
 import { ROUTES, WORKSPACE_MESSAGES } from "@/src/constants";
+import { useCountries } from "@/src/hooks/useCountries";
 
 const normalizeProductMeta = (workspaceProduct: WorkspaceProduct) => {
   const product = products.find((item) => item.id === workspaceProduct.id);
@@ -18,9 +18,6 @@ const normalizeProductMeta = (workspaceProduct: WorkspaceProduct) => {
     description: "Produk kustom dari pengguna.",
   };
 };
-
-const getCountryMeta = (countryId?: string) =>
-  countryId ? countries.find((country) => country.id === countryId) : undefined;
 
 const slugify = (value: string) =>
   value
@@ -33,12 +30,17 @@ export const useDashboardController = () => {
   const router = useRouter();
   const { profile } = useUser();
   const { state, assignCountry, addProduct } = useWorkspaceStore();
+  const {
+    countries,
+    isLoading: countriesLoading,
+    error: countriesError,
+  } = useCountries();
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [countryModalOpen, setCountryModalOpen] = useState(false);
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
-  const [selectedCountryId, setSelectedCountryId] = useState<string>(countries[0]?.id ?? "");
+  const [selectedCountryId, setSelectedCountryId] = useState<string>("");
   const [newProductName, setNewProductName] = useState("");
 
   const trackedProducts = state.products;
@@ -49,7 +51,7 @@ export const useDashboardController = () => {
         id: country.id,
         name: country.name,
       })),
-    [],
+    [countries],
   );
 
   useEffect(() => {
@@ -62,7 +64,9 @@ export const useDashboardController = () => {
 
   const productCards = trackedProducts.map((workspaceProduct) => {
     const meta = normalizeProductMeta(workspaceProduct);
-    const targetCountry = getCountryMeta(workspaceProduct.targetCountryId);
+    const targetCountry = workspaceProduct.targetCountryId
+      ? countries.find((country) => country.id === workspaceProduct.targetCountryId)
+      : undefined;
     return {
       workspace: workspaceProduct,
       meta,
@@ -73,12 +77,14 @@ export const useDashboardController = () => {
   const focusProduct = productCards[0] ?? {
     workspace: trackedProducts[0] ?? ({ id: products[0].id } as WorkspaceProduct),
     meta: normalizeProductMeta(trackedProducts[0] ?? { id: products[0].id }),
-    targetCountry: getCountryMeta(trackedProducts[0]?.targetCountryId),
+    targetCountry: trackedProducts[0]?.targetCountryId
+      ? countries.find((country) => country.id === trackedProducts[0]?.targetCountryId)
+      : undefined,
   };
 
   const countryMatches = useMemo(
     () => [...countries].sort((a, b) => b.matchScore - a.matchScore).slice(0, 4),
-    [],
+    [countries],
   );
 
   const focusCountryId = focusProduct.workspace.targetCountryId ?? profile.targetCountry;
@@ -118,8 +124,12 @@ export const useDashboardController = () => {
     router.push(`${ROUTES.workspace.documents}?product=${pendingProductId}`);
   };
 
-  const startAnalysis = (productId: string) => {
-    router.push(`${ROUTES.workspace.marketAnalysis}?product=${productId}`);
+  const startAnalysis = (productId: string, productName?: string) => {
+    const params = new URLSearchParams({ product: productId });
+    if (productName) {
+      params.set("name", productName);
+    }
+    router.push(`${ROUTES.workspace.marketAnalysis}?${params.toString()}`);
   };
 
   const openAddProductModal = () => {
@@ -138,9 +148,6 @@ export const useDashboardController = () => {
     addProduct(slug, trimmed);
     setAddProductModalOpen(false);
     setNewProductName("");
-    router.push(
-      `${ROUTES.workspace.marketAnalysis}?product=${slug}&name=${encodeURIComponent(trimmed)}`,
-    );
   };
 
   const newsItems = [
@@ -178,6 +185,8 @@ export const useDashboardController = () => {
     profile,
     productCards,
     countryMatches,
+    countriesLoading,
+    countriesError: countriesError instanceof Error ? countriesError.message : null,
     primaryCountry,
     newsItems,
     countryOptions,

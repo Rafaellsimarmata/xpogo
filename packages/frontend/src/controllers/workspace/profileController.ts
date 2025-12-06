@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { products } from "@/src/lib/data/products";
@@ -38,6 +38,15 @@ export const useProfileController = () => {
     },
   });
 
+  useEffect(() => {
+    form.reset({
+      fullName: profile.fullName ?? "",
+      username: profile.username ?? "",
+      company: profile.company ?? "",
+      focusProduct: profile.focusProduct ?? productOptions[0]?.id ?? "",
+    });
+  }, [profile, form, productOptions]);
+
   const onSubmit = form.handleSubmit((values) => {
     updateProfile({
       fullName: values.fullName,
@@ -56,5 +65,6 @@ export const useProfileController = () => {
     form,
     productOptions,
     onSubmit,
+    profile,
   };
 };

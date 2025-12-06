@@ -8,7 +8,7 @@ const ProfilePage = () => {
   const { form, productOptions, onSubmit } = useProfileController();
   const {
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = form;
 
   return (
@@ -16,37 +16,40 @@ const ProfilePage = () => {
       <div className="mx-auto max-w-4xl space-y-6 px-4 sm:px-6">
         <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-            Profil Workspace
+            Profil Bisnis
           </p>
-          <h1 className="mt-3 text-3xl font-bold text-foreground">Lengkapi informasi usaha Anda</h1>
+          <h1 className="mt-3 text-3xl font-bold text-foreground">Perbarui profil usaha Anda</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Data ini digunakan untuk menampilkan rekomendasi produk dan negara tujuan di dashboard.
+            Informasi ini dipakai untuk menampilkan rekomendasi produk dan negara tujuan di dashboard.
           </p>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-5 rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Nama Lengkap</label>
-            <Input
-              placeholder="Nama sesuai KTP"
-              {...register("fullName", { required: "Nama wajib diisi" })}
-              error={errors.fullName?.message}
-            />
-          </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Username</label>
-            <Input
-              placeholder="nama-umkm"
-              {...register("username", { required: "Username wajib diisi" })}
-              error={errors.username?.message}
-            />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Nama Lengkap</label>
+              <Input
+                placeholder="Nama sesuai KTP"
+                {...register("fullName", { required: "Nama wajib diisi" })}
+                error={errors.fullName?.message}
+              />
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Username</label>
+              <Input
+                placeholder="nama-umkm"
+                helperText="Ditampilkan pada workspace & dokumen."
+                {...register("username", { required: "Username wajib diisi" })}
+                error={errors.username?.message}
+              />
+            </div>
           </div>
 
           <div>
             <label className="mb-2 block text-sm font-semibold text-foreground">Nama Perusahaan</label>
             <Input
-              placeholder="PT / CV"
+              placeholder="Contoh: PT Nusantara Craft"
+              helperText="Gunakan nama resmi agar otomatis muncul pada checklist."
               {...register("company", { required: "Nama perusahaan wajib diisi" })}
               error={errors.company?.message}
             />
@@ -73,8 +76,8 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="submit" className="flex-1">
-              Simpan & Lanjutkan ke Dashboard
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : "Simpan & buka Dashboard"}
             </Button>
           </div>
         </form>
