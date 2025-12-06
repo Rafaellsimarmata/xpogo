@@ -1,33 +1,55 @@
 'use client';
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { generateChecklist } from "@/src/lib/data/documents";
-import { products } from "@/src/lib/data/products";
 import { useWorkspaceStore } from "@/src/store/workspaceStore";
 import { useCountries } from "@/src/hooks/useCountries";
 import { generateComplianceChecklist } from "@/src/services/documentAssistantService";
 import { parseComplianceChecklist } from "@/src/lib/utils/parseCompliance";
-import type { DocumentRequirement } from "@/src/lib/data/documents";
+import { useProductDetails } from "@/src/hooks/useProducts";
+import { DEFAULT_PRODUCT_ID, DEFAULT_PRODUCT_NAME } from "@/src/constants";
 
 export const useDocumentCenterController = () => {
   const searchParams = useSearchParams();
   const productQuery = searchParams?.get("product");
   const { state } = useWorkspaceStore();
   const { countries, isLoading: countriesLoading } = useCountries();
-
   const trackedProduct = productQuery
     ? state.products.find((product) => product.id === productQuery)
     : state.products[0];
 
+  const {
+    product: fetchedProduct,
+    isLoading: productLoading,
+    error: productError,
+  } = useProductDetails(trackedProduct?.id);
+
   const productMeta =
     (trackedProduct &&
-      (products.find((product) => product.id === trackedProduct.id) ?? {
-        id: trackedProduct.id,
-        name: trackedProduct.customName ?? trackedProduct.id,
-      })) ??
-    products[0];
+      (fetchedProduct
+        ? {
+            ...fetchedProduct,
+            name: trackedProduct.customName ?? fetchedProduct.name,
+          }
+        : {
+            id: trackedProduct.id,
+            name: trackedProduct.customName ?? trackedProduct.id,
+            description: "Produk kustom dari pengguna.",
+            hsCode: "-",
+            category: "Kustom",
+            difficultyLevel: "Data belum tersedia",
+            majorMarkets: [],
+          })) ??
+    (fetchedProduct ?? {
+      id: DEFAULT_PRODUCT_ID,
+      name: DEFAULT_PRODUCT_NAME,
+      hsCode: "-",
+      category: "Produk unggulan",
+      difficultyLevel: "Medium",
+      majorMarkets: [],
+    });
 
   const countryMeta = trackedProduct?.targetCountryId
     ? countries.find((country) => country.id === trackedProduct.targetCountryId)
@@ -107,5 +129,7 @@ export const useDocumentCenterController = () => {
     countriesLoading,
     complianceLoading,
     complianceError,
+    productLoading,
+    productError: productError instanceof Error ? productError.message : null,
   };
 };

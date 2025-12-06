@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, LogOut } from "lucide-react";
-import { useState } from "react";
+import { ChevronDown, LogOut, Menu } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/src/lib/utils";
 import { useAuth } from "@/src/context/AuthContext";
 import { useUser } from "@/src/context/UserContext";
@@ -17,6 +17,8 @@ const workspaceNav = [
 const WorkspaceNav = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const { signOut } = useAuth();
   const { profile } = useUser();
 
@@ -25,6 +27,18 @@ const WorkspaceNav = () => {
     .map((name) => name.charAt(0).toUpperCase())
     .slice(0, 2)
     .join("") || "U";
+  const profileName = profile.fullName ?? profile.username ?? "Pengguna XP";
+  const profileCompany = profile.company ?? profile.businessName ?? "Perusahaan belum diatur";
+
+  useEffect(() => {
+    const handler = (event: MouseEvent) => {
+      if (!profileMenuRef.current) return;
+      if (profileMenuRef.current.contains(event.target as Node)) return;
+      setProfileMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   return (
     <header className="border-b border-border/60 bg-card/90 shadow-sm">
@@ -38,7 +52,10 @@ const WorkspaceNav = () => {
         <button
           type="button"
           className="rounded-lg border border-border/70 p-2 text-muted-foreground hover:text-foreground lg:hidden"
-          onClick={() => setMenuOpen((prev) => !prev)}
+          onClick={() => {
+            setMenuOpen((prev) => !prev);
+            setProfileMenuOpen(false);
+          }}
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -62,35 +79,75 @@ const WorkspaceNav = () => {
           })}
         </nav>
         <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            href="/profile"
-            className="flex items-center gap-2 rounded-2xl border border-border/60 px-3 py-2 text-sm font-semibold text-foreground hover:border-primary/30"
-          >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
-              {initials}
-            </span>
-            <span>Profile</span>
-          </Link>
-          <button
-            type="button"
-            onClick={signOut}
-            className="inline-flex items-center gap-2 rounded-2xl border border-border/60 px-4 py-2 text-xs font-semibold text-foreground hover:border-primary/30"
-          >
-            <LogOut className="h-4 w-4" />
-            Keluar
-          </button>
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-2xl border border-border/60 px-3 py-2 text-sm font-semibold text-foreground hover:border-primary/40"
+              onClick={() => setProfileMenuOpen((prev) => !prev)}
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
+                {initials}
+              </span>
+              <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition", profileMenuOpen && "rotate-180")} />
+            </button>
+            {profileMenuOpen && (
+              <div className="absolute bg-background right-0 top-full mt-2 w-64 rounded-2xl border border-border/60 p-4 shadow-lg">
+                <div className="mb-3 border-b border-border/60 pb-3">
+                  <p className="text-md font-semibold text-foreground">{profileName}</p>
+                  <p className="text-sm text-muted-foreground">{profileCompany}</p>
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    href="/profile"
+                    className="block rounded-2xl border border-border/50 px-4 py-2 text-sm font-semibold text-foreground hover:border-primary/30"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    Ubah data
+                  </Link>
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between rounded-2xl border border-border/50 px-4 py-2 text-sm font-semibold text-destructive hover:border-destructive/40 cursor-pointer"
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      signOut();
+                    }}
+                  >
+                    Keluar
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       {menuOpen && (
         <div className="border-t border-border/60 bg-card/90 px-4 py-4 lg:hidden">
-          <div className="space-y-2">
-            <Link
-              href="/profile"
-              className="block rounded-xl border border-border/60 px-4 py-3 text-sm font-semibold text-foreground"
-              onClick={() => setMenuOpen(false)}
-            >
-              Profile
-            </Link>
+          <div className="space-y-3">
+            <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
+              <p className="text-sm font-semibold text-foreground">{profileName}</p>
+              <p className="text-xs text-muted-foreground">{profileCompany}</p>
+              <div className="mt-3 space-y-2">
+                <Link
+                  href="/profile"
+                  className="block rounded-xl border border-border/50 px-4 py-2 text-sm font-semibold text-foreground"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Ubah data
+                </Link>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between rounded-xl border border-destructive/40 px-4 py-2 text-sm font-semibold text-destructive"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    signOut();
+                  }}
+                >
+                  Keluar
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
             {workspaceNav.map((item) => (
               <Link
                 key={item.href}
@@ -106,16 +163,6 @@ const WorkspaceNav = () => {
                 {item.label}
               </Link>
             ))}
-            <button
-              type="button"
-              className="block w-full rounded-xl border border-border/60 px-4 py-3 text-left text-sm font-semibold text-foreground"
-              onClick={() => {
-                setMenuOpen(false);
-                signOut();
-              }}
-            >
-              Keluar
-            </button>
           </div>
         </div>
       )}

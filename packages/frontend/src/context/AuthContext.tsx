@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useCallback, useMemo } from "react
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { login } from "@/src/services/authService";
-import type { AuthContextValue, AuthUser, SignInPayload } from "@/src/types/auth";
+import type { AuthContextValue, AuthUser, SignInPayload, SignInOptions } from "@/src/types/auth";
 import { ROUTES } from "@/src/constants";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { mutateAsync: authenticate, isPending } = useMutation({ mutationFn: login });
 
   const signIn = useCallback(
-    async (payload: SignInPayload) => {
+    async (payload: SignInPayload, options?: SignInOptions) => {
       const data = await authenticate(payload);
 
       localStorage.setItem("auth_token", data.token);
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         company: data.user.business_name || "Nusantara Craft",
       });
 
-      router.push(ROUTES.workspace.profile);
+      router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
     },
     [authenticate, router],
   );
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("auth_token");
     setUser(null);
     setToken(null);
-    router.push("/signin");
+    router.push("/");
   }, [router]);
 
   const value = useMemo(
