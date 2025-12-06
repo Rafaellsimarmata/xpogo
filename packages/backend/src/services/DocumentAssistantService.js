@@ -107,7 +107,21 @@ Tolong berikan dokumen kepatuhan komprehensif termasuk:
 6. Opsi Pembayaran & Incoterms
 7. Asuransi & Manajemen Risiko
 
-Format sebagai daftar periksa profesional yang sesuai untuk operasi ekspor. Hanya berikan daftar periksa, tidak perlu memberikan penjelasan lebih lanjut.`;
+PENTING: Format output harus mengikuti format berikut untuk setiap dokumen:
+- Nama dokumen (tanpa checkbox atau simbol apapun di awal)
+- Baris kosong
+- Deskripsi singkat dokumen (1-2 kalimat)
+
+Contoh format yang benar:
+NIB & OSS
+
+Nomor Induk Berusaha dan akses OSS untuk legalitas kegiatan ekspor.
+
+Certificate of Origin (SKA)
+
+Membuktikan barang berasal dari Indonesia untuk mendapatkan tarif preferensi.
+
+Hanya berikan daftar dokumen dengan format di atas, tanpa penjelasan tambahan, tanpa nomor urut, tanpa checkbox, dan tanpa simbol apapun di awal nama dokumen.`;
 
     try {
       const response = await axios.post(

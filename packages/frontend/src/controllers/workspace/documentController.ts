@@ -1,11 +1,15 @@
 'use client';
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { generateChecklist } from "@/src/lib/data/documents";
 import { products } from "@/src/lib/data/products";
 import { useWorkspaceStore } from "@/src/store/workspaceStore";
 import { useCountries } from "@/src/hooks/useCountries";
+import { generateComplianceChecklist } from "@/src/services/documentAssistantService";
+import { parseComplianceChecklist } from "@/src/lib/utils/parseCompliance";
+import type { DocumentRequirement } from "@/src/lib/data/documents";
 
 export const useDocumentCenterController = () => {
   const searchParams = useSearchParams();
@@ -29,10 +33,54 @@ export const useDocumentCenterController = () => {
     ? countries.find((country) => country.id === trackedProduct.targetCountryId)
     : undefined;
 
+  // Fetch compliance checklist from API when product and country are available
+  const { data: complianceData, isLoading: complianceLoading, error: complianceError } = useQuery({
+    queryKey: ["compliance", productMeta.name, countryMeta?.name],
+    queryFn: async () => {
+      if (!productMeta.name || !countryMeta) {
+        return null;
+      }
+      return generateComplianceChecklist({
+        productName: productMeta.name,
+        origin: "Indonesia",
+        destinationCountries: countryMeta.name,
+        productType: productMeta.id,
+      });
+    },
+    enabled: Boolean(productMeta.name && countryMeta),
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+
+  // Parse compliance data and merge with static checklist
   const documents = useMemo(() => {
     if (!countryMeta) return [];
-    return generateChecklist(productMeta.id, countryMeta.id);
-  }, [countryMeta, productMeta.id]);
+
+    // Get static checklist as base
+    const staticChecklist = generateChecklist(productMeta.id, countryMeta.id);
+
+    // If we have API data, parse and merge it
+    if (complianceData?.content) {
+      const apiDocuments = parseComplianceChecklist(complianceData.content);
+
+      // Merge API documents with static ones, avoiding duplicates
+      const merged = [...staticChecklist];
+      apiDocuments.forEach((apiDoc) => {
+        // Check if similar document already exists
+        const exists = merged.some(
+          (doc) =>
+            doc.title.toLowerCase() === apiDoc.title.toLowerCase() ||
+            doc.id === apiDoc.id
+        );
+        if (!exists) {
+          merged.push(apiDoc);
+        }
+      });
+
+      return merged;
+    }
+
+    return staticChecklist;
+  }, [countryMeta, productMeta.id, complianceData]);
 
   const grouped = documents.reduce(
     (acc, doc) => {
@@ -57,5 +105,7 @@ export const useDocumentCenterController = () => {
     grouped,
     serviceProviders,
     countriesLoading,
+    complianceLoading,
+    complianceError,
   };
 };
