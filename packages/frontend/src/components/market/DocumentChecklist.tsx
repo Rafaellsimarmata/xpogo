@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Check, AlertCircle, UploadCloud } from "lucide-react";
-import { DocumentRequirement, checklistCompletion } from "@/src/lib/data/documents";
+import type { DocumentRequirement } from "@/src/lib/utils/parseCompliance";
+import { checklistCompletion } from "@/src/lib/utils/parseCompliance";
 
 type DocumentChecklistProps = {
   documents: DocumentRequirement[];

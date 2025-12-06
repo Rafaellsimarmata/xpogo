@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { generateChecklist } from "@/src/lib/data/documents";
 import { useWorkspaceStore } from "@/src/store/workspaceStore";
 import { useCountries } from "@/src/hooks/useCountries";
 import { generateComplianceChecklist } from "@/src/services/documentAssistantService";
@@ -73,38 +72,20 @@ export const useDocumentCenterController = () => {
     staleTime: 1000 * 60 * 60, // 1 hour
   });
 
-  // Parse compliance data and merge with static checklist
+  // Parse compliance data from API only
   const documents = useMemo(() => {
     if (!countryMeta) return [];
 
-    // Get static checklist as base
-    const staticChecklist = generateChecklist(productMeta.id, countryMeta.id);
-
-    // If we have API data, parse and merge it
+    // Only use API data
     if (complianceData?.content) {
-      const apiDocuments = parseComplianceChecklist(complianceData.content);
-
-      // Merge API documents with static ones, avoiding duplicates
-      const merged = [...staticChecklist];
-      apiDocuments.forEach((apiDoc) => {
-        // Check if similar document already exists
-        const exists = merged.some(
-          (doc) =>
-            doc.title.toLowerCase() === apiDoc.title.toLowerCase() ||
-            doc.id === apiDoc.id
-        );
-        if (!exists) {
-          merged.push(apiDoc);
-        }
-      });
-
-      return merged;
+      return parseComplianceChecklist(complianceData.content);
     }
 
-    return staticChecklist;
-  }, [countryMeta, productMeta.id, complianceData]);
+    // Return empty array if no API data available
+    return [];
+  }, [countryMeta, complianceData]);
 
-  const grouped = documents.reduce(
+  const grouped = documents.reduce<Record<string, number>>(
     (acc, doc) => {
       acc[doc.status] = acc[doc.status] + 1;
       return acc;

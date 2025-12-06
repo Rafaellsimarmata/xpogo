@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import CountryDetail from "@/src/components/market/CountryDetail";
 import DocumentChecklist from "@/src/components/market/DocumentChecklist";
 import StoreSelector from "@/src/components/market/StoreSelector";
-import { generateChecklist, checklistCompletion } from "@/src/lib/data/documents";
+import { generateChecklist } from "@/src/lib/data/staticDocuments";
+import { checklistCompletion } from "@/src/lib/utils/parseCompliance";
 import { fetchCountries } from "@/src/services/countryService";
 
 const getCountries = cache(async () => {
