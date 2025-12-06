@@ -2,32 +2,36 @@
 
 import { FormEvent, useEffect, useState, startTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { products } from "@/src/lib/data/products";
 import type { LookupState } from "@/src/types/market";
 import { useMarketAnalysis } from "@/src/hooks/useMarketAnalysis";
 import { useWorkspaceStore } from "@/src/store/workspaceStore";
-import { ROUTES, WORKSPACE_MESSAGES } from "@/src/constants";
+import { ROUTES, WORKSPACE_MESSAGES, DEFAULT_PRODUCT_ID, DEFAULT_PRODUCT_NAME } from "@/src/constants";
+import { useProducts } from "@/src/hooks/useProducts";
 
 export const useMarketAnalysisController = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { lookupProduct, data, isLoading, error } = useMarketAnalysis();
   const { state, assignCountry } = useWorkspaceStore();
+  const { products: productCatalog } = useProducts();
   const [productQuery, setProductQuery] = useState("");
   const [lookupState, setLookupState] = useState<LookupState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
 
+  const fallbackProductId = productCatalog[0]?.id ?? state.products[0]?.id ?? DEFAULT_PRODUCT_ID;
+
   const activeProductId =
-    searchParams?.get("product") ??
-    state.activeProductId ??
-    state.products[0]?.id ??
-    products[0]?.id ??
-    "";
+    searchParams?.get("product") ?? state.activeProductId ?? state.products[0]?.id ?? fallbackProductId;
   const customNameParam = searchParams?.get("name") ?? "";
 
+  const trackedProduct = state.products.find((product) => product.id === activeProductId);
+
   const productMeta =
-    products.find((product) => product.id === activeProductId) ?? products[0];
+    productCatalog.find((product) => product.id === activeProductId) ??
+    (trackedProduct
+      ? { id: trackedProduct.id, name: trackedProduct.customName ?? trackedProduct.id }
+      : productCatalog[0] ?? { id: fallbackProductId, name: DEFAULT_PRODUCT_NAME });
 
   useEffect(() => {
     if (customNameParam) {

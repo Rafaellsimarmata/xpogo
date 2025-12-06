@@ -129,6 +129,14 @@ const productSpecificDocuments: Record<string, DocumentRequirement[]> = {
   ],
 };
 
+const productAliases: Record<string, string> = {
+  coffee: "kopi",
+  spices: "rempah",
+  textiles: "tekstil",
+  handicrafts: "kerajinan",
+  "palm-oil": "minyak-kelapa",
+};
+
 const countrySpecificDocuments: Record<string, DocumentRequirement[]> = {
   japan: [
     {
@@ -161,9 +169,12 @@ const countrySpecificDocuments: Record<string, DocumentRequirement[]> = {
 };
 
 export const generateChecklist = (productId: string, countryId: string): DocumentRequirement[] => {
+  const resolvedProductId = productSpecificDocuments[productId]
+    ? productId
+    : productAliases[productId] ?? productId;
   const merged = [
     ...baseDocuments,
-    ...(productSpecificDocuments[productId] ?? []),
+    ...(productSpecificDocuments[resolvedProductId] ?? []),
     ...(countrySpecificDocuments[countryId] ?? []),
   ];
 

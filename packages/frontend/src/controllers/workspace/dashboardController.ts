@@ -2,48 +2,79 @@
 
 import { useEffect, useMemo, useState, startTransition } from "react";
 import { useRouter } from "next/navigation";
-import { products } from "@/src/lib/data/products";
 import { useUser } from "@/src/context/UserContext";
 import { useWorkspaceStore } from "@/src/store/workspaceStore";
 import type { WorkspaceProduct } from "@/src/types/workspace";
-import { ROUTES, WORKSPACE_MESSAGES } from "@/src/constants";
+import { ROUTES, WORKSPACE_MESSAGES, DEFAULT_PRODUCT_ID, DEFAULT_PRODUCT_NAME } from "@/src/constants";
 import { useCountries } from "@/src/hooks/useCountries";
+import { useProducts } from "@/src/hooks/useProducts";
+import { useNews } from "@/src/hooks/useNews";
+import type { Product } from "@/src/types/products";
+import type { NewsFilters, NewsArticle, NewsListResponse } from "@/src/types/news";
 
-const normalizeProductMeta = (workspaceProduct: WorkspaceProduct) => {
-  const product = products.find((item) => item.id === workspaceProduct.id);
-  if (product) return product;
-  return {
-    id: workspaceProduct.id,
-    name: workspaceProduct.customName ?? workspaceProduct.id,
-    description: "Produk kustom dari pengguna.",
-  };
+const fallbackProductMeta: Product = {
+  id: DEFAULT_PRODUCT_ID,
+  name: DEFAULT_PRODUCT_NAME,
+  category: "Agricultural",
+  description: "Produk ekspor unggulan Indonesia.",
+  hsCode: "-",
+  annualExportsUsd: 0,
+  majorMarkets: [],
+  difficultyLevel: "Medium",
 };
 
-const slugify = (value: string) =>
-  value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
+const resolveProductMeta = (workspaceProduct: WorkspaceProduct, catalog: Product[]) => {
+  const product = catalog.find((item) => item.id === workspaceProduct.id);
+  if (product) return product;
+  return {
+    ...fallbackProductMeta,
+    id: workspaceProduct.id,
+    name: workspaceProduct.customName ?? workspaceProduct.id,
+  };
+};
 
 export const useDashboardController = () => {
   const router = useRouter();
   const { profile } = useUser();
-  const { state, assignCountry, addProduct } = useWorkspaceStore();
+  const { state, assignCountry, addProduct, removeProduct } = useWorkspaceStore();
   const {
     countries,
     isLoading: countriesLoading,
     error: countriesError,
   } = useCountries();
+  const {
+    products: productCatalog,
+    isLoading: productsLoading,
+    error: productsError,
+  } = useProducts();
+  const [newsFilters, setNewsFilters] = useState<NewsFilters>({ limit: 4 });
+  const {
+    data: newsPayload,
+    isLoading: newsLoading,
+    error: newsError,
+    refetch: refetchNews,
+  } = useNews(newsFilters);
 
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [countryModalOpen, setCountryModalOpen] = useState(false);
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
+  const [removeProductModalOpen, setRemoveProductModalOpen] = useState(false);
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [selectedCountryId, setSelectedCountryId] = useState<string>("");
-  const [newProductName, setNewProductName] = useState("");
+  const [selectedCatalogProductId, setSelectedCatalogProductId] = useState("");
+  const [productToRemove, setProductToRemove] = useState<WorkspaceProduct | null>(null);
 
   const trackedProducts = state.products;
+  const focusProductId =
+    profile.focusProduct ?? trackedProducts[0]?.id ?? productCatalog[0]?.id ?? DEFAULT_PRODUCT_ID;
+  const orderedProducts = useMemo(() => {
+    if (!focusProductId) return trackedProducts;
+    const index = trackedProducts.findIndex((product) => product.id === focusProductId);
+    if (index <= 0) return trackedProducts;
+    const focus = trackedProducts[index];
+    const remaining = trackedProducts.filter((_, idx) => idx !== index);
+    return [focus, ...remaining];
+  }, [trackedProducts, focusProductId]);
 
   const countryOptions = useMemo(
     () =>
@@ -62,8 +93,8 @@ export const useDashboardController = () => {
     }
   }, [countryOptions, selectedCountryId]);
 
-  const productCards = trackedProducts.map((workspaceProduct) => {
-    const meta = normalizeProductMeta(workspaceProduct);
+  const productCards = orderedProducts.map((workspaceProduct, index) => {
+    const meta = resolveProductMeta(workspaceProduct, productCatalog);
     const targetCountry = workspaceProduct.targetCountryId
       ? countries.find((country) => country.id === workspaceProduct.targetCountryId)
       : undefined;
@@ -71,14 +102,19 @@ export const useDashboardController = () => {
       workspace: workspaceProduct,
       meta,
       targetCountry,
+      isFocus: index === 0,
     };
   });
 
+  const defaultWorkspaceProduct: WorkspaceProduct = orderedProducts[0] ?? {
+    id: productCatalog[0]?.id ?? DEFAULT_PRODUCT_ID,
+  };
+
   const focusProduct = productCards[0] ?? {
-    workspace: trackedProducts[0] ?? ({ id: products[0].id } as WorkspaceProduct),
-    meta: normalizeProductMeta(trackedProducts[0] ?? { id: products[0].id }),
-    targetCountry: trackedProducts[0]?.targetCountryId
-      ? countries.find((country) => country.id === trackedProducts[0]?.targetCountryId)
+    workspace: defaultWorkspaceProduct,
+    meta: resolveProductMeta(defaultWorkspaceProduct, productCatalog),
+    targetCountry: defaultWorkspaceProduct.targetCountryId
+      ? countries.find((country) => country.id === defaultWorkspaceProduct.targetCountryId)
       : undefined,
   };
 
@@ -132,54 +168,102 @@ export const useDashboardController = () => {
     router.push(`${ROUTES.workspace.marketAnalysis}?${params.toString()}`);
   };
 
+  const availableCatalogProducts = useMemo(
+    () =>
+      productCatalog.filter(
+        (product) => !trackedProducts.some((workspaceProduct) => workspaceProduct.id === product.id),
+      ),
+    [productCatalog, trackedProducts],
+  );
+
+  const addProductOptions = availableCatalogProducts.map((product) => ({
+    id: product.id,
+    name: product.name,
+  }));
+
   const openAddProductModal = () => {
+    const fallback = addProductOptions[0]?.id ?? "";
+    setSelectedCatalogProductId(fallback);
     setAddProductModalOpen(true);
   };
 
   const closeAddProductModal = () => {
     setAddProductModalOpen(false);
-    setNewProductName("");
+    setSelectedCatalogProductId("");
   };
 
   const submitAddProduct = () => {
-    const trimmed = newProductName.trim();
-    if (!trimmed) return;
-    const slug = slugify(trimmed) || `produk-${Date.now()}`;
-    addProduct(slug, trimmed);
+    if (!selectedCatalogProductId) return;
+    const product = productCatalog.find((item) => item.id === selectedCatalogProductId);
+    if (!product) return;
+    addProduct(product.id, product.name);
     setAddProductModalOpen(false);
-    setNewProductName("");
+    setSelectedCatalogProductId("");
   };
 
-  const newsItems = [
-    {
-      title: "Update Kuota Ekspor Kopi ke Jepang 2025",
-      summary:
-        "Kementerian Perdagangan merilis kuota baru untuk ekspor kopi specialty ke Jepang dengan tambahan 15%.",
-      tag: "Regulasi",
-      date: "5 Des 2025",
-    },
-    {
-      title: "Subsidi Logistik Laut untuk UMKM",
-      summary:
-        "Program subsidi logistik laut tahap III dibuka hingga Januari 2026, prioritas rute Asia Timur.",
-      tag: "Program",
-      date: "3 Des 2025",
-    },
-    {
-      title: "Permintaan Produk Kerajinan di Dubai",
-      summary:
-        "ITPC Dubai mencatat kenaikan permintaan produk kayu ringan sebesar 28% menjelang Expo Timur Tengah.",
-      tag: "Market Insight",
-      date: "1 Des 2025",
-    },
-    {
-      title: "Workshop Packaging untuk Pasar UE",
-      summary:
-        "Atase Perdagangan Brussels mengadakan workshop daring mengenai standar kemasan UE untuk produk pangan.",
-      tag: "Event",
-      date: "29 Nov 2025",
-    },
-  ];
+  const requestRemoveProduct = (productId: string) => {
+    if (trackedProducts.length <= 1) {
+      return;
+    }
+    const workspaceProduct = trackedProducts.find((product) => product.id === productId);
+    if (!workspaceProduct) return;
+    setProductToRemove(workspaceProduct);
+    setRemoveProductModalOpen(true);
+  };
+
+  const confirmRemoveProduct = () => {
+    if (!productToRemove) return;
+    removeProduct(productToRemove.id);
+    setRemoveProductModalOpen(false);
+    setProductToRemove(null);
+  };
+
+  const closeRemoveProductModal = () => {
+    setRemoveProductModalOpen(false);
+    setProductToRemove(null);
+  };
+
+const productToRemoveMeta = productToRemove
+  ? resolveProductMeta(productToRemove, productCatalog)
+  : null;
+
+const newsProductOptions = useMemo(() => {
+  const seen = new Map<string, string>();
+  productCatalog.forEach((product) => {
+    if (!seen.has(product.id)) {
+      seen.set(product.id, product.name);
+    }
+  });
+  return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
+}, [productCatalog]);
+
+  const resolvedNewsPayload = newsPayload as NewsListResponse | undefined;
+  const newsItems = (resolvedNewsPayload?.data ?? []) as NewsArticle[];
+  const newsMeta = {
+    category: resolvedNewsPayload?.category,
+    timestamp: resolvedNewsPayload?.timestamp,
+  };
+
+  const setNewsCategory = (category?: string) => {
+    setNewsFilters((prev) => ({
+      ...prev,
+      category: category || undefined,
+    }));
+  };
+
+  const setNewsCountry = (country: string) => {
+    setNewsFilters((prev) => ({
+      ...prev,
+      country: country || undefined,
+    }));
+  };
+
+  const setNewsProductType = (productType: string) => {
+    setNewsFilters((prev) => ({
+      ...prev,
+      productType: productType || undefined,
+    }));
+  };
 
   return {
     profile,
@@ -189,16 +273,27 @@ export const useDashboardController = () => {
     countriesError: countriesError instanceof Error ? countriesError.message : null,
     primaryCountry,
     newsItems,
+    newsLoading,
+    newsError: newsError instanceof Error ? newsError.message : null,
+    newsMeta,
     countryOptions,
+    productsLoading,
+    productsError: productsError instanceof Error ? productsError.message : null,
+    canRemoveProducts: trackedProducts.length > 1,
+    addProductOptions,
+    newsFilters,
+    newsProductOptions,
     modals: {
       export: exportModalOpen,
       countrySelect: countryModalOpen,
       addProduct: addProductModalOpen,
+      removeProduct: removeProductModalOpen,
     },
     selectedCountryId,
     setSelectedCountryId,
-    newProductName,
-    setNewProductName,
+    selectedCatalogProductId,
+    setSelectedCatalogProductId,
+    productPendingRemoval: productToRemoveMeta,
     actions: {
       startExportFlow,
       handleExportDecision,
@@ -207,6 +302,13 @@ export const useDashboardController = () => {
       openAddProductModal,
       closeAddProductModal,
       submitAddProduct,
+      requestRemoveProduct,
+      confirmRemoveProduct,
+      closeRemoveProductModal,
+      setNewsCategory,
+      setNewsCountry,
+      setNewsProductType,
+      refreshNews: () => refetchNews(),
       closeExportModal: () => setExportModalOpen(false),
       closeCountryModal: () => setCountryModalOpen(false),
     },

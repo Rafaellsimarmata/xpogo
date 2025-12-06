@@ -1,27 +1,35 @@
 'use client';
 
+import { Plus, RefreshCw, ExternalLink } from "lucide-react";
 import Modal from "@/src/components/ui/Modal";
 import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
 
 const DashboardPage = () => {
+  const controller = useDashboardController();
   const {
     profile,
     productCards,
     newsItems,
-    countryMatches,
-    primaryCountry,
+    newsLoading,
+    newsError,
+    newsMeta,
     countryOptions,
-    newProductName,
-    setNewProductName,
+    addProductOptions,
+    newsProductOptions,
     modals,
     selectedCountryId,
     setSelectedCountryId,
+    selectedCatalogProductId,
+    setSelectedCatalogProductId,
+    productPendingRemoval,
+    newsFilters,
     actions,
     messages,
-    countriesLoading,
-    countriesError,
-  } = useDashboardController();
+    canRemoveProducts,
+    productsLoading,
+    productsError,
+  } = controller;
 
   return (
     <section className="bg-background py-12">
@@ -50,6 +58,11 @@ const DashboardPage = () => {
                 countryName={card.targetCountry?.name}
                 onExport={() => actions.startExportFlow(card.workspace.id)}
                 onAnalyze={() => actions.startAnalysis(card.workspace.id, card.meta.name)}
+                onRemove={
+                  canRemoveProducts ? () => actions.requestRemoveProduct(card.workspace.id) : undefined
+                }
+                disableRemove={!canRemoveProducts}
+                isFocus={card.isFocus}
               />
             ))}
 
@@ -58,37 +71,160 @@ const DashboardPage = () => {
               onClick={actions.openAddProductModal}
               className="flex min-h-[220px] flex-col items-center justify-center rounded-3xl border border-dashed border-border/60 bg-background/70 p-6 text-center text-sm text-muted-foreground transition hover:border-primary/50 hover:text-primary"
             >
-              <span className="text-lg font-semibold text-foreground">Add Product</span>
-              <p className="mt-2">Masukkan nama produk baru untuk dianalisis.</p>
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Plus className="h-6 w-6" />
+              </span>
+              <span className="mt-3 text-lg font-semibold text-foreground">Tambah Produk</span>
+              <p className="mt-2">Pilih produk siap ekspor lainnya untuk dipantau.</p>
             </button>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
+        <section className="space-y-4 rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                News & Insight
+              </p>
+              <h2 className="mt-2 text-2xl font-bold text-foreground">Kabar ekspor terbaru</h2>
+              {newsMeta.timestamp && (
+                <p className="text-xs text-muted-foreground">Terakhir diperbarui: {new Date(newsMeta.timestamp).toLocaleString("id-ID")}</p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={actions.refreshNews}
+              className="inline-flex items-center gap-2 rounded-2xl border border-border/60 px-4 py-2 text-sm font-semibold text-foreground transition hover:border-primary/40"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Muat ulang
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-background/70 p-4 sm:flex-row sm:items-center">
+            <div className="flex flex-wrap gap-2 sm:flex-1">
+              {[
+                { label: "Semua", value: "" },
+                { label: "Regulasi", value: "regulations" },
+                { label: "Market Insights", value: "market-insights" },
+                { label: "Program", value: "programs" },
+                { label: "Event", value: "events" },
+              ].map((category) => (
+                <button
+                  key={category.value || "all"}
+                  type="button"
+                  onClick={() => actions.setNewsCategory(category.value)}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                    (newsFilters.category ?? "") === (category.value ?? "")
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-white text-secondary-foreground hover:text-primary"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+              <select
+                value={newsFilters.country ?? ""}
+                onChange={(event) => actions.setNewsCountry(event.target.value)}
+                className="w-full rounded-2xl border border-border/60 bg-white px-3 py-2 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">Semua negara</option>
+                {countryOptions.map((country) => (
+                  <option key={country.id} value={country.name}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={newsFilters.productType ?? ""}
+                onChange={(event) => actions.setNewsProductType(event.target.value)}
+                className="w-full rounded-2xl border border-border/60 bg-white px-3 py-2 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">Semua produk</option>
+                {newsProductOptions.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {newsLoading &&
+              Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={`news-skeleton-${index}`}
+                  className="animate-pulse rounded-3xl border border-border/60 bg-background/70 p-4"
+                >
+                  <div className="h-3 w-24 rounded bg-border/60" />
+                  <div className="mt-3 h-5 w-3/4 rounded bg-border/50" />
+                  <div className="mt-2 h-3 w-full rounded bg-border/40" />
+                </div>
+              ))}
+            {!newsLoading &&
+              newsItems.map((news) => (
+                <article
+                  key={news.id}
+                  className="flex h-full flex-col rounded-3xl border border-border/60 bg-card/90 p-5 shadow-sm transition hover:border-primary/40"
+                >
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="font-semibold uppercase tracking-[0.3em]">{news.tag ?? "Berita"}</span>
+                    <span>{news.date}</span>
+                  </div>
+                  <h3 className="mt-3 text-lg font-semibold text-foreground">{news.title}</h3>
+                  <p className="mt-2 flex-1 text-sm text-muted-foreground">{news.summary}</p>
+                  <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{news.source}</span>
+                    {news.sourceUrl && (
+                      <a
+                        href={news.sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-primary hover:underline"
+                      >
+                        Detail
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                </article>
+              ))}
+            {!newsLoading && !newsItems.length && (
+              <div className="md:col-span-2 rounded-3xl border border-dashed border-border/60 bg-background/60 p-6 text-center text-sm text-muted-foreground">
+                {newsError ?? "Belum ada berita sesuai filter yang dipilih."}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
                 Market Highlight
               </p>
               <h2 className="text-lg font-semibold text-foreground">
-                Negara prioritas minggu ini: {primaryCountry?.name}
+                Negara prioritas minggu ini: {controller.primaryCountry?.name}
               </h2>
               <p className="text-sm text-muted-foreground">
-                {primaryCountry?.readiness} - estimasi proses {primaryCountry?.estimatedTime} hari
+                {controller.primaryCountry?.readiness} - estimasi proses {controller.primaryCountry?.estimatedTime} hari
               </p>
             </div>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {countriesLoading &&
+            {controller.countriesLoading &&
               [1, 2, 3, 4].map((placeholder) => (
                 <div
                   key={placeholder}
                   className="h-24 animate-pulse rounded-2xl border border-border/60 bg-background/50"
                 />
               ))}
-            {!countriesLoading && countryMatches.length > 0 && (
+            {!controller.countriesLoading && controller.countryMatches.length > 0 && (
               <>
-                {countryMatches.map((country) => (
+                {controller.countryMatches.map((country) => (
                   <div
                     key={country.id}
                     className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-foreground"
@@ -107,40 +243,13 @@ const DashboardPage = () => {
                 ))}
               </>
             )}
-            {!countriesLoading && countryMatches.length === 0 && (
+            {!controller.countriesLoading && controller.countryMatches.length === 0 && (
               <div className="rounded-2xl border border-dashed border-border/60 bg-background/60 p-4 text-sm text-muted-foreground md:col-span-2">
-                {countriesError ?? "Belum ada data negara yang dapat ditampilkan saat ini."}
+                {controller.countriesError ?? "Belum ada data negara yang dapat ditampilkan saat ini."}
               </div>
             )}
           </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-              News & Insight
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-foreground">Update terbaru untuk eksportir</h2>
-            <p className="text-sm text-muted-foreground">
-              Placeholder news card untuk menampilkan berita resmi dari Kementerian Perdagangan, ITPC, dan partner.
-            </p>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {newsItems.map((news) => (
-              <article
-                key={news.title}
-                className="rounded-3xl border border-border/60 bg-card/90 p-5 shadow-sm transition hover:border-primary/40"
-              >
-                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                  {news.tag}
-                </span>
-                <h3 className="mt-2 text-xl font-semibold text-foreground">{news.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{news.summary}</p>
-                <p className="mt-4 text-xs text-muted-foreground">{news.date}</p>
-              </article>
-            ))}
-          </div>
-        </div>
+        </div> */}
       </div>
 
       <Modal
@@ -201,23 +310,66 @@ const DashboardPage = () => {
         title="Tambah Produk"
       >
         <p className="text-sm text-slate-600">
-          Masukkan nama produk yang ingin dianalisis. Sistem akan membuka Market Intelligence dengan input
-          tersebut secara otomatis.
+          Pilih produk resmi dari katalog ekspor Indonesia untuk ditambahkan ke workspace Anda.
         </p>
-        <input
-          type="text"
-          value={newProductName}
-          onChange={(event) => setNewProductName(event.target.value)}
-          placeholder="contoh: Kopi Arabika"
+        {productsLoading && (
+          <p className="mt-4 text-xs text-muted-foreground">Memuat katalog produk...</p>
+        )}
+        {productsError && (
+          <p className="mt-4 text-xs text-destructive">Gagal memuat katalog: {productsError}</p>
+        )}
+        <select
+          value={selectedCatalogProductId}
+          onChange={(event) => setSelectedCatalogProductId(event.target.value)}
           className="mt-4 w-full rounded-2xl border border-border/60 bg-white px-4 py-3 text-sm text-secondary focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-        />
+          disabled={productsLoading || addProductOptions.length === 0}
+        >
+          {addProductOptions.length === 0 ? (
+            <option value="">Semua produk sudah ditambahkan</option>
+          ) : (
+            addProductOptions.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))
+          )}
+        </select>
         <button
           type="button"
           onClick={actions.submitAddProduct}
-          className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+          disabled={!selectedCatalogProductId}
+          className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Analisa produk
+          Tambahkan produk
         </button>
+      </Modal>
+
+      <Modal
+        open={modals.removeProduct}
+        onClose={actions.closeRemoveProductModal}
+        title="Hapus Produk"
+      >
+        <p className="text-sm text-slate-600">
+          {productPendingRemoval
+            ? `Hapus ${productPendingRemoval.name} dari daftar produk yang dipantau?`
+            : "Hapus produk ini dari workspace?"}
+        </p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={actions.confirmRemoveProduct}
+            className="flex-1 rounded-2xl bg-destructive px-4 py-2 text-sm font-semibold text-white transition hover:bg-destructive/90"
+          >
+            Ya, hapus
+          </button>
+          <button
+            type="button"
+            onClick={actions.closeRemoveProductModal}
+            className="flex-1 rounded-2xl border border-border/60 px-4 py-2 text-sm font-semibold text-secondary transition hover:border-primary/40"
+          >
+            Batalkan
+          </button>
+        </div>
       </Modal>
     </section>
   );

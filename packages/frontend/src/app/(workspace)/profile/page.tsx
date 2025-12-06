@@ -5,11 +5,22 @@ import Input from "@/src/components/ui/Input";
 import { Button } from "@/src/components/ui/Button";
 
 const ProfilePage = () => {
-  const { form, productOptions, onSubmit } = useProfileController();
+  const {
+    form,
+    productOptions,
+    onSubmit,
+    isFirstSetup,
+    productListLoading,
+    productListError,
+  } = useProfileController();
   const {
     register,
     formState: { errors, isSubmitting },
   } = form;
+  const focusProductRegister = register(
+    "focusProduct",
+    isFirstSetup ? { required: "Pilih salah satu produk" } : {},
+  );
 
   return (
     <section className="bg-background py-12">
@@ -18,9 +29,13 @@ const ProfilePage = () => {
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">
             Profil Bisnis
           </p>
-          <h1 className="mt-3 text-3xl font-bold text-foreground">Perbarui profil usaha Anda</h1>
+          <h1 className="mt-3 text-3xl font-bold text-foreground">
+            {isFirstSetup ? "Perbarui profil usaha Anda" : "Identitas usaha"}
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Informasi ini dipakai untuk menampilkan rekomendasi produk dan negara tujuan di dashboard.
+            {isFirstSetup
+              ? "Lengkapi data awal untuk menentukan produk fokus dan rekomendasi ekspor Anda."
+              : "Perbaharui nama, username, dan nama perusahaan kapan pun dibutuhkan."}
           </p>
         </div>
 
@@ -55,29 +70,42 @@ const ProfilePage = () => {
             />
           </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-foreground">Produk Fokus</label>
-            <select
-              {...register("focusProduct", { required: "Pilih salah satu produk" })}
-              className="w-full rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            >
-              {productOptions.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name}
-                </option>
-              ))}
-            </select>
-            {errors.focusProduct && (
-              <p className="mt-1 text-xs text-destructive">{errors.focusProduct.message}</p>
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              Produk ini menjadi prioritas pertama pada dashboard dan analisis pasar.
-            </p>
-          </div>
+          {isFirstSetup ? (
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Produk Fokus</label>
+              <select
+                {...focusProductRegister}
+                className="w-full rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                disabled={productListLoading}
+              >
+                {productOptions.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name}
+                  </option>
+                ))}
+              </select>
+              {productListLoading && (
+                <p className="mt-1 text-xs text-muted-foreground">Memuat daftar produk unggulan...</p>
+              )}
+              {productListError && (
+                <p className="mt-1 text-xs text-destructive">
+                  Gagal memuat katalog produk. Menggunakan daftar default. {productListError}
+                </p>
+              )}
+              {errors.focusProduct && (
+                <p className="mt-1 text-xs text-destructive">{errors.focusProduct.message}</p>
+              )}
+              <p className="mt-2 text-xs text-muted-foreground">
+                Produk ini menjadi prioritas pertama pada dashboard dan analisis pasar.
+              </p>
+            </div>
+          ) : (
+            <input type="hidden" {...focusProductRegister} />
+          )}
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button type="submit" className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? "Menyimpan..." : "Simpan & buka Dashboard"}
+              {isSubmitting ? "Menyimpan..." : isFirstSetup ? "Simpan & buka Dashboard" : "Simpan perubahan"}
             </Button>
           </div>
         </form>

@@ -8,10 +8,10 @@ import {
   useReducer,
   type ReactNode,
 } from "react";
-import { products } from "@/src/lib/data/products";
+import { DEFAULT_PRODUCT_ID } from "@/src/constants";
 import type { WorkspaceProduct } from "@/src/types/workspace";
 
-const fallbackProductId = products[0]?.id ?? "default-product";
+const fallbackProductId = DEFAULT_PRODUCT_ID;
 
 type WorkspaceState = {
   products: WorkspaceProduct[];
@@ -21,7 +21,8 @@ type WorkspaceState = {
 type WorkspaceAction =
   | { type: "SET_ACTIVE"; productId: string }
   | { type: "ASSIGN_COUNTRY"; productId: string; countryId: string }
-  | { type: "ADD_PRODUCT"; productId: string; customName?: string };
+  | { type: "ADD_PRODUCT"; productId: string; customName?: string }
+  | { type: "REMOVE_PRODUCT"; productId: string };
 
 const initialState: WorkspaceState = {
   products: [{ id: fallbackProductId }],
@@ -34,6 +35,7 @@ const WorkspaceStoreContext = createContext<
       setActiveProduct: (productId: string) => void;
       assignCountry: (productId: string, countryId: string) => void;
       addProduct: (productId: string, customName?: string) => void;
+      removeProduct: (productId: string) => void;
     }
   | undefined
 >(undefined);
@@ -62,6 +64,22 @@ const reducer = (state: WorkspaceState, action: WorkspaceAction): WorkspaceState
         activeProductId: action.productId,
       };
     }
+    case "REMOVE_PRODUCT": {
+      const nextProducts = state.products.filter((product) => product.id !== action.productId);
+      if (nextProducts.length === 0) {
+        return {
+          products: [{ id: fallbackProductId }],
+          activeProductId: fallbackProductId,
+        };
+      }
+      const nextActive =
+        state.activeProductId === action.productId ? nextProducts[0].id : state.activeProductId;
+      return {
+        ...state,
+        products: nextProducts,
+        activeProductId: nextActive,
+      };
+    }
     default:
       return state;
   }
@@ -87,14 +105,20 @@ export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     [],
   );
 
+  const removeProduct = useCallback(
+    (productId: string) => dispatch({ type: "REMOVE_PRODUCT", productId }),
+    [],
+  );
+
   const value = useMemo(
     () => ({
       state,
       setActiveProduct,
       assignCountry,
       addProduct,
+      removeProduct,
     }),
-    [state, setActiveProduct, assignCountry, addProduct],
+    [state, setActiveProduct, assignCountry, addProduct, removeProduct],
   );
 
   return <WorkspaceStoreContext.Provider value={value}>{children}</WorkspaceStoreContext.Provider>;

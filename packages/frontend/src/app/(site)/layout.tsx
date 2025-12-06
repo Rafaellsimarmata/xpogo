@@ -1,5 +1,5 @@
-import Navbar from "@/src/components/layout/Navbar";
 import Footer from "@/src/components/layout/Footer";
+import Navbar from "@/src/components/layout/Navbar";
 
 const SiteLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex min-h-screen flex-col">

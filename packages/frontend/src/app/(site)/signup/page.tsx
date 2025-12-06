@@ -1,21 +1,75 @@
+import Image from "next/image";
 import SignUpForm from "@/src/components/auth/SignUpForm";
-import Card from "@/src/components/ui/Card";
 
 const SignUpPage = () => (
-  <section className="bg-gradient-to-br from-background via-accent/10 to-background py-24">
-    <div className="mx-auto flex max-w-3xl flex-col items-center px-4">
-      <Card className="w-full rounded-[32px] border border-white/40 bg-white/95 p-10 shadow-2xl">
-        <div className="mb-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Daftar</p>
-          <h1 className="mt-3 text-3xl font-bold text-foreground">Buat Akun XPOGO</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Isi form singkat di bawah ini untuk memulai.
-          </p>
+  <div className="relative w-full min-h-screen">
+    {/* Background Image */}
+    <Image 
+      src="/img/logistics.jpg" 
+      alt="Background"
+      fill
+      className="object-cover"
+      priority
+    />
+    
+    {/* Overlay - berbeda untuk dark/light mode */}
+    <div className="absolute inset-0 bg-black/50 dark:bg-black/70 z-10"></div>
+    
+    {/* Konten - Two Column Layout */}
+    <div className="relative z-20 flex items-center justify-center min-h-screen p-4 md:p-8 pt-24 md:pt-20">
+      <div className="w-full max-w-6xl bg-white/10 dark:bg-white/5 backdrop-blur-md rounded-[30px] md:rounded-[30px] shadow-2xl overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-0">
+          
+          {/* Kolom Kiri - Welcome Section - HIDDEN di mobile */}
+          <div className="hidden md:flex flex-col justify-between p-8 md:p-12 lg:p-16 text-white min-h-[600px]">
+            {/* Top Badge - User Count */}
+            <div className="flex items-center gap-3">
+              <div className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full font-bold text-sm shadow-lg">
+                500+
+              </div>
+              <div className="flex flex-col">
+                <span className="font-semibold text-sm uppercase tracking-wide">
+                  UMKM BERGABUNG!
+                </span>
+                <span className="text-xs text-white/80 dark:text-white/70">
+                  Ekspor jadi lebih mudah
+                </span>
+              </div>
+            </div>
+
+            {/* Main Heading */}
+            <div className="space-y-4">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-primary drop-shadow-lg">
+                Wujudkan Impian Ekspor
+              </h1>
+              <p className="text-md md:text-md text-white/90 dark:text-white/80 max-w-md">
+                Mulai perjalanan ekspor Anda dengan platform market intelligence terpercaya untuk UMKM Indonesia.
+              </p>
+            </div>
+          </div>
+
+          {/* Kolom Kanan - Form Section */}
+          <div className="bg-white dark:bg-slate-900 rounded-[30px] md:rounded-r-[30px] md:rounded-l-none p-8 md:p-10 lg:p-12 max-h-screen overflow-y-hidden">
+            <div className="max-w-md mx-auto">
+              <div className="mb-8 text-center">
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Daftar</p>
+                <h2 className="mt-3 text-3xl font-bold text-slate-800 dark:text-white">
+                  Akun XPOGO
+                </h2>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  Mulai perjalanan ekspor Anda bersama kami.
+                </p>
+              </div>
+              
+              {/* SignUpForm Component */}
+              <SignUpForm />
+            </div>
+          </div>
+
         </div>
-        <SignUpForm />
-      </Card>
+      </div>
     </div>
-  </section>
+  </div>
 );
 
 export default SignUpPage;

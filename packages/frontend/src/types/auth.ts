@@ -34,10 +34,14 @@ export interface SignUpResponse {
   message: string;
 }
 
+export type SignInOptions = {
+  redirectTo?: string;
+};
+
 export type AuthContextValue = {
   user: AuthUser | null;
   token: string | null;
   loading: boolean;
-  signIn: (payload: SignInPayload) => Promise<void>;
+  signIn: (payload: SignInPayload, options?: SignInOptions) => Promise<void>;
   signOut: () => void;
 };

@@ -13,6 +13,8 @@ export const DocumentCenterContent = () => {
     serviceProviders,
     complianceLoading,
     complianceError,
+    productLoading,
+    productError,
   } = useDocumentCenterController();
 
   return (
@@ -27,6 +29,36 @@ export const DocumentCenterContent = () => {
             Data diambil dari checklist DocuAssist untuk produk {product.name}{" "}
             {country ? `dan target ${country.name}.` : "dan akan dilengkapi setelah negara tujuan dipilih."}
           </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Kategori</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{product.category ?? "Belum ditentukan"}</p>
+            </div>
+            <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">HS Code</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">{product.hsCode ?? "-"}</p>
+            </div>
+            <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Tingkat</p>
+              <p className="mt-1 text-sm font-semibold text-foreground">
+                {product.difficultyLevel ?? "Belum ada data"}
+              </p>
+            </div>
+          </div>
+          {product.majorMarkets?.length ? (
+            <div className="mt-4 rounded-2xl border border-border/60 bg-background/70 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground">Pasar utama</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {product.majorMarkets.slice(0, 5).join(", ")}
+              </p>
+            </div>
+          ) : null}
+          {productLoading && (
+            <p className="mt-2 text-xs text-muted-foreground">Memuat detail produk terbaru...</p>
+          )}
+          {productError && (
+            <p className="mt-2 text-xs text-red-500">Gagal memuat detail produk: {productError}</p>
+          )}
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
