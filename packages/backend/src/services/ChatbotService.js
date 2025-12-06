@@ -48,22 +48,22 @@ class ChatbotService {
         const messages = [
           {
             role: 'system',
-            content: `You are an expert AI assistant specializing in helping small enterprises export their products. 
+            content: `Anda adalah asisten AI ahli yang mengkhususkan diri dalam membantu usaha kecil mengekspor produk mereka. 
           
-Your expertise includes:
-- Product export documentation and compliance
-- International trade regulations and customs
-- Market analysis for different countries
-- Shipping and logistics guidance
-- Product pricing strategies for export markets
-- Finding target markets and business opportunities
-- Export financing and payment terms
-- Product packaging and labeling requirements
-- Certificate of Origin and trade documentation
-- Import/Export regulations by country
+Keahlian Anda meliputi:
+- Dokumentasi ekspor produk dan kepatuhan
+- Regulasi perdagangan internasional dan bea cukai
+- Analisis pasar untuk berbagai negara
+- Panduan pengiriman dan logistik
+- Strategi penetapan harga produk untuk pasar ekspor
+- Mencari pasar sasaran dan peluang bisnis
+- Pembiayaan ekspor dan syarat pembayaran
+- Persyaratan pengemasan dan pelabelan produk
+- Sertifikat Asal dan dokumentasi perdagangan
+- Regulasi Impor/Ekspor berdasarkan negara
 
-Be helpful, professional, and provide actionable advice. Ask clarifying questions when needed.
-If asked about something outside export assistance, politely redirect to export-related topics.`
+Bersikaplah membantu, profesional, dan berikan saran yang dapat ditindaklanjuti. Ajukan pertanyaan klarifikasi jika diperlukan.
+Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke topik terkait ekspor.`
           }
         ];
 
@@ -87,7 +87,7 @@ If asked about something outside export assistance, politely redirect to export-
           messages: [
             {
               role: 'system',
-              content: `You are an expert AI assistant specializing in helping small enterprises export their products.`
+              content: `Anda adalah asisten AI ahli yang mengkhususkan diri dalam membantu usaha kecil mengekspor produk mereka.`
             }
           ]
         });
@@ -244,20 +244,20 @@ If asked about something outside export assistance, politely redirect to export-
    */
   async analyzeProductForExport(userId, productInfo) {
     // productInfo is now a string with product description
-    const analysisPrompt = `Please analyze the following product for export potential and provide detailed guidance:
+    const analysisPrompt = `Tolong analisis produk berikut untuk potensi ekspor dan berikan panduan detail:
 
 ${productInfo}
 
-Please provide:
-1. Export Feasibility Assessment
-2. Recommended Target Markets (ranked by opportunity)
-3. Required Compliance & Certifications
-4. Estimated Costs for Export
-5. Timeline for Market Entry
-6. Key Risks & How to Mitigate Them
-7. Next Steps to Get Started
+Tolong berikan:
+1. Penilaian Kelayakan Ekspor
+2. Pasar Sasaran yang Direkomendasikan (diurutkan berdasarkan peluang)
+3. Kepatuhan & Sertifikasi yang Diperlukan
+4. Perkiraan Biaya untuk Ekspor
+5. Timeline untuk Masuk Pasar
+6. Risiko Utama & Cara Menguranginya
+7. Langkah Selanjutnya untuk Memulai
 
-Format as actionable advice for a small business.`;
+Format sebagai saran yang dapat ditindaklanjuti untuk usaha kecil.`;
 
     return this.sendMessage(userId, analysisPrompt);
   }
@@ -267,21 +267,21 @@ Format as actionable advice for a small business.`;
    */
   async getMarketEntryStrategy(userId, marketInfo) {
     // marketInfo is now a string with market details
-    const strategyPrompt = `I need help developing an export strategy based on the following details:
+    const strategyPrompt = `Saya membutuhkan bantuan untuk mengembangkan strategi ekspor berdasarkan detail berikut:
 
 ${marketInfo}
 
-Please provide a detailed market entry strategy including:
-1. Market Overview & Opportunity Assessment
-2. Regulatory & Compliance Requirements
-3. Pricing Strategy for This Market
-4. Distribution Channels
-5. Marketing Approach
-6. Required Documentation
-7. Cost Breakdown
-8. 12-Month Action Plan
+Tolong berikan strategi masuk pasar yang detail termasuk:
+1. Gambaran Pasar & Penilaian Peluang
+2. Persyaratan Regulasi & Kepatuhan
+3. Strategi Penetapan Harga untuk Pasar Ini
+4. Saluran Distribusi
+5. Pendekatan Pemasaran
+6. Dokumentasi yang Diperlukan
+7. Rincian Biaya
+8. Rencana Aksi 12 Bulan
 
-Make it specific and actionable for a small enterprise.`;
+Buatlah spesifik dan dapat ditindaklanjuti untuk usaha kecil.`;
 
     return this.sendMessage(userId, strategyPrompt);
   }
@@ -291,20 +291,20 @@ Make it specific and actionable for a small enterprise.`;
    */
   async getComplianceGuidance(userId, complianceQuery) {
     // complianceQuery is now a string with compliance details
-    const compliancePrompt = `I need guidance on export compliance based on the following details:
+    const compliancePrompt = `Saya membutuhkan panduan tentang kepatuhan ekspor berdasarkan detail berikut:
 
 ${complianceQuery}
 
-Please provide:
-1. Relevant Regulations & Standards
-2. Required Certifications
-3. Documentation Needed
-4. Common Pitfalls to Avoid
-5. Timeline for Compliance
-6. Estimated Costs
-7. Resources & Contact Information
+Tolong berikan:
+1. Regulasi & Standar yang Relevan
+2. Sertifikasi yang Diperlukan
+3. Dokumentasi yang Diperlukan
+4. Kesalahan Umum yang Harus Dihindari
+5. Timeline untuk Kepatuhan
+6. Perkiraan Biaya
+7. Sumber Daya & Informasi Kontak
 
-Provide practical, actionable advice.`;
+Berikan saran praktis yang dapat ditindaklanjuti.`;
 
     return this.sendMessage(userId, compliancePrompt);
   }
@@ -314,20 +314,20 @@ Provide practical, actionable advice.`;
    */
   async getShippingGuidance(userId, shippingInfo) {
     // shippingInfo is now a string with shipping details
-    const shippingPrompt = `I need guidance on shipping my products internationally.
+    const shippingPrompt = `Saya membutuhkan panduan tentang pengiriman produk saya secara internasional.
 
 ${shippingInfo}
 
-Please advise on:
-1. Best Shipping Methods
-2. Estimated Costs & Timeline
-3. Documentation Required
-4. Insurance Recommendations
-5. Packaging Requirements
-6. Incoterms Selection
-7. Recommended Carriers
+Tolong berikan saran tentang:
+1. Metode Pengiriman Terbaik
+2. Perkiraan Biaya & Timeline
+3. Dokumentasi yang Diperlukan
+4. Rekomendasi Asuransi
+5. Persyaratan Pengemasan
+6. Pemilihan Incoterms
+7. Pengangkut yang Direkomendasikan
 
-Focus on cost-effective solutions for small businesses.`;
+Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
 
     return this.sendMessage(userId, shippingPrompt);
   }

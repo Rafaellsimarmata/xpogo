@@ -346,7 +346,7 @@ class ChatbotSupabaseRealtimeHandler {
       const messages = conv.messages;
 
       // Create product analysis prompt
-      const userMessage = `Please analyze this product for export: ${productInfo}`;
+      const userMessage = `Tolong analisis produk ini untuk ekspor: ${productInfo}`;
       
       // Add to message history
       messages.push({
@@ -383,7 +383,7 @@ class ChatbotSupabaseRealtimeHandler {
       const conv = await this.chatbotService.initializeConversation(userId);
       const messages = conv.messages;
 
-      const userMessage = `What's the best market entry strategy for: ${marketInfo}`;
+      const userMessage = `Apa strategi masuk pasar terbaik untuk: ${marketInfo}`;
       
       messages.push({
         role: 'user',
@@ -419,7 +419,7 @@ class ChatbotSupabaseRealtimeHandler {
       const conv = await this.chatbotService.initializeConversation(userId);
       const messages = conv.messages;
 
-      const userMessage = `I need compliance guidance: ${complianceQuery}`;
+      const userMessage = `Saya membutuhkan panduan kepatuhan: ${complianceQuery}`;
       
       messages.push({
         role: 'user',
@@ -455,7 +455,7 @@ class ChatbotSupabaseRealtimeHandler {
       const conv = await this.chatbotService.initializeConversation(userId);
       const messages = conv.messages;
 
-      const userMessage = `Please provide shipping guidance for: ${shippingInfo}`;
+      const userMessage = `Tolong berikan panduan pengiriman untuk: ${shippingInfo}`;
       
       messages.push({
         role: 'user',
