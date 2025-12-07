@@ -157,12 +157,10 @@ Gunakan bahasa Indonesia yang profesional dan mudah dipahami oleh pelaku usaha k
       'Kemenkop UKM': 'https://www.kemenkopukm.go.id',
     };
 
-    // Try exact match first
     if (sourceMap[sourceName]) {
       return sourceMap[sourceName];
     }
 
-    // Try partial match
     const sourceLower = sourceName.toLowerCase();
     for (const [key, url] of Object.entries(sourceMap)) {
       if (sourceLower.includes(key.toLowerCase()) || key.toLowerCase().includes(sourceLower)) {
@@ -170,7 +168,6 @@ Gunakan bahasa Indonesia yang profesional dan mudah dipahami oleh pelaku usaha k
       }
     }
 
-    // Default to Kemendag
     return 'https://www.kemendag.go.id';
   }
 
@@ -206,22 +203,18 @@ Gunakan bahasa Indonesia yang profesional dan mudah dipahami oleh pelaku usaha k
           source = line.replace(/^SOURCE:\s*/i, '').trim();
         } else if (line.startsWith('SOURCE_URL:') || line.startsWith('SOURCE URL:')) {
           const url = line.replace(/^SOURCE_URL:\s*/i, '').replace(/^SOURCE URL:\s*/i, '').trim();
-          // Validate URL format
           if (url.match(/^https?:\/\//)) {
             sourceUrl = url;
           } else if (url) {
-            // If not a full URL, try to construct one
             sourceUrl = url.startsWith('/') ? `https://www.kemendag.go.id${url}` : `https://${url}`;
           }
         }
       }
 
-      // If no source URL was found, generate one based on source name
       if (sourceUrl === 'https://www.kemendag.go.id' && source !== 'Kementerian Perdagangan') {
         sourceUrl = this.getSourceUrl(source);
       }
 
-      // Fallback parsing if format is different
       if (!title && lines.length > 0) {
         title = lines[0].replace(/^#{1,3}\s*/, '').trim();
       }
@@ -242,7 +235,6 @@ Gunakan bahasa Indonesia yang profesional dan mudah dipahami oleh pelaku usaha k
       }
     }
 
-    // If parsing failed, create a single news item from content
     if (newsItems.length === 0 && content.trim()) {
       const firstLine = content.split('\n')[0].trim();
       if (firstLine.length > 10) {

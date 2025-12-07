@@ -15,7 +15,6 @@ router.get('/', (req, res) => {
     const { region, search } = req.query;
     let results = [...countriesData];
 
-    // Filter by region if provided
     if (region) {
       const normalizedRegion = region.toLowerCase();
       results = results.filter(
@@ -23,7 +22,6 @@ router.get('/', (req, res) => {
       );
     }
 
-    // Filter by search query if provided
     if (search) {
       const normalizedSearch = search.toLowerCase();
       results = results.filter(
@@ -31,7 +29,6 @@ router.get('/', (req, res) => {
       );
     }
 
-    // Sort by name
     results.sort((a, b) => a.name.localeCompare(b.name));
 
     res.json({

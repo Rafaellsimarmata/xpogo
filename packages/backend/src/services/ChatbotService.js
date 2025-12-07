@@ -21,7 +21,6 @@ class ChatbotService {
   async initializeConversation(userId) {
     if (!this.conversationHistory.has(userId)) {
       try {
-        // Get or create conversation
         const convResult = await pool.query(
           'SELECT id FROM chatbot_conversations WHERE user_id = $1 AND is_active = true ORDER BY created_at DESC LIMIT 1',
           [userId]
@@ -29,7 +28,6 @@ class ChatbotService {
 
         let conversationId;
         if (convResult.rows.length === 0) {
-          // Create new conversation
           const createConvResult = await pool.query(
             'INSERT INTO chatbot_conversations (user_id, title) VALUES ($1, $2) RETURNING id',
             [userId, `Conversation ${new Date().toLocaleDateString()}`]
@@ -39,7 +37,6 @@ class ChatbotService {
           conversationId = convResult.rows[0].id;
         }
 
-        // Load conversation history from database
         const messagesResult = await pool.query(
           'SELECT role, content FROM chatbot_messages WHERE user_id = $1 ORDER BY created_at ASC',
           [userId]
@@ -67,7 +64,6 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
           }
         ];
 
-        // Add existing messages to conversation
         messagesResult.rows.forEach(msg => {
           messages.push({
             role: msg.role,
@@ -81,7 +77,6 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
         });
       } catch (error) {
         console.error('Error initializing conversation:', error);
-        // Fallback to in-memory conversation
         this.conversationHistory.set(userId, {
           conversationId: null,
           messages: [
@@ -132,20 +127,16 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
    */
   async sendMessage(userId, userMessage) {
     try {
-      // Initialize conversation if needed
       const conv = await this.initializeConversation(userId);
       const messages = conv.messages;
 
-      // Add user message to memory
       messages.push({
         role: 'user',
         content: userMessage
       });
 
-      // Save user message to database
       await this.saveMessage(userId, 'user', userMessage, 'message');
 
-      // Call AI API with conversation history
       const response = await axios.post(
         `${this.apiBaseUrl}/chat/completions`,
         {
@@ -165,20 +156,17 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
       const assistantMessage = response.data.choices[0].message.content;
       const tokensUsed = response.data.usage?.total_tokens || 0;
 
-      // Add assistant response to memory
       messages.push({
         role: 'assistant',
         content: assistantMessage
       });
 
-      // Save assistant message to database
       await pool.query(
         `INSERT INTO chatbot_messages (user_id, role, content, message_type, tokens_used) 
          VALUES ($1, $2, $3, $4, $5)`,
         [userId, 'assistant', assistantMessage, 'response', tokensUsed]
       );
 
-      // Update conversation message count
       if (conv.conversationId) {
         await pool.query(
           'UPDATE chatbot_conversations SET message_count = message_count + 2 WHERE id = $1',
@@ -204,13 +192,11 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
    */
   async clearConversation(userId) {
     try {
-      // Mark conversation as inactive
       await pool.query(
         'UPDATE chatbot_conversations SET is_active = false WHERE user_id = $1',
         [userId]
       );
       
-      // Clear from memory cache
       this.conversationHistory.delete(userId);
       
       return { success: true, message: 'Conversation cleared' };
@@ -243,7 +229,6 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
    * Analyze product and provide export guidance
    */
   async analyzeProductForExport(userId, productInfo) {
-    // productInfo is now a string with product description
     const analysisPrompt = `Tolong analisis produk berikut untuk potensi ekspor dan berikan panduan detail:
 
 ${productInfo}
@@ -266,7 +251,6 @@ Format sebagai saran yang dapat ditindaklanjuti untuk usaha kecil.`;
    * Get market entry strategy
    */
   async getMarketEntryStrategy(userId, marketInfo) {
-    // marketInfo is now a string with market details
     const strategyPrompt = `Saya membutuhkan bantuan untuk mengembangkan strategi ekspor berdasarkan detail berikut:
 
 ${marketInfo}
@@ -290,7 +274,6 @@ Buatlah spesifik dan dapat ditindaklanjuti untuk usaha kecil.`;
    * Get answers about specific compliance requirements
    */
   async getComplianceGuidance(userId, complianceQuery) {
-    // complianceQuery is now a string with compliance details
     const compliancePrompt = `Saya membutuhkan panduan tentang kepatuhan ekspor berdasarkan detail berikut:
 
 ${complianceQuery}
@@ -313,7 +296,6 @@ Berikan saran praktis yang dapat ditindaklanjuti.`;
    * Get shipping and logistics guidance
    */
   async getShippingGuidance(userId, shippingInfo) {
-    // shippingInfo is now a string with shipping details
     const shippingPrompt = `Saya membutuhkan panduan tentang pengiriman produk saya secara internasional.
 
 ${shippingInfo}
@@ -340,7 +322,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       const conv = await this.initializeConversation(userId);
       const messages = conv.messages;
 
-      // Add user message
       messages.push({
         role: 'user',
         content: userMessage
@@ -348,7 +329,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
 
       await this.saveMessage(userId, 'user', userMessage, 'message');
 
-      // Call AI API
       const response = await axios.post(
         `${this.apiBaseUrl}/chat/completions`,
         {
@@ -368,7 +348,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       const assistantMessage = response.data.choices[0].message.content;
       const tokensUsed = response.data.usage?.total_tokens || 0;
 
-      // Add to memory and database
       messages.push({
         role: 'assistant',
         content: assistantMessage
@@ -380,7 +359,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
         [userId, 'assistant', assistantMessage, 'response', tokensUsed]
       );
 
-      // Update conversation count
       if (conv.conversationId) {
         await pool.query(
           'UPDATE chatbot_conversations SET message_count = message_count + 2 WHERE id = $1',
@@ -412,7 +390,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       let promptTokens = 0;
       let completionTokens = 0;
 
-      // Use native fetch for true streaming from AI API
       const response = await fetch(`${this.apiBaseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -437,12 +414,10 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       const decoder = new TextDecoder();
       let buffer = '';
 
-      // Stream directly from AI API without buffering entire response
       while (true) {
         const { done, value } = await reader.read();
         
         if (done) {
-          // Stream ended - process any remaining buffer and send finish event
           if (buffer.trim()) {
             const lines = buffer.split('\n');
             for (const line of lines) {
@@ -458,12 +433,10 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
                   completionTokens = parsed.usage.completion_tokens || 0;
                 }
               } catch (e) {
-                // Ignore parse errors in final buffer
               }
             }
           }
           
-          // Send completion event
           res.write(`data: ${JSON.stringify({
             type: 'finish',
             fullResponse: fullResponse,
@@ -473,7 +446,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           })}\n\n`);
           res.end();
           
-          // Save full response to database asynchronously
           this.saveStreamedMessage(userId, fullResponse, tokensUsed).catch(err => 
             console.error('Error saving streamed message:', err)
           );
@@ -483,7 +455,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
         
-        // Keep the last incomplete line in the buffer
         buffer = lines.pop() || '';
 
         for (const line of lines) {
@@ -493,7 +464,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           const data = line.replace('data: ', '').trim();
           
           if (data === '[DONE]') {
-            // Stream finished - send completion event
             res.write(`data: ${JSON.stringify({
               type: 'finish',
               fullResponse: fullResponse,
@@ -503,7 +473,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
             })}\n\n`);
             res.end();
             
-            // Save full response to database asynchronously
             this.saveStreamedMessage(userId, fullResponse, tokensUsed).catch(err => 
               console.error('Error saving streamed message:', err)
             );
@@ -515,31 +484,25 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
             const deltaContent = parsed.choices?.[0]?.delta?.content;
             const finishReason = parsed.choices?.[0]?.finish_reason;
             
-            // Extract token usage from the final chunk (if available)
             if (parsed.usage) {
               tokensUsed = parsed.usage.total_tokens || 0;
               promptTokens = parsed.usage.prompt_tokens || 0;
               completionTokens = parsed.usage.completion_tokens || 0;
             }
             
-            // Handle content delta
             if (deltaContent) {
               fullResponse += deltaContent;
               
-              // Send each chunk immediately as it arrives from AI API
               res.write(`data: ${JSON.stringify({
                 type: 'chunk',
                 content: deltaContent,
               })}\n\n`);
             }
             
-            // If finish_reason is present, the stream is ending
             if (finishReason === 'stop' && parsed.usage) {
-              // Final chunk with usage stats - wait for [DONE] to send finish event
               continue;
             }
           } catch (parseError) {
-            // Skip invalid JSON chunks silently
             console.warn('Failed to parse SSE chunk:', parseError, 'Data:', data);
           }
         }
@@ -559,10 +522,8 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
    */
   async saveStreamedMessage(userId, content, tokenCount) {
     try {
-      // Get conversation
       const conv = await this.initializeConversation(userId);
       
-      // Add to conversation history
       if (conv.messages) {
         conv.messages.push({
           role: 'assistant',
@@ -570,14 +531,12 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
         });
       }
 
-      // Save to database
       await pool.query(
         `INSERT INTO chatbot_messages (user_id, role, content, message_type, tokens_used) 
          VALUES ($1, $2, $3, $4, $5)`,
         [userId, 'assistant', content, 'response', tokenCount]
       );
 
-      // Update conversation message count (only assistant message, user message already counted)
       if (conv.conversationId) {
         await pool.query(
           'UPDATE chatbot_conversations SET message_count = message_count + 1 WHERE id = $1',

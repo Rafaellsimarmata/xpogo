@@ -19,7 +19,6 @@ class MarketIntelligenceService {
     const apiBaseUrl = process.env.AI_API_BASE_URL || 'https://api.together.xyz/v1';
     const model = process.env.AI_MODEL || 'meta-llama/llama-4-maverick-17b-128e-instruct';
 
-    // Build the request payload with user's exact format
     const payload = {
       max_tokens: 2000,
       messages: [
@@ -40,8 +39,7 @@ class MarketIntelligenceService {
         headers: {
           'Authorization': `Bearer ${secretToken}`,
           'Content-Type': 'application/json'
-        },
-        // timeout: 60000 // 60 second timeout
+        }
       });
 
       if (response.data && response.data.choices && response.data.choices[0]) {
@@ -77,12 +75,10 @@ class MarketIntelligenceService {
       const countryTrimmed = country.trim();
       const productionTrimmed = production.trim();
       
-      // Skip header rows (English or Indonesian)
       if (countryTrimmed === 'Country' || countryTrimmed === 'Negara') {
         continue;
       }
       
-      // Skip separator rows (rows with only dashes or similar separators)
       const isSeparatorRow = 
         countryTrimmed.match(/^[-=]+$/) || 
         productionTrimmed.match(/^[-=]+$/) ||
@@ -94,7 +90,6 @@ class MarketIntelligenceService {
         continue;
       }
       
-      // Skip rows where country field looks like a header/description
       const isHeaderLike = 
         countryTrimmed.toLowerCase().includes('volume') ||
         countryTrimmed.toLowerCase().includes('produksi') ||
@@ -108,7 +103,6 @@ class MarketIntelligenceService {
         continue;
       }
       
-      // Only add valid data rows
       rows.push({
         country: countryTrimmed,
         productionVolume: productionTrimmed,

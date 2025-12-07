@@ -16,7 +16,6 @@ class ChatbotSupabaseRealtimeHandler {
       console.warn('Supabase credentials not configured. Realtime chat will not work.');
     }
 
-    // Initialize Supabase client
     this.supabase = createClient(this.supabaseUrl, this.supabaseKey);
   }
 
@@ -32,7 +31,6 @@ class ChatbotSupabaseRealtimeHandler {
     }
 
     try {
-      // Set up database change listeners
       this.setupDatabaseListeners();
       console.log('Supabase Realtime initialized successfully');
     } catch (error) {
@@ -44,8 +42,6 @@ class ChatbotSupabaseRealtimeHandler {
    * Setup listeners for database changes (optional - for monitoring)
    */
   setupDatabaseListeners() {
-    // This can be extended to listen for message changes
-    // For now, we'll keep it simple and rely on REST API calls
   }
 
   /**
@@ -54,7 +50,6 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async broadcastMessage(userId, event, data) {
     try {
-      // Skip broadcasting if Supabase not configured
       if (!this.supabaseUrl || !this.supabaseKey) {
         console.log('Supabase not configured, skipping broadcast');
         return null;
@@ -62,21 +57,17 @@ class ChatbotSupabaseRealtimeHandler {
 
       const channelName = `user-${userId}`;
       
-      // Get or create channel
       let channel = this.userConnections.get(channelName);
       
       if (!channel) {
-        // Create new channel and subscribe
         channel = this.supabase.channel(channelName);
         channel = await channel.subscribe((status) => {
           console.log(`Channel subscription status: ${status}`);
         });
         
-        // Store channel for future use
         this.userConnections.set(channelName, channel);
       }
 
-      // Broadcast message
       channel.send('broadcast', {
         event,
         data: {
@@ -88,7 +79,6 @@ class ChatbotSupabaseRealtimeHandler {
       return channel;
     } catch (error) {
       console.error('Error broadcasting message:', error);
-      // Don't throw - broadcasting is best-effort
       return null;
     }
   }
@@ -98,10 +88,8 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async handleJoinChat(userId, userName) {
     try {
-      // Initialize conversation
       await this.chatbotService.initializeConversation(userId);
 
-      // Broadcast welcome message
       await this.broadcastMessage(userId, 'chat-started', {
         success: true,
         message: `Welcome to XPogo AI Chatbot, ${userName}!`,
@@ -126,23 +114,19 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async handleSendMessage(userId, message) {
     try {
-      // Broadcast typing indicator
       await this.broadcastMessage(userId, 'bot-typing', {
         status: 'typing',
         userId
       });
 
-      // Process message and get response
       const response = await this.chatbotService.sendMessage(userId, message);
 
-      // Broadcast response
       await this.broadcastMessage(userId, 'bot-response', response);
 
       return response;
     } catch (error) {
       console.error('Error handling send-message:', error);
       
-      // Broadcast error
       await this.broadcastMessage(userId, 'error', {
         success: false,
         error: error.message
@@ -159,7 +143,6 @@ class ChatbotSupabaseRealtimeHandler {
     try {
       const history = await this.chatbotService.getConversationSummary(userId);
 
-      // Broadcast history
       await this.broadcastMessage(userId, 'conversation-history', {
         success: true,
         messages: history,
@@ -183,7 +166,6 @@ class ChatbotSupabaseRealtimeHandler {
     try {
       const result = await this.chatbotService.clearConversation(userId);
 
-      // Broadcast clear confirmation
       await this.broadcastMessage(userId, 'chat-cleared', {
         success: true,
         message: 'Conversation cleared'
@@ -201,7 +183,6 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async handleAnalyzeProduct(userId, productInfo) {
     try {
-      // Broadcast typing indicator
       await this.broadcastMessage(userId, 'bot-typing', {
         status: 'analyzing',
         userId
@@ -209,7 +190,6 @@ class ChatbotSupabaseRealtimeHandler {
 
       const response = await this.chatbotService.analyzeProductForExport(userId, productInfo);
 
-      // Broadcast response
       await this.broadcastMessage(userId, 'bot-response', response);
 
       return response;
@@ -305,22 +285,18 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async handleSendMessageStream(userId, userMessage, res) {
     try {
-      // Initialize conversation if needed
       const conv = await this.chatbotService.initializeConversation(userId);
       const messages = conv.messages;
 
-      // Add user message to memory
       messages.push({
         role: 'user',
         content: userMessage
       });
 
-      // Save user message to database asynchronously (don't block streaming)
       this.chatbotService.saveMessage(userId, 'user', userMessage, 'message').catch(err => 
         console.error('Error saving user message:', err)
       );
 
-      // Start streaming immediately - no "start" event, just begin streaming chunks
       await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
     } catch (error) {
       console.error('Error in streaming send message:', error);
@@ -341,25 +317,20 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async handleAnalyzeProductStream(userId, productInfo, res) {
     try {
-      // Initialize conversation if needed
       const conv = await this.chatbotService.initializeConversation(userId);
       const messages = conv.messages;
 
-      // Create product analysis prompt
       const userMessage = `Tolong analisis produk ini untuk ekspor: ${productInfo}`;
       
-      // Add to message history
       messages.push({
         role: 'user',
         content: userMessage
       });
 
-      // Save user message asynchronously (don't block streaming)
       this.chatbotService.saveMessage(userId, 'user', userMessage, 'analyze_product').catch(err => 
         console.error('Error saving user message:', err)
       );
 
-      // Start streaming immediately
       await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
     } catch (error) {
       console.error('Error in streaming product analysis:', error);
@@ -390,12 +361,10 @@ class ChatbotSupabaseRealtimeHandler {
         content: userMessage
       });
 
-      // Save user message asynchronously (don't block streaming)
       this.chatbotService.saveMessage(userId, 'user', userMessage, 'market_strategy').catch(err => 
         console.error('Error saving user message:', err)
       );
 
-      // Start streaming immediately
       await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
     } catch (error) {
       console.error('Error in streaming market strategy:', error);
@@ -426,12 +395,10 @@ class ChatbotSupabaseRealtimeHandler {
         content: userMessage
       });
 
-      // Save user message asynchronously (don't block streaming)
       this.chatbotService.saveMessage(userId, 'user', userMessage, 'compliance_guidance').catch(err => 
         console.error('Error saving user message:', err)
       );
 
-      // Start streaming immediately
       await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
     } catch (error) {
       console.error('Error in streaming compliance guidance:', error);
@@ -462,12 +429,10 @@ class ChatbotSupabaseRealtimeHandler {
         content: userMessage
       });
 
-      // Save user message asynchronously (don't block streaming)
       this.chatbotService.saveMessage(userId, 'user', userMessage, 'shipping_guidance').catch(err => 
         console.error('Error saving user message:', err)
       );
 
-      // Start streaming immediately
       await this.chatbotService.sendMessageWithStream(userId, userMessage, messages, res);
     } catch (error) {
       console.error('Error in streaming shipping guidance:', error);

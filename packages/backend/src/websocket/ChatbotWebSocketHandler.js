@@ -19,52 +19,42 @@ class ChatbotWebSocketHandler {
     this.io.on('connection', (socket) => {
       console.log(`New WebSocket connection: ${socket.id}`);
 
-      // Handle user joining chat
       socket.on('join-chat', (data) => {
         this.handleJoinChat(socket, data);
       });
 
-      // Handle incoming messages
       socket.on('send-message', (data) => {
         this.handleSendMessage(socket, data);
       });
 
-      // Handle getting conversation history
       socket.on('get-history', (data) => {
         this.handleGetHistory(socket, data);
       });
 
-      // Handle clearing conversation
       socket.on('clear-chat', (data) => {
         this.handleClearChat(socket, data);
       });
 
-      // Handle product analysis request
       socket.on('analyze-product', (data) => {
         this.handleAnalyzeProduct(socket, data);
       });
 
-      // Handle market entry strategy request
       socket.on('market-strategy', (data) => {
         this.handleMarketStrategy(socket, data);
       });
 
-      // Handle compliance guidance request
       socket.on('compliance-guidance', (data) => {
         this.handleComplianceGuidance(socket, data);
       });
 
-      // Handle shipping guidance request
       socket.on('shipping-guidance', (data) => {
         this.handleShippingGuidance(socket, data);
       });
 
-      // Handle disconnection
       socket.on('disconnect', () => {
         this.handleDisconnect(socket);
       });
 
-      // Handle errors
       socket.on('error', (error) => {
         console.error(`WebSocket error for socket ${socket.id}:`, error);
         socket.emit('error', {
@@ -89,13 +79,10 @@ class ChatbotWebSocketHandler {
       return;
     }
 
-    // Store connection
     this.userConnections.set(userId, socket.id);
 
-    // Initialize conversation
     this.chatbotService.initializeConversation(userId);
 
-    // Send welcome message
     socket.emit('chat-started', {
       success: true,
       message: `Welcome to Export Assistant! 👋 I'm here to help you with all aspects of exporting your products. What would you like to know?`,
@@ -121,16 +108,13 @@ class ChatbotWebSocketHandler {
     }
 
     try {
-      // Send typing indicator
       socket.emit('bot-typing', {
         status: 'typing',
         userId
       });
 
-      // Get AI response
       const response = await this.chatbotService.sendMessage(userId, message);
 
-      // Send response back to client
       socket.emit('bot-response', {
         success: true,
         message: response.message,
@@ -340,7 +324,6 @@ class ChatbotWebSocketHandler {
    * Handle user disconnect
    */
   handleDisconnect(socket) {
-    // Find and remove user from connections
     for (const [userId, socketId] of this.userConnections.entries()) {
       if (socketId === socket.id) {
         this.userConnections.delete(userId);

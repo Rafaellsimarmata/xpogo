@@ -22,7 +22,6 @@ class ExportAgentService {
     try {
       const agents = await ExportAgent.findAll(filters);
 
-      // Parse metadata JSON if exists
       const formattedAgents = agents.map(agent => ({
         ...agent,
         metadata: agent.metadata ? (typeof agent.metadata === 'string' ? JSON.parse(agent.metadata) : agent.metadata) : null,
@@ -81,7 +80,6 @@ class ExportAgentService {
           throw new Error('Product not found');
         }
       } else {
-        // Get user's active products
         const products = await UserProduct.findByUserId(userId, 'active');
         if (products.length > 0) {
           product = products[0]; // Use first active product
@@ -92,7 +90,6 @@ class ExportAgentService {
         throw new Error('No product found for recommendations. Please add a product first.');
       }
 
-      // Get all active agents
       const allAgents = await ExportAgent.findAll({ verifiedOnly: options.verifiedOnly || false });
 
       if (allAgents.length === 0) {
@@ -104,10 +101,8 @@ class ExportAgentService {
         };
       }
 
-      // Use AI to generate recommendations
       const recommendations = await this.generateAIRecommendations(product, allAgents, options.limit || 5);
 
-      // Save recommendations to database
       for (const rec of recommendations) {
         await ExportAgent.saveRecommendation({
           userId,
@@ -170,7 +165,6 @@ class ExportAgentService {
         throw new Error('AI_SECRET_TOKEN environment variable is not set');
       }
 
-      // Prepare agent data for AI analysis
       const agentsData = agents.map(agent => ({
         id: agent.id,
         companyName: agent.company_name,
@@ -239,7 +233,6 @@ Hanya kembalikan JSON array, tanpa teks tambahan.`;
 
       const content = response.data.choices[0].message.content.trim();
       
-      // Extract JSON from response (handle markdown code blocks if present)
       let jsonContent = content;
       if (content.startsWith('```')) {
         const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -250,7 +243,6 @@ Hanya kembalikan JSON array, tanpa teks tambahan.`;
 
       const aiRecommendations = JSON.parse(jsonContent);
 
-      // Map AI recommendations to full agent data
       const recommendations = aiRecommendations
         .map(aiRec => {
           const agent = agents.find(a => a.id === aiRec.agentId);
@@ -270,7 +262,6 @@ Hanya kembalikan JSON array, tanpa teks tambahan.`;
     } catch (error) {
       console.error('Error generating AI recommendations:', error);
       
-      // Fallback: Simple matching based on product and agent data
       return this.generateFallbackRecommendations(product, agents, limit);
     }
   }
@@ -284,10 +275,9 @@ Hanya kembalikan JSON array, tanpa teks tambahan.`;
    */
   generateFallbackRecommendations(product, agents, limit) {
     const recommendations = agents.map(agent => {
-      let score = 50; // Base score
+      let score = 50;
       const reasons = [];
 
-      // Match by category
       if (product.category && agent.specialization_categories) {
         const categoryMatch = agent.specialization_categories.some(cat =>
           cat.toLowerCase().includes(product.category.toLowerCase()) ||
@@ -299,7 +289,6 @@ Hanya kembalikan JSON array, tanpa teks tambahan.`;
         }
       }
 
-      // Match by target country
       if (product.target_country_name && agent.target_countries) {
         const countryMatch = agent.target_countries.some(country =>
           country.toLowerCase().includes(product.target_country_name.toLowerCase()) ||
@@ -311,7 +300,6 @@ Hanya kembalikan JSON array, tanpa teks tambahan.`;
         }
       }
 
-      // Rating bonus
       if (agent.rating >= 4.5) {
         score += 10;
         reasons.push('Rating tinggi');
@@ -320,13 +308,11 @@ Hanya kembalikan JSON array, tanpa teks tambahan.`;
         reasons.push('Rating baik');
       }
 
-      // Verification bonus
       if (agent.is_verified) {
         score += 10;
         reasons.push('Agen terverifikasi');
       }
 
-      // Experience bonus
       if (agent.experience_years && agent.experience_years >= 5) {
         score += 5;
         reasons.push(`Berpengalaman ${agent.experience_years} tahun`);

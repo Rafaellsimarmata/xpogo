@@ -15,7 +15,6 @@ class UserProductService {
     try {
       const products = await UserProduct.findByUserId(userId, status);
       
-      // Parse metadata JSON if exists
       const formattedProducts = products.map(product => ({
         ...product,
         metadata: product.metadata ? (typeof product.metadata === 'string' ? JSON.parse(product.metadata) : product.metadata) : null,
@@ -106,13 +105,11 @@ class UserProductService {
    */
   async updateProduct(productId, userId, updateData) {
     try {
-      // Check if product exists and belongs to user
       const existingProduct = await UserProduct.findByIdAndUserId(productId, userId);
       if (!existingProduct) {
         throw new Error('Product not found');
       }
 
-      // Clean up update data
       const cleanedData = {};
       if (updateData.name !== undefined) cleanedData.name = updateData.name.trim();
       if (updateData.description !== undefined) cleanedData.description = updateData.description?.trim() || null;

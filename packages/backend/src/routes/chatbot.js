@@ -5,7 +5,6 @@ const ChatbotSupabaseRealtimeHandler = require('../websocket/ChatbotSupabaseReal
 const router = express.Router();
 const chatbotHandler = new ChatbotSupabaseRealtimeHandler();
 
-// Initialize Supabase Realtime on startup
 chatbotHandler.initialize();
 
 /**
@@ -186,15 +185,13 @@ router.post('/send-message-stream', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'message is required' });
     }
 
-    // Set headers for streaming immediately
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    res.setHeader('X-Accel-Buffering', 'no');
     res.setHeader('Transfer-Encoding', 'chunked');
     
-    // Flush headers immediately
     res.flushHeaders();
 
     await chatbotHandler.handleSendMessageStream(userId, message, res);
@@ -223,15 +220,13 @@ router.post('/analyze-product-stream', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'productInfo is required and must be a string' });
     }
 
-    // Set headers for streaming immediately
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    res.setHeader('X-Accel-Buffering', 'no');
     res.setHeader('Transfer-Encoding', 'chunked');
     
-    // Flush headers immediately
     res.flushHeaders();
 
     await chatbotHandler.handleAnalyzeProductStream(userId, productInfo, res);
@@ -260,15 +255,13 @@ router.post('/market-strategy-stream', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'marketInfo is required and must be a string' });
     }
 
-    // Set headers for streaming immediately
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    res.setHeader('X-Accel-Buffering', 'no');
     res.setHeader('Transfer-Encoding', 'chunked');
     
-    // Flush headers immediately
     res.flushHeaders();
 
     await chatbotHandler.handleMarketStrategyStream(userId, marketInfo, res);
@@ -297,15 +290,13 @@ router.post('/compliance-guidance-stream', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'complianceQuery is required and must be a string' });
     }
 
-    // Set headers for streaming immediately
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    res.setHeader('X-Accel-Buffering', 'no');
     res.setHeader('Transfer-Encoding', 'chunked');
     
-    // Flush headers immediately
     res.flushHeaders();
 
     await chatbotHandler.handleComplianceGuidanceStream(userId, complianceQuery, res);
@@ -334,15 +325,13 @@ router.post('/shipping-guidance-stream', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'shippingInfo is required and must be a string' });
     }
 
-    // Set headers for streaming immediately
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
+    res.setHeader('X-Accel-Buffering', 'no');
     res.setHeader('Transfer-Encoding', 'chunked');
     
-    // Flush headers immediately
     res.flushHeaders();
 
     await chatbotHandler.handleShippingGuidanceStream(userId, shippingInfo, res);

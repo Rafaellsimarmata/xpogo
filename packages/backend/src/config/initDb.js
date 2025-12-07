@@ -138,7 +138,6 @@ const initDatabase = async () => {
     `);
     console.log('Database initialized: indices created/exist');
 
-    // Seed export agents data (run asynchronously, don't block initialization)
     const seedExportAgents = require('./seedExportAgents');
     seedExportAgents().catch(err => {
       console.error('Error seeding export agents (non-blocking):', err);
