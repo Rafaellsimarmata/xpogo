@@ -20,6 +20,7 @@ export const MarketAnalysisContent = () => {
     handleSaveCountry,
     productMeta,
     messages,
+    savingCountry,
   } = useMarketAnalysisController();
 
   return (
@@ -129,9 +130,10 @@ export const MarketAnalysisContent = () => {
                   <button
                     type="button"
                     onClick={handleSaveCountry}
-                    className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+                    disabled={savingCountry || !selectedCountryId}
+                    className="mt-4 w-full rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Simpan negara tujuan
+                    {savingCountry ? "Menyimpan negara..." : "Simpan negara tujuan"}
                   </button>
                 </>
               ) : (

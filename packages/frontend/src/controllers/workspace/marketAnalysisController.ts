@@ -18,6 +18,7 @@ export const useMarketAnalysisController = () => {
   const [lookupState, setLookupState] = useState<LookupState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
+  const [savingCountry, setSavingCountry] = useState(false);
 
   const fallbackProductId = productCatalog[0]?.id ?? state.products[0]?.id ?? DEFAULT_PRODUCT_ID;
 
@@ -93,12 +94,21 @@ export const useMarketAnalysisController = () => {
       setErrorMessage(WORKSPACE_MESSAGES.missingCountry);
       return;
     }
-    await assignCountry({
-      userProductId: workspaceProduct.userProductId,
-      countryId: country.id,
-      countryName: country.name,
-    });
-    router.push(ROUTES.workspace.dashboard);
+    setSavingCountry(true);
+    try {
+      await assignCountry({
+        userProductId: workspaceProduct.userProductId,
+        countryId: country.id,
+        countryName: country.name,
+      });
+      router.push(ROUTES.workspace.dashboard);
+    } catch (assignError) {
+      const fallbackMessage =
+        assignError instanceof Error ? assignError.message : "Gagal menyimpan negara tujuan.";
+      setErrorMessage(fallbackMessage);
+    } finally {
+      setSavingCountry(false);
+    }
   };
 
   return {
@@ -116,5 +126,6 @@ export const useMarketAnalysisController = () => {
     handleSaveCountry,
     productMeta,
     messages: WORKSPACE_MESSAGES,
+    savingCountry,
   };
 };
