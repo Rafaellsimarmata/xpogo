@@ -22,8 +22,6 @@ const WorkspaceNav = () => {
   const { signOut } = useAuth();
   const { profile } = useUser();
 
-  console.log("[WorkspaceNav] Rendering with profile:", profile?.fullName || "null");
-
   // Handle null profile during hydration
   const initials = profile?.fullName
     ? profile.fullName

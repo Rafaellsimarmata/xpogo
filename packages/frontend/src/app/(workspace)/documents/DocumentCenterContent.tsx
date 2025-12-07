@@ -20,19 +20,16 @@ export const DocumentCenterContent = () => {
     productError,
   } = useDocumentCenterController();
 
-  // Fetch export agents filtered by product category
   const { agents: exportAgents, isLoading: agentsLoading } = useExportAgents(product?.category);
 
   const countryId = country?.id;
 
-  // Use custom hook to manage localStorage-backed state without React warnings
-  // Key changes with country to isolate saved states per country
+  // Persist status per country so each destination keeps its own checklist progress
   const [allDocumentStatuses, setAllDocumentStatuses] = useLocalStorage<Record<string, DocumentRequirement["status"]>>(
     `doc-statuses-${countryId || 'default'}`,
     {}
   );
 
-  // Apply updates and calculate counts
   const documentsWithUpdates = useMemo(() => {
     return apiDocuments.map((doc) => ({
       ...doc,
