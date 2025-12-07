@@ -15,7 +15,6 @@ const seedExportAgents = async () => {
       return;
     }
 
-    console.log('Seeding export agents data...');
 
     const categories = [
       'Agricultural',
