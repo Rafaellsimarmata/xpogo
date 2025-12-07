@@ -56,7 +56,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section id="how-it-works" className="relative py-24 bg-gray-950">
+    <section id="how-it-works" className="relative overflow-hidden py-24 bg-gray-950">
       {/* Background sama dengan landing page */}
       <div className="absolute inset-0 bg-linear-to-b from-gray-950 via-gray-900 to-gray-950" />
       

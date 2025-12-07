@@ -26,10 +26,11 @@ const features = [
 
 
 const Features = () => (
-  <section id="features" className="relative py-24 bg-gray-950">
+  <section id="features" className="relative overflow-hidden py-24 bg-gray-950">
     {/* Background Elements */}
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-48 bg-linear-to-b from-blue-500/5 to-transparent blur-3xl" />
+    <div className="absolute inset-0">
+      <div className="absolute top-1/4 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 -right-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
     </div>
 
     <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -43,7 +44,7 @@ const Features = () => (
         >
           <h2 className="mb-4 text-3xl md:text-4xl lg:text-5xl font-bold text-white">
             Fitur Inti yang
-            <span className="block bg-linear-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <span className="block bg-linear-to-r from-blue-400 to-secondary bg-clip-text text-transparent">
               Mengubah Ekspor Jadi Mudah
             </span>
           </h2>
