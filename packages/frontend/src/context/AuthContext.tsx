@@ -69,8 +69,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     async (payload: SignInPayload, options?: SignInOptions) => {
       console.log("[AuthContext] Sign in started for:", payload.email);
       try {
+        console.log("[AuthContext] Calling authenticate mutation...");
         const data = await authenticate(payload);
-        console.log("[AuthContext] Authenticate mutation completed");
+        console.log("[AuthContext] Authenticate mutation completed. Response:", {
+          userId: data.user?.id,
+          username: data.user?.username,
+          hasToken: !!data.token,
+        });
 
         const newUser: AuthUser = {
           id: data.user.id,
@@ -95,18 +100,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           throw error;
         }
         
+        console.log("[AuthContext] Setting user and token state...");
         setToken(data.token);
         setUser(newUser);
         
         console.log("[AuthContext] State updated. Scheduling redirect to dashboard...");
         // Schedule redirect for next event loop to ensure state is committed
         setTimeout(() => {
-          console.log("[AuthContext] Performing redirect now");
+          console.log("[AuthContext] Performing redirect now to:", options?.redirectTo ?? ROUTES.workspace.dashboard);
           router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
           console.log("[AuthContext] router.push() called");
         }, 0);
       } catch (error) {
-        console.error("[AuthContext] Sign in error:", error);
+        console.error("[AuthContext] Sign in error:", {
+          message: error instanceof Error ? error.message : String(error),
+          error,
+        });
         throw error;
       }
     },
