@@ -1,32 +1,40 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { UserCircle, Search, FileText, MessageSquare, Truck, BarChart } from "lucide-react";
+import { UserCircle, Search, LayoutDashboard, FileText, MessageSquare, BarChart } from "lucide-react";
 
 const steps = [
   {
-    title: "Profil UMKM",
+    title: "Profile UMKM",
     icon: UserCircle,
     color: "text-blue-400",
     bg: "bg-blue-500/10",
     border: "border-blue-500/20",
-    desc: "Setup data perusahaan dan produk fokus",
+    desc: "Lengkapi identitas usaha, kapasitas produksi, dan produk fokus sebagai fondasi ekspor.",
   },
   {
-    title: "Analisis Pasar",
+    title: "Analisa Pasar",
     icon: Search,
     color: "text-emerald-400",
     bg: "bg-emerald-500/10",
     border: "border-emerald-500/20",
-    desc: "Temukan negara terbaik dengan AI",
+    desc: "AI kami memetakan negara dan buyer paling potensial beserta insight permintaan.",
   },
   {
-    title: "Dokumen Ekspor",
-    icon: FileText,
+    title: "Dashboard Produk",
+    icon: LayoutDashboard,
     color: "text-purple-400",
     bg: "bg-purple-500/10",
     border: "border-purple-500/20",
-    desc: "Checklist otomatis dan template",
+    desc: "Lihat performa tiap produk, kesiapan harga, dan kebutuhan compliance dalam satu layar.",
+  },
+  {
+    title: "Document Center",
+    icon: FileText,
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+    desc: "Checklist otomatis dan template terkurasi menjaga seluruh dokumen ekspor tetap rapi.",
   },
   {
     title: "Asisten AI",
@@ -34,15 +42,7 @@ const steps = [
     color: "text-pink-400",
     bg: "bg-pink-500/10",
     border: "border-pink-500/20",
-    desc: "Tanya langsung ke Export Assistant",
-  },
-  {
-    title: "Kirim Produk",
-    icon: Truck,
-    color: "text-cyan-400",
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/20",
-    desc: "Tracking shipment dan pengiriman",
+    desc: "Tanya Export Assistant untuk rekomendasi dokumen, buyer, hingga negosiasi dalam hitungan detik.",
   },
   {
     title: "Monitoring",
@@ -50,7 +50,7 @@ const steps = [
     color: "text-amber-400",
     bg: "bg-amber-500/10",
     border: "border-amber-500/20",
-    desc: "Pantau progress real-time",
+    desc: "Pantau kelengkapan dokumen, tenggat penting, dan progres task ekspor secara real-time.",
   },
 ];
 
