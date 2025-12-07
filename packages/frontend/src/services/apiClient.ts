@@ -54,15 +54,11 @@ export const apiFetch = async <TResponse>(
     }
   }
 
-  console.log(`[apiFetch] Making ${options.method || 'GET'} request to:`, url);
-
   const response = await fetch(url, {
     ...options,
     headers,
     body,
   });
-
-  console.log(`[apiFetch] Response status:`, response.status, "from", endpoint);
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as
@@ -81,6 +77,5 @@ export const apiFetch = async <TResponse>(
   }
 
   const data = (await response.json()) as TResponse;
-  console.log(`[apiFetch] Success response from ${endpoint}`);
   return data;
 };

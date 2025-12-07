@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function middleware(_: NextRequest) {
   // Note: Server-side middleware cannot access localStorage
   // Auth protection is handled client-side by ProtectedRoute component
-  // Middleware only logs for debugging
-  
-  const { pathname } = request.nextUrl;
-  
-  console.log('[Middleware] Request to:', pathname);
-  
+
   return NextResponse.next();
 }
 

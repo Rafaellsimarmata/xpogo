@@ -48,8 +48,6 @@ export const useDashboardController = () => {
   const router = useRouter();
   const { profile } = useUser();
   const { state, assignCountry, addProduct, removeProduct } = useWorkspaceStore();
-  
-  console.log("[useDashboardController] Starting initialization with profile:", profile?.username);
   const {
     countries,
     isLoading: countriesLoading,

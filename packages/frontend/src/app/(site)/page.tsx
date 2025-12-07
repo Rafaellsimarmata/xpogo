@@ -16,19 +16,15 @@ const LandingPage = () => {
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   useEffect(() => {
-    // Immediate redirect for authenticated users
+    // Redirect authenticated users to the workspace dashboard
     if (!loading && user && token) {
-      console.log("[LandingPage] User already logged in. Redirecting immediately to dashboard...");
-      console.log("[LandingPage] user:", user.name, "token exists:", !!token);
       router.replace(ROUTES.workspace.dashboard);
-      console.log("[LandingPage] router.replace() called");
       return;
     }
 
     setHasCheckedAuth(true);
   }, [user, token, loading, router]);
 
-  // Show nothing while checking auth
   if (!hasCheckedAuth || loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -40,7 +36,6 @@ const LandingPage = () => {
     );
   }
 
-  // Tampilkan landing page hanya untuk user yang belum login
   if (user && token) {
     return null;
   }

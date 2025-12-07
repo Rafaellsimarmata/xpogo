@@ -6,7 +6,6 @@ import { UserProvider } from "@/src/context/UserContext";
 import { QueryProvider } from "@/src/components/providers/QueryProvider";
 import { WorkspaceProvider } from "@/src/store/workspaceStore";
 import WorkspaceLayoutProvider from "@/src/components/providers/WorkspaceLayoutProvider";
-import { RenderDiagnostics } from "@/src/components/providers/RenderDiagnostics";
 import { GlobalErrorHandler } from "@/src/components/providers/GlobalErrorHandler";
 
 const cabin = Cabin({
@@ -37,7 +36,6 @@ export default function RootLayout({
     <html lang="id" className={`${cabin.variable} dark`}>
       <body className="bg-background text-foreground antialiased">
         <GlobalErrorHandler />
-        <RenderDiagnostics />
         <QueryProvider>
           <AuthProvider>
             <UserProvider>

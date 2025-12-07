@@ -23,8 +23,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    console.log("[AuthContext] useEffect started - checking localStorage...");
-    
     // Set timeout to ensure hydration completes even if there's an error
     const hydrationTimeout = setTimeout(() => {
       if (!isHydrated) {
@@ -37,17 +35,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const storedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
       const storedUser = localStorage.getItem(STORAGE_KEY_USER);
 
-      console.log("[AuthContext] localStorage check - Token exists:", !!storedToken, "User exists:", !!storedUser);
-
       if (storedToken) {
-        console.log("[AuthContext] Setting token from localStorage");
         setToken(storedToken);
       }
 
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser) as AuthUser;
-          console.log("[AuthContext] User restored from localStorage:", parsedUser.name);
           setUser(parsedUser);
         } catch (error) {
           console.warn("[AuthContext] Failed to parse stored user", error);
@@ -60,22 +54,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     
     // Mark as hydrated after restoring state
-    console.log("[AuthContext] Hydration complete - setting isHydrated to true");
     setIsHydrated(true);
     clearTimeout(hydrationTimeout);
   }, []);
 
   const signIn = useCallback(
     async (payload: SignInPayload, options?: SignInOptions) => {
-      console.log("[AuthContext] Sign in started for:", payload.email);
       try {
-        console.log("[AuthContext] Calling authenticate mutation...");
         const data = await authenticate(payload);
-        console.log("[AuthContext] Authenticate mutation completed. Response:", {
-          userId: data.user?.id,
-          username: data.user?.username,
-          hasToken: !!data.token,
-        });
 
         const newUser: AuthUser = {
           id: data.user.id,
@@ -91,25 +77,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           
           localStorage.setItem(STORAGE_KEY_TOKEN, tokenToStore);
           localStorage.setItem(STORAGE_KEY_USER, userToStore);
-          
-          console.log("[AuthContext] User and token saved to localStorage. User:", newUser.name);
-          console.log("[AuthContext] Verification - Token in localStorage:", !!localStorage.getItem(STORAGE_KEY_TOKEN));
-          console.log("[AuthContext] Verification - User in localStorage:", !!localStorage.getItem(STORAGE_KEY_USER));
         } catch (error) {
           console.error("[AuthContext] Failed to save to localStorage", error);
           throw error;
         }
         
-        console.log("[AuthContext] Setting user and token state...");
         setToken(data.token);
         setUser(newUser);
         
-        console.log("[AuthContext] State updated. Scheduling redirect to dashboard...");
         // Schedule redirect for next event loop to ensure state is committed
         setTimeout(() => {
-          console.log("[AuthContext] Performing redirect now to:", options?.redirectTo ?? ROUTES.workspace.dashboard);
           router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
-          console.log("[AuthContext] router.push() called");
         }, 0);
       } catch (error) {
         console.error("[AuthContext] Sign in error:", {
@@ -123,11 +101,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const signOut = useCallback(() => {
-    console.log("[AuthContext] Sign out started...");
     try {
       localStorage.removeItem(STORAGE_KEY_TOKEN);
       localStorage.removeItem(STORAGE_KEY_USER);
-      console.log("[AuthContext] User logged out - localStorage cleared");
     } catch (error) {
       console.error("[AuthContext] Failed to clear localStorage", error);
     }
