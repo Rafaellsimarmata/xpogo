@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/context/AuthContext";
 
@@ -11,8 +11,19 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, token, loading } = useAuth();
   const router = useRouter();
+  const [renderTimeout, setRenderTimeout] = useState(false);
 
   console.log("[ProtectedRoute] Rendering. loading:", loading, "user:", user?.name, "token:", !!token);
+
+  useEffect(() => {
+    // Safety timeout: if loading takes more than 3 seconds, force render
+    const timeout = setTimeout(() => {
+      console.warn("[ProtectedRoute] Loading timeout - forcing render");
+      setRenderTimeout(true);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     console.log("[ProtectedRoute] useEffect triggered. loading:", loading, "user:", user?.name, "token:", !!token);
@@ -37,8 +48,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [user, token, loading, router]);
 
-  // While loading auth, show loading screen
-  if (loading) {
+  // While loading auth, show loading screen (unless timeout occurred)
+  if (loading && !renderTimeout) {
     console.log("[ProtectedRoute] Showing loading screen because loading === true");
     return (
       <div className="flex h-screen items-center justify-center bg-background">
