@@ -22,13 +22,16 @@ const WorkspaceNav = () => {
   const { signOut } = useAuth();
   const { profile } = useUser();
 
-  const initials = profile.fullName
-    .split(" ")
-    .map((name) => name.charAt(0).toUpperCase())
-    .slice(0, 2)
-    .join("") || "U";
-  const profileName = profile.fullName ?? profile.username ?? "Pengguna XP";
-  const profileCompany = profile.company ?? profile.businessName ?? "Perusahaan belum diatur";
+  // Handle null profile during hydration
+  const initials = profile?.fullName
+    ? profile.fullName
+        .split(" ")
+        .map((name) => name.charAt(0).toUpperCase())
+        .slice(0, 2)
+        .join("")
+    : "U";
+  const profileName = profile?.fullName ?? profile?.username ?? "Pengguna XP";
+  const profileCompany = profile?.company ?? profile?.businessName ?? "Perusahaan belum diatur";
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {

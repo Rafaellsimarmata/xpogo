@@ -85,7 +85,7 @@ export const useDashboardController = () => {
   const trackedProducts = state.products;
   const focusProductId =
     state.activeProductId ??
-    profile.focusProduct ??
+    profile?.focusProduct ??
     trackedProducts[0]?.id ??
     productCatalog[0]?.id ??
     DEFAULT_PRODUCT_ID;
@@ -148,7 +148,7 @@ export const useDashboardController = () => {
     [countries],
   );
 
-  const focusCountryId = focusProduct.workspace.targetCountryId ?? profile.targetCountry;
+  const focusCountryId = focusProduct.workspace.targetCountryId ?? profile?.targetCountry;
 
   const primaryCountry = focusCountryId
     ? countries.find((country) => country.id === focusCountryId) ?? countryMatches[0]

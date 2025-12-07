@@ -12,14 +12,14 @@ import {
 import { useAuth } from "./AuthContext";
 import type { UserContextValue, UserProfile } from "@/src/types/user";
 
-const defaultProfile: UserProfile = {
-  fullName: "Alya Pratama",
-  username: "alya",
-  company: "Nusantara Craft",
-  businessName: "Nusantara Craft",
+const createDefaultProfile = (userName?: string, company?: string): UserProfile => ({
+  fullName: userName || "Alya Pratama",
+  username: userName || "alya",
+  company: company || "Nusantara Craft",
+  businessName: company || "Nusantara Craft",
   businessType: "Kerajinan Kayu",
   onboardingComplete: false,
-};
+});
 
 const STORAGE_PREFIX = "xpogo_profile_";
 
@@ -38,9 +38,9 @@ const parseProfile = (raw: string | null): UserProfile | null => {
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const storageKey = getStorageKey(user?.id);
-  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   const persistProfile = useCallback(
     (nextProfile: UserProfile) => {
@@ -57,32 +57,43 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   // Sync user data from AuthContext to UserProfile / load from storage
   useEffect(() => {
     if (typeof window === "undefined") return;
+    
+    // Tunggu sampai auth selesai loading
+    if (authLoading) {
+      console.log("[UserContext] Waiting for auth to load...");
+      return;
+    }
+
+    // Jika tidak ada user, set profile ke null
+    if (!user) {
+      console.log("[UserContext] No user, setting profile to null");
+      setProfile(null);
+      return;
+    }
+
+    console.log("[UserContext] User found, checking stored profile for user:", user.id);
+    
     const storedProfile = parseProfile(localStorage.getItem(storageKey));
     if (storedProfile) {
+      console.log("[UserContext] Found stored profile, using it");
       startTransition(() => {
         setProfile(storedProfile);
       });
       return;
     }
 
-    const fallback = user
-      ? {
-          ...defaultProfile,
-          fullName: user.name,
-          username: user.name,
-          company: user.company,
-          businessName: user.company,
-        }
-      : defaultProfile;
-
+    // Create profile from auth user
+    const newProfile = createDefaultProfile(user.name, user.company);
+    console.log("[UserContext] Creating profile from auth user:", user.name);
     startTransition(() => {
-      setProfile(fallback);
+      setProfile(newProfile);
     });
-    persistProfile(fallback);
-  }, [storageKey, user, persistProfile]);
+    persistProfile(newProfile);
+  }, [storageKey, user, authLoading, persistProfile]);
 
   const updateProfile = useCallback((updates: Partial<UserProfile>) => {
     setProfile((prev) => {
+      if (!prev) return null;
       const nextProfile = { ...prev, ...updates };
       persistProfile(nextProfile);
       return nextProfile;
@@ -91,6 +102,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const setOnboardingComplete = useCallback((status: boolean) => {
     setProfile((prev) => {
+      if (!prev) return null;
       const nextProfile = { ...prev, onboardingComplete: status };
       persistProfile(nextProfile);
       return nextProfile;

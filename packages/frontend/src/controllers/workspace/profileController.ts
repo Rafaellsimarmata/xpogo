@@ -19,7 +19,7 @@ export const useProfileController = () => {
   const router = useRouter();
   const { profile, updateProfile, setOnboardingComplete } = useUser();
   const { addProduct, setActiveProduct } = useWorkspaceStore();
-  const isFirstSetup = !profile.onboardingComplete;
+  const isFirstSetup = !profile?.onboardingComplete;
   const {
     products,
     isLoading: productsLoading,
@@ -46,18 +46,18 @@ export const useProfileController = () => {
   );
 
   const defaultFocusProduct = useMemo(
-    () => profile.focusProduct ?? productOptions[0]?.id ?? DEFAULT_PRODUCT_ID,
-    [profile.focusProduct, productOptions],
+    () => profile?.focusProduct ?? productOptions[0]?.id ?? DEFAULT_PRODUCT_ID,
+    [profile?.focusProduct, productOptions],
   );
 
   const defaultFormValues = useMemo(
     () => ({
-      fullName: profile.fullName ?? "",
-      username: profile.username ?? "",
-      company: profile.company ?? "",
+      fullName: profile?.fullName ?? "",
+      username: profile?.username ?? "",
+      company: profile?.company ?? "",
       focusProduct: defaultFocusProduct,
     }),
-    [profile.fullName, profile.username, profile.company, defaultFocusProduct],
+    [profile?.fullName, profile?.username, profile?.company, defaultFocusProduct],
   );
 
   const form = useForm<ProfileFormValues>({
@@ -83,7 +83,7 @@ export const useProfileController = () => {
       username: values.username,
       company: values.company,
       businessName: values.company,
-      focusProduct: isFirstSetup ? values.focusProduct : profile.focusProduct,
+      focusProduct: isFirstSetup ? values.focusProduct : profile?.focusProduct,
     });
     if (isFirstSetup) {
       const product = products.find((item) => item.id === values.focusProduct);
@@ -101,7 +101,7 @@ export const useProfileController = () => {
         setActiveProduct(product.id);
       }
       setOnboardingComplete(true);
-    } else if (profile.focusProduct) {
+    } else if (profile?.focusProduct) {
       setActiveProduct(profile.focusProduct);
     }
     router.push(ROUTES.workspace.dashboard);
