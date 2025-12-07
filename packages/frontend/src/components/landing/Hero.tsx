@@ -106,7 +106,8 @@ const Hero = () => {
                     whileTap={{ scale: 0.98 }}
                   >
                     <Link 
-                      href="/demo" 
+                      href="https://youtu.be/HrAxP14Kfys" 
+                      target="_blank"
                       className="group relative flex items-center gap-3 text-gray-300 hover:text-white transition-colors py-1"
                     >
                       <span className="text-md font-medium tracking-wide relative overflow-hidden">
