@@ -12,8 +12,11 @@ const DashboardPage = () => {
   }, []);
 
   try {
+    console.log("[DashboardPage] Starting controller initialization...");
     const controller = useDashboardController();
-  const {
+    console.log("[DashboardPage] Controller initialized successfully");
+    
+    const {
     profile,
     productCards,
     workspaceLoading,
@@ -45,6 +48,8 @@ const DashboardPage = () => {
 
   const showNewsSkeleton = newsLoading || newsRefreshing;
   const showProductSkeleton = workspaceLoading && productCards.length === 0;
+
+  console.log("[DashboardPage] Rendering dashboard. Products:", productCards.length, "News:", newsItems?.length);
 
   return (
     <section className="bg-background py-12">
