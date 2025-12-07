@@ -10,7 +10,7 @@ export type UserProfile = {
 };
 
 export type UserContextValue = {
-  profile: UserProfile;
+  profile: UserProfile | null;
   updateProfile: (updates: Partial<UserProfile>) => void;
   setOnboardingComplete: (status: boolean) => void;
 };

@@ -24,13 +24,13 @@ const businessTypes = [
 
 const OnboardingPage = () => {
   const { profile, updateProfile, setOnboardingComplete } = useUser();
-  const completion = useMemo(() => (profile.onboardingComplete ? 100 : 70), [profile]);
+  const completion = useMemo(() => (profile?.onboardingComplete ? 100 : 70), [profile]);
   const { register, handleSubmit } = useForm<OnboardingValues>({
     defaultValues: {
-      fullName: profile.fullName,
-      username: profile.username,
-      company: profile.company,
-      businessType: profile.businessType,
+      fullName: profile?.fullName ?? "",
+      username: profile?.username ?? "",
+      company: profile?.company ?? "",
+      businessType: profile?.businessType ?? "",
     },
   });
 

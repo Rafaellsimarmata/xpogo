@@ -50,7 +50,7 @@ const DashboardPage = () => {
                 Workspace Overview
               </p>
               <h1 className="mt-2 text-3xl font-bold text-foreground">
-                Halo, {profile.fullName ?? profile.username ?? "Eksportir"}
+                Halo, {profile?.fullName ?? profile?.username ?? "Eksportir"}
               </h1>
               <p className="text-sm text-muted-foreground">
                 Pantau produk ekspor dan temukan insight terbaru tiap hari.
@@ -59,7 +59,7 @@ const DashboardPage = () => {
             <div className="rounded-2xl border border-border/60 bg-background/70 px-5 py-3 text-right text-sm text-foreground">
               <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Perusahaan</p>
               <p className="text-base font-semibold">
-                {profile.company ?? profile.businessName ?? "Belum ditentukan"}
+                {profile?.company ?? profile?.businessName ?? "Belum ditentukan"}
               </p>
             </div>
           </div>
