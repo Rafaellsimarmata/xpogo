@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus, RefreshCw, ExternalLink, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Modal from "@/src/components/ui/Modal";
 import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";

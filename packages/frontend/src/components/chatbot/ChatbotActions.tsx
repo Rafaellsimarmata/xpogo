@@ -103,7 +103,6 @@ export default function ChatbotActions({
       const message = buildMessage(actionId);
       await callback(message);
       
-      // Reset form
       if (actionId === "product") {
         setFormInputs((prev) => ({
           ...prev,
@@ -265,7 +264,6 @@ export default function ChatbotActions({
         </Card>
       ))}
 
-      {/* Clear Chat Button */}
       <Card className="p-0">
         <button
           onClick={onClearChat}

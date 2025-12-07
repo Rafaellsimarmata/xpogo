@@ -60,7 +60,6 @@ const SignUpForm = () => {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {/* Row 1: Email & Business Name */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-600">Email</label>
@@ -84,7 +83,6 @@ const SignUpForm = () => {
         </div>
       </div>
 
-      {/* Row 2: Username (full width) */}
       <div>
         <label className="mb-2 block text-sm font-semibold text-slate-600">Username</label>
         <Input
@@ -95,7 +93,6 @@ const SignUpForm = () => {
         />
       </div>
 
-      {/* Row 3: Password & Confirm Password */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-600">Password</label>
@@ -124,14 +121,12 @@ const SignUpForm = () => {
         </div>
       </div>
 
-      {/* Error & Success Messages */}
       {error && (
         <div className="rounded-2xl border border-red-100 bg-red-50/80 px-4 py-3 text-sm text-red-600">
           {error}
         </div>
       )}
 
-      {/* Submit Button */}
       <Button
         type="submit"
         className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
@@ -140,7 +135,6 @@ const SignUpForm = () => {
         {registerMutation.isPending || authLoading ? "Memproses..." : "Buat Akun"}
       </Button>
 
-      {/* Login Link */}
       <p className="text-center text-sm text-slate-500">
         Sudah punya akun?{" "}
         <Link href="/signin" className="font-semibold text-blue-500">

@@ -54,14 +54,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     [storageKey],
   );
 
-  // Sync user data from AuthContext to UserProfile / load from storage
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    // Tunggu sampai auth selesai loading
     if (authLoading) return;
 
-    // Jika tidak ada user, set profile ke null
     if (!user) {
       setProfile(null);
       return;
@@ -75,7 +72,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // Create profile from auth user
     const newProfile = createDefaultProfile(user.name, user.company);
     startTransition(() => {
       setProfile(newProfile);

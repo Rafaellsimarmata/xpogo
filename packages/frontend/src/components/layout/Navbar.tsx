@@ -22,7 +22,6 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("#hero");
 
-  // Detect active section on scroll - only on homepage
   useEffect(() => {
     if (pathname !== "/") {
       return;
@@ -45,7 +44,7 @@ const Navbar = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    handleScroll(); 
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, [pathname]);
@@ -109,7 +108,6 @@ const Navbar = () => {
                 >
                   {link.label}
                   
-                  {/* Animated underline on hover - only show when NOT active */}
                   {!isActive && (
                     <span className="hidden md:block absolute bottom-1 left-1/2 h-0.5 w-0 -translate-x-1/2 bg-linear-to-r from-primary via-accent to-primary transition-all duration-300 ease-out group-hover:w-3/4 dark:from-primary dark:via-blue-400 dark:to-primary"></span>
                   )}

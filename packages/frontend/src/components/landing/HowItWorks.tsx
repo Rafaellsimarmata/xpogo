@@ -57,7 +57,6 @@ const steps = [
 const HowItWorks = () => {
   return (
     <section id="how-it-works" className="relative overflow-hidden py-24 bg-gray-950">
-      {/* Background sama dengan landing page */}
       <div className="absolute inset-0 bg-linear-to-b from-gray-950 via-gray-900 to-gray-950" />
       
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -81,9 +80,9 @@ const HowItWorks = () => {
           </motion.div>
         </div>
 
-        {/* Desktop Layout - 2 Rows tanpa garis */}
+        {/* Desktop Layout  */}
         <div className="hidden lg:block">
-          {/* First Row - Steps 1-3 */}
+          {/* First Row */}
           <div className="grid grid-cols-3 gap-8 mb-8">
             {steps.slice(0, 3).map((step, index) => (
               <motion.div
@@ -100,7 +99,7 @@ const HowItWorks = () => {
                   {/* Hover Glow Effect */}
                   <div className="absolute inset-0 rounded-3xl bg-linear-to-r from-blue-500/0 via-blue-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
-                  {/* Step Number - Top Left */}
+                  {/* Step Number */}
                   <div className="absolute -top-3 -left-3 z-10">
                     <div className="h-10 w-10 rounded-full bg-linear-to-r from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
                       <span className="text-sm font-bold text-white">0{index + 1}</span>
@@ -131,7 +130,7 @@ const HowItWorks = () => {
             ))}
           </div>
 
-          {/* Second Row - Steps 4-6 */}
+          {/* Second Row  */}
           <div className="grid grid-cols-3 gap-8">
             {steps.slice(3).map((step, index) => (
               <motion.div
@@ -148,7 +147,7 @@ const HowItWorks = () => {
                   {/* Hover Glow Effect */}
                   <div className="absolute inset-0 rounded-3xl bg-linear-to-r from-blue-500/0 via-blue-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
-                  {/* Step Number - Top Right */}
+                  {/* Step Number */}
                   <div className="absolute -top-3 -right-3 z-10">
                     <div className="h-10 w-10 rounded-full bg-linear-to-r from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
                       <span className="text-sm font-bold text-white">0{index + 4}</span>
@@ -180,7 +179,7 @@ const HowItWorks = () => {
           </div>
         </div>
 
-        {/* Mobile Layout - tanpa garis */}
+        {/* Mobile Layout  */}
         <div className="lg:hidden">
           <div className="space-y-5">
             {steps.map((step, index) => (

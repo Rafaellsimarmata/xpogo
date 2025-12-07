@@ -24,7 +24,6 @@ export default function ChatbotContainer() {
     clearChat,
   } = useChatbot();
 
-  // init chat
   useEffect(() => {
     if (user?.id) {
       joinChat(user.name || "User").catch(() => {});
@@ -35,7 +34,6 @@ export default function ChatbotContainer() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  // scroll ketika ada pesan baru
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
