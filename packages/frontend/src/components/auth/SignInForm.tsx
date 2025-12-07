@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
 import { useAuth } from "@/src/context/AuthContext";
@@ -15,6 +16,7 @@ type SignInValues = SignInPayload & {
 const SignInForm = () => {
   const { signIn, loading } = useAuth();
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -61,15 +63,26 @@ const SignInForm = () => {
         <label className="mb-2 block text-sm font-semibold text-slate-600">
           Password
         </label>
-        <Input
-          type="password"
-          placeholder="Masukkan password"
-          {...register("password", {
-            required: "Password wajib diisi",
-            minLength: { value: 6, message: "Minimal 6 karakter" },
-          })}
-          error={errors.password?.message}
-        />
+        <div className="relative">
+          <Input
+            type={showPassword ? "text" : "password"}
+            placeholder="Masukkan password"
+            className="pr-12"
+            {...register("password", {
+              required: "Password wajib diisi",
+              minLength: { value: 6, message: "Minimal 6 karakter" },
+            })}
+            error={errors.password?.message}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-slate-700"
+            aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center justify-between text-sm">

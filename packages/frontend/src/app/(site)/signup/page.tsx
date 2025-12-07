@@ -45,7 +45,7 @@ const SignUpPage = () => (
             </div>
           </div>
 
-          <div className="bg-slate-900 rounded-[30px] md:rounded-r-[30px] md:rounded-l-none p-8 md:p-10 lg:p-12 max-h-screen overflow-y-hidden">
+          <div className="bg-slate-900 rounded-[30px] md:rounded-r-[30px] md:rounded-l-none p-8 md:p-10 lg:p-12">
             <div className="max-w-md mx-auto">
               <div className="mb-8 text-center">
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">Daftar</p>

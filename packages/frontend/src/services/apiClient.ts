@@ -68,7 +68,6 @@ export const apiFetch = async <TResponse>(
       payload?.message ??
       payload?.error ??
       `Request failed with status ${response.status}`;
-    console.error(`[apiFetch] Error from ${endpoint}:`, errorMessage);
     throw new Error(errorMessage);
   }
 
