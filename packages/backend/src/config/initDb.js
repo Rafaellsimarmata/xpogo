@@ -13,7 +13,7 @@ const initDatabase = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log('Database initialized: users table created/exists');
+
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS chatbot_messages (
@@ -28,7 +28,6 @@ const initDatabase = async () => {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
-    console.log('Database initialized: chatbot_messages table created/exists');
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS chatbot_conversations (
@@ -42,7 +41,6 @@ const initDatabase = async () => {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
-    console.log('Database initialized: chatbot_conversations table created/exists');
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS chatbot_analysis_requests (
@@ -57,7 +55,6 @@ const initDatabase = async () => {
         FOREIGN KEY (conversation_id) REFERENCES chatbot_conversations(id) ON DELETE SET NULL
       );
     `);
-    console.log('Database initialized: chatbot_analysis_requests table created/exists');
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS user_products (
@@ -76,7 +73,6 @@ const initDatabase = async () => {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
-    console.log('Database initialized: user_products table created/exists');
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS export_agents (
@@ -105,7 +101,6 @@ const initDatabase = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log('Database initialized: export_agents table created/exists');
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS agent_recommendations (
@@ -121,7 +116,6 @@ const initDatabase = async () => {
         FOREIGN KEY (agent_id) REFERENCES export_agents(id) ON DELETE CASCADE
       );
     `);
-    console.log('Database initialized: agent_recommendations table created/exists');
 
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_chatbot_messages_user_id ON chatbot_messages(user_id);
@@ -136,7 +130,6 @@ const initDatabase = async () => {
       CREATE INDEX IF NOT EXISTS idx_agent_recommendations_product_id ON agent_recommendations(product_id);
       CREATE INDEX IF NOT EXISTS idx_agent_recommendations_agent_id ON agent_recommendations(agent_id);
     `);
-    console.log('Database initialized: indices created/exist');
 
     const seedExportAgents = require('./seedExportAgents');
     seedExportAgents().catch(err => {

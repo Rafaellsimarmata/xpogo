@@ -22,8 +22,7 @@ class ChatbotSupabaseRealtimeHandler {
   /**
    * Initialize Supabase Realtime subscriptions
    */
-  async initialize() {
-    console.log('Initializing Supabase Realtime Handler...');
+  async initialize() {    
 
     if (!this.supabaseUrl || !this.supabaseKey) {
       console.warn('Skipping Supabase Realtime initialization - credentials not configured');
@@ -31,8 +30,7 @@ class ChatbotSupabaseRealtimeHandler {
     }
 
     try {
-      this.setupDatabaseListeners();
-      console.log('Supabase Realtime initialized successfully');
+      this.setupDatabaseListeners();      
     } catch (error) {
       console.error('Error initializing Supabase Realtime:', error);
     }
@@ -272,8 +270,7 @@ class ChatbotSupabaseRealtimeHandler {
       
       if (channel) {
         await channel.unsubscribe();
-        this.userConnections.delete(channelName);
-        console.log(`Cleaned up channel for user ${userId}`);
+        this.userConnections.delete(channelName);        
       }
     } catch (error) {
       console.error('Error cleaning up user connection:', error);

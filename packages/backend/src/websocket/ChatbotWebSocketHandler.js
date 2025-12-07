@@ -13,11 +13,9 @@ class ChatbotWebSocketHandler {
   /**
    * Initialize WebSocket event handlers
    */
-  initialize() {
-    console.log("Initializing Chatbot WebSocket Handler...");
+  initialize() {    
 
-    this.io.on('connection', (socket) => {
-      console.log(`New WebSocket connection: ${socket.id}`);
+    this.io.on('connection', (socket) => {      
 
       socket.on('join-chat', (data) => {
         this.handleJoinChat(socket, data);
@@ -90,7 +88,6 @@ class ChatbotWebSocketHandler {
       timestamp: new Date().toISOString()
     });
 
-    console.log(`User ${userId} (${userName}) joined chat`);
   }
 
   /**
@@ -327,7 +324,6 @@ class ChatbotWebSocketHandler {
     for (const [userId, userSocket] of this.userConnections.entries()) {
       if (userSocket === socket) {
         this.userConnections.delete(userId);
-        console.log(`User ${userId} disconnected`);
         break;
       }
     }

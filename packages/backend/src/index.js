@@ -11,8 +11,7 @@ const env = process.env.NODE_ENV || 'development';
 const envFile = path.resolve(__dirname, '..', `.env.${env}`);
 dotenv.config();
 try {
-  dotenv.config({ path: envFile });
-  console.log(`Loaded env from ${envFile}`);
+  dotenv.config({ path: envFile });  
 } catch (err) {
 }
 
@@ -47,7 +46,6 @@ if (realtimeProvider === 'socket.io' || isDevelopment) {
 
   const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
   const chatbotHandler = new ChatbotWebSocketHandler(io);
-  console.log('Socket.io initialized (development mode)');
   chatbotHandler.initialize();
 }
 
