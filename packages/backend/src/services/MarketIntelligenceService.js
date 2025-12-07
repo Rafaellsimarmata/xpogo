@@ -21,7 +21,7 @@ class MarketIntelligenceService {
 
     // Build the request payload with user's exact format
     const payload = {
-      max_tokens: 2000,
+      max_tokens: 2500,
       messages: [
         {
           role: 'system',

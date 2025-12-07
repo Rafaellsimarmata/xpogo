@@ -10,7 +10,7 @@ class ChatbotSupabaseRealtimeHandler {
     this.supabaseUrl = process.env.SUPABASE_URL;
     this.supabaseKey = process.env.SUPABASE_KEY;
     this.chatbotService = new ChatbotService();
-    this.userConnections = new Map(); // Track user subscriptions
+    this.userConnections = new Map();
 
     if (!this.supabaseUrl || !this.supabaseKey) {
       console.warn('Supabase credentials not configured. Realtime chat will not work.');
@@ -54,7 +54,6 @@ class ChatbotSupabaseRealtimeHandler {
    */
   async broadcastMessage(userId, event, data) {
     try {
-      // Skip broadcasting if Supabase not configured
       if (!this.supabaseUrl || !this.supabaseKey) {
         console.log('Supabase not configured, skipping broadcast');
         return null;
@@ -62,21 +61,17 @@ class ChatbotSupabaseRealtimeHandler {
 
       const channelName = `user-${userId}`;
       
-      // Get or create channel
       let channel = this.userConnections.get(channelName);
       
       if (!channel) {
-        // Create new channel and subscribe
         channel = this.supabase.channel(channelName);
         channel = await channel.subscribe((status) => {
           console.log(`Channel subscription status: ${status}`);
         });
         
-        // Store channel for future use
         this.userConnections.set(channelName, channel);
       }
 
-      // Broadcast message
       channel.send('broadcast', {
         event,
         data: {
@@ -88,7 +83,6 @@ class ChatbotSupabaseRealtimeHandler {
       return channel;
     } catch (error) {
       console.error('Error broadcasting message:', error);
-      // Don't throw - broadcasting is best-effort
       return null;
     }
   }

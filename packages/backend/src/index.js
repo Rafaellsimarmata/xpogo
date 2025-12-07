@@ -7,7 +7,6 @@ const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 
-// Load environment variables
 const env = process.env.NODE_ENV || 'development';
 const envFile = path.resolve(__dirname, '..', `.env.${env}`);
 dotenv.config();
@@ -15,7 +14,6 @@ try {
   dotenv.config({ path: envFile });
   console.log(`Loaded env from ${envFile}`);
 } catch (err) {
-  // ignore if file not present
 }
 
 const initDatabase = require('./config/initDb');
@@ -33,15 +31,12 @@ const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Determine realtime provider
 const realtimeProvider = process.env.REALTIME_PROVIDER || 'socket.io';
 const isDevelopment = env === 'development';
 
-// Create HTTP server
 const server = http.createServer(app);
 let io = null;
 
-// Setup Socket.io for development (or if explicitly configured)
 if (realtimeProvider === 'socket.io' || isDevelopment) {
   io = new Server(server, {
     cors: {
@@ -50,7 +45,6 @@ if (realtimeProvider === 'socket.io' || isDevelopment) {
     }
   });
 
-  // Initialize Socket.io WebSocket handlers for development
   const ChatbotWebSocketHandler = require('./websocket/ChatbotWebSocketHandler');
   const chatbotHandler = new ChatbotWebSocketHandler(io);
   console.log('Socket.io initialized (development mode)');
@@ -74,7 +68,6 @@ const swaggerSpec = {
   externalDocs: {
     description: 'WebSocket API Documentation (AsyncAPI 3.0.0) - View event-driven communication patterns',
     url: 'https://studio.asyncapi.com/'
-    // url: 'https://studio.asyncapi.com/url=github.com/your-repo-path/CHATBOT_ASYNCAPI.yaml'
   },
   servers: [
     {
@@ -2021,22 +2014,16 @@ app.use('/market-intelligence', marketIntelligenceRoutes);
 
 app.use('/document-assistant', documentAssistantRoutes);
 
-// Chatbot routes - works with both Socket.io (dev) and Supabase Realtime (prod)
 app.use('/api/chatbot', chatbotRoutes);
 
-// Countries routes
 app.use('/api/countries', countriesRoutes);
 
-// Products routes
 app.use('/api/products', productsRoutes);
 
-// News routes
 app.use('/api/news', newsRoutes);
 
-// User Products routes
 app.use('/api/user/products', userProductsRoutes);
 
-// Export Agents routes
 app.use('/api/export-agents', exportAgentsRoutes);
 
 app.get('/health', (req, res) => {
