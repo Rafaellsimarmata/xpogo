@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Sparkles, ArrowRight, Target, Globe, CheckCircle } from "lucide-react";
+import { Sparkles, ArrowUpRight , Target, Globe, CheckCircle } from "lucide-react";
 
 const stats = [
   { 
@@ -28,7 +28,11 @@ const stats = [
 
 const Hero = () => {
   return (
-    <section id="hero" className="relative min-h-screen bg-gray-950 pt-16">
+    <section id="hero" className="relative min-h-screen overflow-hidden bg-gray-950 pt-16">
+      {/* Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-48 bg-linear-to-b from-blue-500/5 to-transparent blur-3xl" />
+      </div>
 
       {/* Main Container */}
       <div className="relative mx-auto max-w-full h-[calc(100vh-4rem)] px-4 sm:px-6 lg:px-8">
@@ -72,7 +76,7 @@ const Hero = () => {
                 </div>
 
                 {/* Main Heading */}
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
                   <span className="block text-white">Ekspor Jadi</span>
                   <span className="block bg-linear-to-br from-primary to-secondary bg-clip-text text-transparent">
                     Mudah dengan XPOGO
@@ -93,7 +97,7 @@ const Hero = () => {
                         <span className="relative z-10">Mulai Sekarang</span>
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-linear-to-r from-blue-400 to-secondary group-hover:w-full transition-all duration-500 ease-out"></span>
                       </span>
-                      <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                      <ArrowUpRight className="h-5 w-5 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
                     </Link>
                   </motion.div>
                   
@@ -109,7 +113,7 @@ const Hero = () => {
                         <span className="relative z-10">Pelajari Lebih Lanjut</span>
                         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-linear-to-r from-gray-400 to-gray-300 group-hover:w-full transition-all duration-500 ease-out"></span>
                       </span>
-                      <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                      <ArrowUpRight  className="h-5 w-5 -translate-x-2 group-hover:translate-x-0 transition-all duration-300" />
                     </Link>
                   </motion.div>
                 </div>
@@ -133,10 +137,10 @@ const Hero = () => {
                       transition={{ delay: 0.6 + index * 0.1 }}
                       className="text-center space-y-1"
                     >
-                      <div className={`text-xl sm:text-2xl md:text-3xl font-bold ${stat.color}`}>
+                      <div className={`text-2xl sm:text-4xl md:text-5xl font-bold ${stat.color}`}>
                         {stat.value}
                       </div>
-                      <p className="text-xs text-gray-400 tracking-wide leading-tight">
+                      <p className="text-sm text-gray-400 tracking-wide leading-tight">
                         {stat.label}
                       </p>
                     </motion.div>
@@ -148,16 +152,39 @@ const Hero = () => {
         </motion.div>
       </div>
 
-      {/* Scroll Indicator - Center Bottom */}
+      {/* Scroll Indicator with Animation */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="absolute bottom-4 left-1/2 transform -translate-x-1/2"
+        transition={{ delay: 1.5 }}
+        className="absolute bottom-5 left-1/2 transform -translate-x-1/2"
       >
-        <div className="flex flex-col items-center">
-          <div className="h-6 w-px bg-linear-to-b from-blue-400 to-transparent" />
-        </div>
+        <motion.div
+          animate={{ 
+            y: [0, 10, 0],
+            opacity: [0.5, 1, 0.5]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          className="flex flex-col items-center cursor-pointer"
+          onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
+        >
+          <div className="text-gray-400 text-xs mb-2">Scroll</div>
+          <div className="w-6 h-10 border-2 border-gray-600 rounded-full flex justify-center p-1">
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              className="w-1 h-3 bg-linear-to-b from-blue-400 to-cyan-400 rounded-full"
+            />
+          </div>
+        </motion.div>
       </motion.div>
     </section>
   );

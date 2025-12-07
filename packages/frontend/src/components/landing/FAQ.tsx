@@ -44,10 +44,10 @@ const faqData = [
 ];
 
 const FAQ = () => (
-  <section id="faq" className="relative py-24 bg-gray-950">
+  <section id="faq" className="relative overflow-hidden py-24 bg-gray-950">
     {/* Background */}
     <div className="absolute inset-0 bg-linear-to-b from-gray-950 via-gray-900 to-gray-950" />
-    <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-linear-to-r from-blue-500/5 to-cyan-500/5 blur-3xl" />
+    <div className="pointer-events-none absolute -bottom-20 -left-8 sm:-left-20 h-64 w-64 rounded-full bg-linear-to-r from-blue-500/5 to-cyan-500/5 blur-3xl" />
 
     <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
       {/* Header */}

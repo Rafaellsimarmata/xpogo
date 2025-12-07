@@ -58,10 +58,10 @@ const stats = [
 ];
 
 const Testimonials = () => (
-  <section id="testimonials" className="relative py-24 bg-gray-950">
+  <section id="testimonials" className="relative overflow-hidden py-24 bg-gray-950">
     {/* Background */}
     <div className="absolute inset-0 bg-linear-to-b from-gray-950 via-gray-900 to-gray-950" />
-    <div className="absolute top-0 right-0 h-64 w-64 -translate-y-32 translate-x-32 rounded-full bg-linear-to-r from-blue-500/5 to-cyan-500/5 blur-3xl" />
+    <div className="pointer-events-none absolute top-0 right-0 h-64 w-64 -translate-y-32 translate-x-0 sm:translate-x-16 lg:translate-x-32 rounded-full bg-linear-to-r from-blue-500/5 to-cyan-500/5 blur-3xl" />
 
     <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       {/* Header */}
