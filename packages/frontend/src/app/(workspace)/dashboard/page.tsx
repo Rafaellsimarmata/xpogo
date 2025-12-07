@@ -18,15 +18,12 @@ const DashboardPage = () => {
     console.log("[DashboardPage] Component mounted (useEffect called)");
   }, []);
 
-  console.log("[DashboardPage] Starting to call useDashboardController hook...");
-  
-  let controller;
-  try {
-    controller = useDashboardController();
-    console.log("[DashboardPage] Controller initialized successfully");
-  } catch (error) {
-    console.error("[DashboardPage] Error initializing controller:", error);
-    setInitError(String(error));
+  console.log("[DashboardPage] About to call useDashboardController hook...");
+  const controller = useDashboardController();
+  console.log("[DashboardPage] Controller hook returned successfully");
+
+  // Show error state if controller initialization failed
+  if (initError) {
     return (
       <section className="bg-background py-12">
         <div className="mx-auto max-w-6xl">
@@ -45,9 +42,21 @@ const DashboardPage = () => {
     );
   }
 
-  try {
-    
-    const {
+  // Destructure controller safely
+  if (!controller) {
+    return (
+      <section className="bg-background py-12">
+        <div className="mx-auto max-w-6xl flex h-96 items-center justify-center">
+          <div className="text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading dashboard...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const {
     profile,
     productCards,
     workspaceLoading,
@@ -405,28 +414,7 @@ const DashboardPage = () => {
         </div>
       </Modal>
     </section>
-    );
-  } catch (error) {
-    console.error("[DashboardPage] Error rendering dashboard:", error);
-    return (
-      <section className="bg-background py-12">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-6">
-            <h2 className="text-lg font-semibold text-red-900">Error</h2>
-            <p className="text-sm text-red-700 mt-2">
-              Terjadi kesalahan saat memuat dashboard. Silakan muat ulang halaman.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Muat Ulang
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  );
 };
 
 export default DashboardPage;

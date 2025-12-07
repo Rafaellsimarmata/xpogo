@@ -96,10 +96,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setToken(data.token);
       setUser(newUser);
       
-      console.log("[AuthContext] State updated. Redirecting to dashboard...");
-      // Redirect immediately without waiting for microtasks
-      router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
-      console.log("[AuthContext] router.push() called");
+      console.log("[AuthContext] State updated. Scheduling redirect to dashboard...");
+      // Schedule redirect for next event loop to ensure state is committed
+      setTimeout(() => {
+        console.log("[AuthContext] Performing redirect now");
+        router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
+        console.log("[AuthContext] router.push() called");
+      }, 0);
     },
     [authenticate, router],
   );
