@@ -51,5 +51,24 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   // Auth valid, render children
-  return <>{children}</>;
+  try {
+    console.log("[ProtectedRoute] Auth valid. Rendering children...");
+    return <>{children}</>;
+  } catch (error) {
+    console.error("[ProtectedRoute] Error rendering children:", error);
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <h2 className="text-lg font-semibold text-red-600">Error Loading Workspace</h2>
+          <p className="text-sm text-muted-foreground mt-2">{String(error)}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
+  }
 };

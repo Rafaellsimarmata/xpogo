@@ -22,6 +22,8 @@ const WorkspaceNav = () => {
   const { signOut } = useAuth();
   const { profile } = useUser();
 
+  console.log("[WorkspaceNav] Rendering with profile:", profile?.fullName || "null");
+
   // Handle null profile during hydration
   const initials = profile?.fullName
     ? profile.fullName
@@ -43,8 +45,9 @@ const WorkspaceNav = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  return (
-    <header className="border-b border-border/60 bg-card/90 shadow-sm">
+  try {
+    return (
+      <header className="border-b border-border/60 bg-card/90 shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground">
@@ -170,7 +173,29 @@ const WorkspaceNav = () => {
         </div>
       )}
     </header>
-  );
+    );
+  } catch (error) {
+    console.error("[WorkspaceNav] Error rendering:", error);
+    return (
+      <header className="border-b border-border/60 bg-card/90 shadow-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground">
+              Workspace
+            </p>
+            <p className="text-lg font-semibold text-foreground">XPOGO</p>
+          </div>
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-2xl border border-destructive/40 px-3 py-2 text-sm font-semibold text-destructive"
+            onClick={() => window.location.reload()}
+          >
+            Error - Reload
+          </button>
+        </div>
+      </header>
+    );
+  }
 };
 
 export default WorkspaceNav;
