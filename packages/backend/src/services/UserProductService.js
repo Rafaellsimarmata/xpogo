@@ -95,13 +95,11 @@ class UserProductService {
    */
   async updateProduct(productId, userId, updateData) {
     try {
-      // Check if product exists and belongs to user
       const existingProduct = await UserProduct.findByIdAndUserId(productId, userId);
       if (!existingProduct) {
         throw new Error('Product not found');
       }
 
-      // Clean up update data
       const cleanedData = {};
       if (updateData.name !== undefined) cleanedData.name = updateData.name.trim();
       if (updateData.description !== undefined) cleanedData.description = updateData.description?.trim() || null;

@@ -16,7 +16,6 @@ router.get('/', (req, res) => {
     const { category, search, difficulty } = req.query;
     let results = [...productsData];
 
-    // Filter by category if provided
     if (category) {
       const normalizedCategory = category.toLowerCase();
       results = results.filter(
@@ -24,7 +23,6 @@ router.get('/', (req, res) => {
       );
     }
 
-    // Filter by difficulty level if provided
     if (difficulty) {
       const normalizedDifficulty = difficulty.toLowerCase();
       results = results.filter(
@@ -32,7 +30,6 @@ router.get('/', (req, res) => {
       );
     }
 
-    // Filter by search query if provided
     if (search) {
       const normalizedSearch = search.toLowerCase();
       results = results.filter(
@@ -42,7 +39,6 @@ router.get('/', (req, res) => {
       );
     }
 
-    // Sort by name
     results.sort((a, b) => a.name.localeCompare(b.name));
 
     res.json({

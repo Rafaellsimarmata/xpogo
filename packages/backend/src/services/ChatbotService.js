@@ -127,20 +127,16 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
    */
   async sendMessage(userId, userMessage) {
     try {
-      // Initialize conversation if needed
       const conv = await this.initializeConversation(userId);
       const messages = conv.messages;
 
-      // Add user message to memory
       messages.push({
         role: 'user',
         content: userMessage
       });
 
-      // Save user message to database
       await this.saveMessage(userId, 'user', userMessage, 'message');
 
-      // Call AI API with conversation history
       const response = await axios.post(
         `${this.apiBaseUrl}/chat/completions`,
         {
@@ -160,20 +156,17 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
       const assistantMessage = response.data.choices[0].message.content;
       const tokensUsed = response.data.usage?.total_tokens || 0;
 
-      // Add assistant response to memory
       messages.push({
         role: 'assistant',
         content: assistantMessage
       });
 
-      // Save assistant message to database
       await pool.query(
         `INSERT INTO chatbot_messages (user_id, role, content, message_type, tokens_used) 
          VALUES ($1, $2, $3, $4, $5)`,
         [userId, 'assistant', assistantMessage, 'response', tokensUsed]
       );
 
-      // Update conversation message count
       if (conv.conversationId) {
         await pool.query(
           'UPDATE chatbot_conversations SET message_count = message_count + 2 WHERE id = $1',
@@ -303,7 +296,6 @@ Berikan saran praktis yang dapat ditindaklanjuti.`;
    * Get shipping and logistics guidance
    */
   async getShippingGuidance(userId, shippingInfo) {
-    // shippingInfo is now a string with shipping details
     const shippingPrompt = `Saya membutuhkan panduan tentang pengiriman produk saya secara internasional.
 
 ${shippingInfo}
@@ -330,7 +322,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       const conv = await this.initializeConversation(userId);
       const messages = conv.messages;
 
-      // Add user message
       messages.push({
         role: 'user',
         content: userMessage
@@ -338,7 +329,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
 
       await this.saveMessage(userId, 'user', userMessage, 'message');
 
-      // Call AI API
       const response = await axios.post(
         `${this.apiBaseUrl}/chat/completions`,
         {
@@ -358,7 +348,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       const assistantMessage = response.data.choices[0].message.content;
       const tokensUsed = response.data.usage?.total_tokens || 0;
 
-      // Add to memory and database
       messages.push({
         role: 'assistant',
         content: assistantMessage
@@ -370,7 +359,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
         [userId, 'assistant', assistantMessage, 'response', tokensUsed]
       );
 
-      // Update conversation count
       if (conv.conversationId) {
         await pool.query(
           'UPDATE chatbot_conversations SET message_count = message_count + 2 WHERE id = $1',
@@ -402,7 +390,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       let promptTokens = 0;
       let completionTokens = 0;
 
-      // Use native fetch for true streaming from AI API
       const response = await fetch(`${this.apiBaseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -427,12 +414,10 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
       const decoder = new TextDecoder();
       let buffer = '';
 
-      // Stream directly from AI API without buffering entire response
       while (true) {
         const { done, value } = await reader.read();
         
         if (done) {
-          // Stream ended - process any remaining buffer and send finish event
           if (buffer.trim()) {
             const lines = buffer.split('\n');
             for (const line of lines) {
@@ -448,12 +433,10 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
                   completionTokens = parsed.usage.completion_tokens || 0;
                 }
               } catch (e) {
-                // Ignore parse errors in final buffer
               }
             }
           }
           
-          // Send completion event
           res.write(`data: ${JSON.stringify({
             type: 'finish',
             fullResponse: fullResponse,
@@ -463,7 +446,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           })}\n\n`);
           res.end();
           
-          // Save full response to database asynchronously
           this.saveStreamedMessage(userId, fullResponse, tokensUsed).catch(err => 
             console.error('Error saving streamed message:', err)
           );
@@ -473,7 +455,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
         
-        // Keep the last incomplete line in the buffer
         buffer = lines.pop() || '';
 
         for (const line of lines) {
@@ -483,7 +464,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           const data = line.replace('data: ', '').trim();
           
           if (data === '[DONE]') {
-            // Stream finished - send completion event
             res.write(`data: ${JSON.stringify({
               type: 'finish',
               fullResponse: fullResponse,
@@ -493,7 +473,6 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
             })}\n\n`);
             res.end();
             
-            // Save full response to database asynchronously
             this.saveStreamedMessage(userId, fullResponse, tokensUsed).catch(err => 
               console.error('Error saving streamed message:', err)
             );
@@ -505,31 +484,25 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
             const deltaContent = parsed.choices?.[0]?.delta?.content;
             const finishReason = parsed.choices?.[0]?.finish_reason;
             
-            // Extract token usage from the final chunk (if available)
             if (parsed.usage) {
               tokensUsed = parsed.usage.total_tokens || 0;
               promptTokens = parsed.usage.prompt_tokens || 0;
               completionTokens = parsed.usage.completion_tokens || 0;
             }
             
-            // Handle content delta
             if (deltaContent) {
               fullResponse += deltaContent;
               
-              // Send each chunk immediately as it arrives from AI API
               res.write(`data: ${JSON.stringify({
                 type: 'chunk',
                 content: deltaContent,
               })}\n\n`);
             }
             
-            // If finish_reason is present, the stream is ending
             if (finishReason === 'stop' && parsed.usage) {
-              // Final chunk with usage stats - wait for [DONE] to send finish event
               continue;
             }
           } catch (parseError) {
-            // Skip invalid JSON chunks silently
             console.warn('Failed to parse SSE chunk:', parseError, 'Data:', data);
           }
         }
@@ -549,10 +522,8 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
    */
   async saveStreamedMessage(userId, content, tokenCount) {
     try {
-      // Get conversation
       const conv = await this.initializeConversation(userId);
       
-      // Add to conversation history
       if (conv.messages) {
         conv.messages.push({
           role: 'assistant',
@@ -560,14 +531,12 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
         });
       }
 
-      // Save to database
       await pool.query(
         `INSERT INTO chatbot_messages (user_id, role, content, message_type, tokens_used) 
          VALUES ($1, $2, $3, $4, $5)`,
         [userId, 'assistant', content, 'response', tokenCount]
       );
 
-      // Update conversation message count (only assistant message, user message already counted)
       if (conv.conversationId) {
         await pool.query(
           'UPDATE chatbot_conversations SET message_count = message_count + 1 WHERE id = $1',
