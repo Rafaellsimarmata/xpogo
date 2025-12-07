@@ -12,13 +12,13 @@ const features = [
   },
   {
     title: "Document Center",
-    description: "Manajemen dokumen ekspor otomatis dengan checklist dan template lengkap.",
+    description: "Manajemen dokumen ekspor otomatis dengan checklist dokumen terlengkap.",
     icon: FileCheck2,
     gradient: "from-emerald-500 to-teal-400",
   },
   {
     title: "Export Assistant",
-    description: "AI assistant yang membantu seluruh proses ekspor dari A sampai Z.",
+    description: "AI assistant yang membantu seluruh dengan dapat menjawab seluruh pertanyaanmu terkait eksport.",
     icon: MessageCircle,
     gradient: "from-purple-500 to-pink-400",
   },

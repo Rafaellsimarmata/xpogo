@@ -22,8 +22,8 @@ const faqData = [
     answer: "Absolutely! XPOGO dirancang khusus untuk UMKM yang baru memulai. Fitur Export Workflow kami menyediakan panduan step-by-step dari riset pasar hingga pengiriman. Plus, tim support kami siap membantu 24/7 dalam Bahasa Indonesia.",
   },
   {
-    question: "Bagaimana sistem DocuAssist AI bekerja?",
-    answer: "DocuAssist AI menggunakan machine learning untuk mengidentifikasi dokumen yang diperlukan berdasarkan jenis produk dan negara tujuan. Sistem akan generate checklist otomatis, memberikan template dokumen, dan mengingatkan deadline. Akurasi checklist kami mencapai 96%!",
+    question: "Bagaimana Document Center bekerja?",
+    answer: "Document Center mengelola seluruh dokumen ekspor dalam satu ruang kerja. Checklist otomatis menyesuaikan negara dan produkmu, template siap unduh tersedia kapan pun, dan reminder pintar memastikan tidak ada tenggat atau persyaratan yang terlewat.",
   },
   {
     question: "Apakah data bisnis saya aman di XPOGO?",
@@ -32,10 +32,6 @@ const faqData = [
   {
     question: "Negara mana saja yang bisa jadi tujuan ekspor?",
     answer: "Database kami mencakup 35+ negara tujuan ekspor populer termasuk Jepang, UAE, Australia, Singapura, Amerika, dan negara-negara Eropa. Sistem Market Intelligence kami akan merekomendasikan negara dengan skor kecocokan tertinggi untuk produkmu.",
-  },
-  {
-    question: "Bagaimana cara connect dengan verified buyers?",
-    answer: "Fitur Smart Matching kami akan mencocokkan produkmu dengan database 1000+ verified buyers dan distributors. Setiap partner sudah melalui verifikasi ketat dan memiliki rating dari pengguna lain. Kamu bisa langsung chat dan negosiasi dalam platform.",
   },
   {
     question: "Berapa lama proses dari daftar sampai ekspor pertama?",
