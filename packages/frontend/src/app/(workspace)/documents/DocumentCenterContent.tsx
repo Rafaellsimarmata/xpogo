@@ -5,6 +5,7 @@ import { useDocumentCenterController } from "@/src/controllers/workspace/documen
 import { DocumentTableWrapper } from "@/src/components/workspace/DocumentTableWrapper";
 import { RecommendationList } from "@/src/components/workspace/RecommendationList";
 import { useLocalStorage } from "@/src/hooks/useLocalStorage";
+import { useExportAgents } from "@/src/hooks/useExportAgents";
 import type { DocumentRequirement } from "@/src/lib/utils/parseCompliance";
 
 export const DocumentCenterContent = () => {
@@ -18,6 +19,9 @@ export const DocumentCenterContent = () => {
     productLoading,
     productError,
   } = useDocumentCenterController();
+
+  // Fetch export agents filtered by product category
+  const { agents: exportAgents, isLoading: agentsLoading } = useExportAgents(product?.category);
 
   const countryId = country?.id;
 
@@ -166,16 +170,33 @@ export const DocumentCenterContent = () => {
           </div>
 
           <div className="lg:col-span-4">
-            <RecommendationList
-              title="Agen penyedia layanan"
-              items={serviceProviders}
-              emptyMessage={
-                country
-                  ? "Belum ada rekomendasi agen untuk negara ini."
-                  : "Pilih negara tujuan untuk melihat rekomendasi agen."
-              }
-              ctaLabel="Hubungi"
-            />
+            {agentsLoading ? (
+              <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-foreground">Agen penyedia layanan</h3>
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  <p className="text-sm text-muted-foreground">Memuat agen untuk kategori {product?.category}...</p>
+                </div>
+              </div>
+            ) : (
+              <RecommendationList
+                title="Agen penyedia layanan"
+                items={exportAgents.length > 0 ? exportAgents.slice(0, 10).map((agent) => ({
+                  id: agent.id.toString(),
+                  title: agent.name,
+                  company_name: agent.company_name,
+                  contact_person: agent.contact_person,
+                  subtitle: agent.city || agent.specialization || agent.category,
+                  description: agent.email || agent.phone || "Hubungi untuk informasi lebih lanjut",
+                })) : serviceProviders}
+                emptyMessage={
+                  product?.category
+                    ? "Belum ada agen tersedia untuk kategori ini. Menampilkan daftar kontak negara tujuan."
+                    : "Pilih produk untuk melihat agen yang tersedia."
+                }
+                ctaLabel="Hubungi"
+              />
+            )}
           </div>
         </div>
       </div>

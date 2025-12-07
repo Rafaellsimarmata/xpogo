@@ -6,6 +6,8 @@ type RecommendationItem = {
   subtitle?: string;
   description?: string;
   badge?: string;
+  company_name?: string;
+  contact_person?: string;
 };
 
 type RecommendationListProps = {
@@ -55,7 +57,13 @@ export const RecommendationList = ({
                 <div>
                   <p className="font-semibold text-foreground">{item.title}</p>
                   {item.subtitle && (
-                    <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+                    <p className="text-sm font-semibold text-muted-foreground">{item.subtitle}</p>
+                  )}
+                  {item.company_name && (
+                    <p className="text-xs text-muted-foreground">{item.company_name}</p>
+                  )}
+                  {item.contact_person && (
+                    <p className="text-xs text-muted-foreground">{item.contact_person}</p>
                   )}
                 </div>
                 <span className="text-xs font-semibold text-primary">{ctaLabel}</span>
