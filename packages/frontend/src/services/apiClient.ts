@@ -39,6 +39,7 @@ export const apiFetch = async <TResponse>(
   options: ApiRequestOptions = {},
 ): Promise<TResponse> => {
   if (!BACKEND_URL) {
+    console.error("[apiFetch] BACKEND_URL not configured");
     throw new Error("NEXT_PUBLIC_BACKEND_URL is not configured");
   }
 
@@ -53,11 +54,15 @@ export const apiFetch = async <TResponse>(
     }
   }
 
+  console.log(`[apiFetch] Making ${options.method || 'GET'} request to:`, url);
+
   const response = await fetch(url, {
     ...options,
     headers,
     body,
   });
+
+  console.log(`[apiFetch] Response status:`, response.status, "from", endpoint);
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as
@@ -67,6 +72,7 @@ export const apiFetch = async <TResponse>(
       payload?.message ??
       payload?.error ??
       `Request failed with status ${response.status}`;
+    console.error(`[apiFetch] Error from ${endpoint}:`, errorMessage);
     throw new Error(errorMessage);
   }
 
@@ -74,5 +80,7 @@ export const apiFetch = async <TResponse>(
     return {} as TResponse;
   }
 
-  return (await response.json()) as TResponse;
+  const data = (await response.json()) as TResponse;
+  console.log(`[apiFetch] Success response from ${endpoint}`);
+  return data;
 };

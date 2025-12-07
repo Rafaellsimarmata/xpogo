@@ -67,42 +67,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signIn = useCallback(
     async (payload: SignInPayload, options?: SignInOptions) => {
-      console.log("[AuthContext] Sign in started...");
-      const data = await authenticate(payload);
-
-      const newUser: AuthUser = {
-        id: data.user.id,
-        name: data.user.username,
-        email: data.user.email,
-        role: "Owner",
-        company: data.user.business_name || "Nusantara Craft",
-      };
-
+      console.log("[AuthContext] Sign in started for:", payload.email);
       try {
-        const tokenToStore = data.token;
-        const userToStore = JSON.stringify(newUser);
+        const data = await authenticate(payload);
+        console.log("[AuthContext] Authenticate mutation completed");
+
+        const newUser: AuthUser = {
+          id: data.user.id,
+          name: data.user.username,
+          email: data.user.email,
+          role: "Owner",
+          company: data.user.business_name || "Nusantara Craft",
+        };
+
+        try {
+          const tokenToStore = data.token;
+          const userToStore = JSON.stringify(newUser);
+          
+          localStorage.setItem(STORAGE_KEY_TOKEN, tokenToStore);
+          localStorage.setItem(STORAGE_KEY_USER, userToStore);
+          
+          console.log("[AuthContext] User and token saved to localStorage. User:", newUser.name);
+          console.log("[AuthContext] Verification - Token in localStorage:", !!localStorage.getItem(STORAGE_KEY_TOKEN));
+          console.log("[AuthContext] Verification - User in localStorage:", !!localStorage.getItem(STORAGE_KEY_USER));
+        } catch (error) {
+          console.error("[AuthContext] Failed to save to localStorage", error);
+          throw error;
+        }
         
-        localStorage.setItem(STORAGE_KEY_TOKEN, tokenToStore);
-        localStorage.setItem(STORAGE_KEY_USER, userToStore);
+        setToken(data.token);
+        setUser(newUser);
         
-        console.log("[AuthContext] User and token saved to localStorage. User:", newUser.name);
-        console.log("[AuthContext] Verification - Token in localStorage:", !!localStorage.getItem(STORAGE_KEY_TOKEN));
-        console.log("[AuthContext] Verification - User in localStorage:", !!localStorage.getItem(STORAGE_KEY_USER));
+        console.log("[AuthContext] State updated. Scheduling redirect to dashboard...");
+        // Schedule redirect for next event loop to ensure state is committed
+        setTimeout(() => {
+          console.log("[AuthContext] Performing redirect now");
+          router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
+          console.log("[AuthContext] router.push() called");
+        }, 0);
       } catch (error) {
-        console.error("[AuthContext] Failed to save to localStorage", error);
+        console.error("[AuthContext] Sign in error:", error);
         throw error;
       }
-      
-      setToken(data.token);
-      setUser(newUser);
-      
-      console.log("[AuthContext] State updated. Scheduling redirect to dashboard...");
-      // Schedule redirect for next event loop to ensure state is committed
-      setTimeout(() => {
-        console.log("[AuthContext] Performing redirect now");
-        router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
-        console.log("[AuthContext] router.push() called");
-      }, 0);
     },
     [authenticate, router],
   );
