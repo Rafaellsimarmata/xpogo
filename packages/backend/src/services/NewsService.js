@@ -105,7 +105,7 @@ Gunakan bahasa Indonesia yang profesional dan mudah dipahami oleh pelaku usaha k
             },
           ],
           temperature: 0.8,
-          max_tokens: 2000,
+          max_tokens: 1000,
         },
         {
           headers: {

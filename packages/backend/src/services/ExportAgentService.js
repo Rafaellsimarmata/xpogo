@@ -2,10 +2,6 @@ const axios = require('axios');
 const ExportAgent = require('../models/ExportAgent');
 const UserProduct = require('../models/UserProduct');
 
-/**
- * Export Agent Service
- * Provides AI-powered recommendations for export agents based on user products
- */
 class ExportAgentService {
   constructor() {
     this.apiBaseUrl = process.env.AI_API_BASE_URL || 'https://api.kolosal.ai/v1';
@@ -13,16 +9,10 @@ class ExportAgentService {
     this.model = process.env.AI_MODEL || 'meta-llama/llama-4-maverick-17b-128e-instruct';
   }
 
-  /**
-   * Get all export agents with optional filters
-   * @param {Object} filters - Filter options
-   * @returns {Promise<Object>} Agents response
-   */
   async getAllAgents(filters = {}) {
     try {
       const agents = await ExportAgent.findAll(filters);
 
-      // Parse metadata JSON if exists
       const formattedAgents = agents.map(agent => ({
         ...agent,
         metadata: agent.metadata ? (typeof agent.metadata === 'string' ? JSON.parse(agent.metadata) : agent.metadata) : null,

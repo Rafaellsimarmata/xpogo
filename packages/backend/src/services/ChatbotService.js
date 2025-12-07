@@ -11,7 +11,7 @@ class ChatbotService {
     this.apiBaseUrl = process.env.AI_API_BASE_URL || 'https://api.kolosal.ai/v1';
     this.secretToken = process.env.AI_SECRET_TOKEN;
     this.model = process.env.AI_MODEL || 'meta-llama/llama-4-maverick-17b-128e-instruct';
-    this.conversationHistory = new Map(); // Cache for active conversations
+    this.conversationHistory = new Map();
   }
 
   /**
@@ -21,7 +21,6 @@ class ChatbotService {
   async initializeConversation(userId) {
     if (!this.conversationHistory.has(userId)) {
       try {
-        // Get or create conversation
         const convResult = await pool.query(
           'SELECT id FROM chatbot_conversations WHERE user_id = $1 AND is_active = true ORDER BY created_at DESC LIMIT 1',
           [userId]
@@ -29,7 +28,6 @@ class ChatbotService {
 
         let conversationId;
         if (convResult.rows.length === 0) {
-          // Create new conversation
           const createConvResult = await pool.query(
             'INSERT INTO chatbot_conversations (user_id, title) VALUES ($1, $2) RETURNING id',
             [userId, `Conversation ${new Date().toLocaleDateString()}`]
@@ -39,7 +37,6 @@ class ChatbotService {
           conversationId = convResult.rows[0].id;
         }
 
-        // Load conversation history from database
         const messagesResult = await pool.query(
           'SELECT role, content FROM chatbot_messages WHERE user_id = $1 ORDER BY created_at ASC',
           [userId]
@@ -67,7 +64,6 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
           }
         ];
 
-        // Add existing messages to conversation
         messagesResult.rows.forEach(msg => {
           messages.push({
             role: msg.role,
@@ -81,7 +77,6 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
         });
       } catch (error) {
         console.error('Error initializing conversation:', error);
-        // Fallback to in-memory conversation
         this.conversationHistory.set(userId, {
           conversationId: null,
           messages: [
@@ -152,7 +147,7 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
           model: this.model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 2000,
         },
         {
           headers: {
@@ -204,13 +199,11 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
    */
   async clearConversation(userId) {
     try {
-      // Mark conversation as inactive
       await pool.query(
         'UPDATE chatbot_conversations SET is_active = false WHERE user_id = $1',
         [userId]
       );
       
-      // Clear from memory cache
       this.conversationHistory.delete(userId);
       
       return { success: true, message: 'Conversation cleared' };
@@ -243,7 +236,6 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
    * Analyze product and provide export guidance
    */
   async analyzeProductForExport(userId, productInfo) {
-    // productInfo is now a string with product description
     const analysisPrompt = `Tolong analisis produk berikut untuk potensi ekspor dan berikan panduan detail:
 
 ${productInfo}
@@ -266,7 +258,6 @@ Format sebagai saran yang dapat ditindaklanjuti untuk usaha kecil.`;
    * Get market entry strategy
    */
   async getMarketEntryStrategy(userId, marketInfo) {
-    // marketInfo is now a string with market details
     const strategyPrompt = `Saya membutuhkan bantuan untuk mengembangkan strategi ekspor berdasarkan detail berikut:
 
 ${marketInfo}
@@ -290,7 +281,6 @@ Buatlah spesifik dan dapat ditindaklanjuti untuk usaha kecil.`;
    * Get answers about specific compliance requirements
    */
   async getComplianceGuidance(userId, complianceQuery) {
-    // complianceQuery is now a string with compliance details
     const compliancePrompt = `Saya membutuhkan panduan tentang kepatuhan ekspor berdasarkan detail berikut:
 
 ${complianceQuery}
@@ -355,7 +345,7 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           model: this.model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 2000,
         },
         {
           headers: {
@@ -423,7 +413,7 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           model: this.model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 2000,
           stream: true,
         }),
       });

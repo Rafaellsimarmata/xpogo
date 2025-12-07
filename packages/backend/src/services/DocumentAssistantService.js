@@ -1,9 +1,5 @@
 const axios = require('axios');
 
-/**
- * Document Assistant Service
- * Helps small enterprises generate export documentation using AI
- */
 class DocumentAssistantService {
   constructor() {
     this.apiBaseUrl = process.env.AI_API_BASE_URL || 'https://api.kolosal.ai/v1';
@@ -11,10 +7,6 @@ class DocumentAssistantService {
     this.model = process.env.AI_MODEL || 'meta-llama/llama-4-maverick-17b-128e-instruct';
   }
 
-  /**
-   * Generate Product Description for Export
-   * Helps create a professional product description for export documentation
-   */
   async generateProductDescription(productData) {
     const {
       productName,

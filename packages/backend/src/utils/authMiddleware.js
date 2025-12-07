@@ -3,7 +3,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key-change-in-prod';
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
