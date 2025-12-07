@@ -54,37 +54,25 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     [storageKey],
   );
 
-  // Sync user data from AuthContext to UserProfile / load from storage
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    // Tunggu sampai auth selesai loading
-    if (authLoading) {
-      console.log("[UserContext] Waiting for auth to load...");
-      return;
-    }
+    if (authLoading) return;
 
-    // Jika tidak ada user, set profile ke null
     if (!user) {
-      console.log("[UserContext] No user, setting profile to null");
       setProfile(null);
       return;
     }
 
-    console.log("[UserContext] User found, checking stored profile for user:", user.id);
-    
     const storedProfile = parseProfile(localStorage.getItem(storageKey));
     if (storedProfile) {
-      console.log("[UserContext] Found stored profile, using it");
       startTransition(() => {
         setProfile(storedProfile);
       });
       return;
     }
 
-    // Create profile from auth user
     const newProfile = createDefaultProfile(user.name, user.company);
-    console.log("[UserContext] Creating profile from auth user:", user.name);
     startTransition(() => {
       setProfile(newProfile);
     });

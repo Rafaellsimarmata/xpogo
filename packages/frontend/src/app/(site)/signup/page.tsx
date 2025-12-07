@@ -12,15 +12,12 @@ const SignUpPage = () => (
       priority
     />
     
-    {/* Overlay - berbeda untuk dark/light mode */}
     <div className="absolute inset-0 bg-black/70 z-10"></div>
     
-    {/* Konten - Two Column Layout */}
     <div className="relative z-20 flex items-center justify-center min-h-screen p-4 md:p-8 pt-24 md:pt-20">
       <div className="w-full max-w-6xl bg-white/5 backdrop-blur-md rounded-[30px] md:rounded-[30px] shadow-2xl overflow-hidden">
         <div className="grid md:grid-cols-2 gap-0">
           
-          {/* Kolom Kiri - Welcome Section - HIDDEN di mobile */}
           <div className="hidden md:flex flex-col justify-between p-8 md:p-12 lg:p-16 text-white min-h-[600px]">
             {/* Top Badge - User Count */}
             <div className="flex items-center gap-3">
@@ -48,7 +45,6 @@ const SignUpPage = () => (
             </div>
           </div>
 
-          {/* Kolom Kanan - Form Section */}
           <div className="bg-slate-900 rounded-[30px] md:rounded-r-[30px] md:rounded-l-none p-8 md:p-10 lg:p-12 max-h-screen overflow-y-hidden">
             <div className="max-w-md mx-auto">
               <div className="mb-8 text-center">

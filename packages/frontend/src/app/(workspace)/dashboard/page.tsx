@@ -1,28 +1,16 @@
 'use client';
 
-console.log("[DashboardPage Module] Loading dashboard page module...");
-
 import { Plus, RefreshCw, ExternalLink, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Modal from "@/src/components/ui/Modal";
 import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
 
-console.log("[DashboardPage Module] Imports complete");
 
 const DashboardPage = () => {
-  console.log("[DashboardPage] Component rendering (at top level)");
   const [initError, setInitError] = useState<string | null>(null);
-
-  useEffect(() => {
-    console.log("[DashboardPage] Component mounted (useEffect called)");
-  }, []);
-
-  console.log("[DashboardPage] About to call useDashboardController hook...");
   const controller = useDashboardController();
-  console.log("[DashboardPage] Controller hook returned successfully");
 
-  // Show error state if controller initialization failed
   if (initError) {
     return (
       <section className="bg-background py-12">
@@ -42,7 +30,6 @@ const DashboardPage = () => {
     );
   }
 
-  // Destructure controller safely
   if (!controller) {
     return (
       <section className="bg-background py-12">
@@ -88,8 +75,6 @@ const DashboardPage = () => {
 
   const showNewsSkeleton = newsLoading || newsRefreshing;
   const showProductSkeleton = workspaceLoading && productCards.length === 0;
-
-  console.log("[DashboardPage] Rendering dashboard. Products:", productCards.length, "News:", newsItems?.length);
 
   return (
     <section className="bg-background py-12">

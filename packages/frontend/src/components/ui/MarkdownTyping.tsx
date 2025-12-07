@@ -6,8 +6,8 @@ import remarkGfm from "remark-gfm";
 
 interface Props {
   text: string;
-  typingSpeed?: number; // ms per karakter
-  onProgress?: () => void; // dipanggil setiap kali teks bertambah
+  typingSpeed?: number;
+  onProgress?: () => void; 
 }
 
 export default function MarkdownTyping({ text, typingSpeed = 12, onProgress }: Props) {
@@ -17,7 +17,7 @@ export default function MarkdownTyping({ text, typingSpeed = 12, onProgress }: P
     let i = 0;
     const interval = setInterval(() => {
       setDisplayed(text.slice(0, i));
-      onProgress?.(); // minta parent scroll ke bawah
+      onProgress?.(); 
       i++;
       if (i > text.length) clearInterval(interval);
     }, typingSpeed);

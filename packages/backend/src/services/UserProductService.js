@@ -1,16 +1,6 @@
 const UserProduct = require('../models/UserProduct');
 
-/**
- * User Product Service
- * Handles business logic for user product management
- */
 class UserProductService {
-  /**
-   * Get all products for a user
-   * @param {number} userId - User ID
-   * @param {string} status - Filter by status (optional)
-   * @returns {Promise<Object>} Products response
-   */
   async getUserProducts(userId, status = null) {
     try {
       const products = await UserProduct.findByUserId(userId, status);

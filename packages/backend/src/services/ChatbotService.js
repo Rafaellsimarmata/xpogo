@@ -11,7 +11,7 @@ class ChatbotService {
     this.apiBaseUrl = process.env.AI_API_BASE_URL || 'https://api.kolosal.ai/v1';
     this.secretToken = process.env.AI_SECRET_TOKEN;
     this.model = process.env.AI_MODEL || 'meta-llama/llama-4-maverick-17b-128e-instruct';
-    this.conversationHistory = new Map(); // Cache for active conversations
+    this.conversationHistory = new Map();
   }
 
   /**
@@ -143,7 +143,7 @@ Jika ditanya tentang sesuatu di luar bantuan ekspor, alihkan dengan sopan ke top
           model: this.model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 2000,
         },
         {
           headers: {
@@ -335,7 +335,7 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           model: this.model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 2000,
         },
         {
           headers: {
@@ -400,7 +400,7 @@ Fokus pada solusi yang hemat biaya untuk usaha kecil.`;
           model: this.model,
           messages: messages,
           temperature: 0.7,
-          max_tokens: 800,
+          max_tokens: 2000,
           stream: true,
         }),
       });

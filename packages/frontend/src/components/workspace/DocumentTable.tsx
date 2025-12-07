@@ -37,13 +37,11 @@ export const DocumentTable = ({ documents: initialDocuments, onStatusChange, cou
     getStoredUpdates(countryId)
   );
 
-  // Save to localStorage whenever documentUpdates changes
   useEffect(() => {
     const storageKey = `document-status-${countryId}`;
     localStorage.setItem(storageKey, JSON.stringify(documentUpdates));
   }, [documentUpdates, countryId]);
 
-  // Apply local updates to documents
   const documents = initialDocuments.map((doc) => ({
     ...doc,
     status: documentUpdates[doc.id] ?? doc.status,

@@ -10,7 +10,7 @@ export const useExportAgents = (category?: string) => {
       return getExportAgentsByCategory(category);
     },
     enabled: Boolean(category),
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60, 
   });
 
   return {

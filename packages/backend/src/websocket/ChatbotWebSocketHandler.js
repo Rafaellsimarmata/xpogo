@@ -7,7 +7,7 @@ class ChatbotWebSocketHandler {
   constructor(io) {
     this.io = io;
     this.chatbotService = new ChatbotService();
-    this.userConnections = new Map(); // Track user WebSocket connections
+    this.userConnections = new Map();
   }
 
   /**
@@ -323,9 +323,9 @@ class ChatbotWebSocketHandler {
   /**
    * Handle user disconnect
    */
-  handleDisconnect(socket) {
-    for (const [userId, socketId] of this.userConnections.entries()) {
-      if (socketId === socket.id) {
+  handleUserDisconnect(socket) {
+    for (const [userId, userSocket] of this.userConnections.entries()) {
+      if (userSocket === socket) {
         this.userConnections.delete(userId);
         console.log(`User ${userId} disconnected`);
         break;

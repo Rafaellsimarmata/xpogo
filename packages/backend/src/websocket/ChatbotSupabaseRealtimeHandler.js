@@ -10,7 +10,7 @@ class ChatbotSupabaseRealtimeHandler {
     this.supabaseUrl = process.env.SUPABASE_URL;
     this.supabaseKey = process.env.SUPABASE_KEY;
     this.chatbotService = new ChatbotService();
-    this.userConnections = new Map(); // Track user subscriptions
+    this.userConnections = new Map();
 
     if (!this.supabaseUrl || !this.supabaseKey) {
       console.warn('Supabase credentials not configured. Realtime chat will not work.');

@@ -20,7 +20,7 @@ class MarketIntelligenceService {
     const model = process.env.AI_MODEL || 'meta-llama/llama-4-maverick-17b-128e-instruct';
 
     const payload = {
-      max_tokens: 2000,
+      max_tokens: 2500,
       messages: [
         {
           role: 'system',
