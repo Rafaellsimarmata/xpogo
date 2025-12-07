@@ -7,14 +7,17 @@ import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
 
 const DashboardPage = () => {
+  console.log("[DashboardPage] Component rendering (at top level)");
+
   useEffect(() => {
-    console.log("[DashboardPage] Component mounted");
+    console.log("[DashboardPage] Component mounted (useEffect called)");
   }, []);
 
+  console.log("[DashboardPage] Starting to call useDashboardController hook...");
+  const controller = useDashboardController();
+  console.log("[DashboardPage] Controller initialized successfully");
+
   try {
-    console.log("[DashboardPage] Starting controller initialization...");
-    const controller = useDashboardController();
-    console.log("[DashboardPage] Controller initialized successfully");
     
     const {
     profile,

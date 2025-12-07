@@ -12,7 +12,11 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, token, loading } = useAuth();
   const router = useRouter();
 
+  console.log("[ProtectedRoute] Rendering. loading:", loading, "user:", user?.name, "token:", !!token);
+
   useEffect(() => {
+    console.log("[ProtectedRoute] useEffect triggered. loading:", loading, "user:", user?.name, "token:", !!token);
+    
     // If still loading, don't do anything
     if (loading) {
       console.log("[ProtectedRoute] Still loading auth state...");
