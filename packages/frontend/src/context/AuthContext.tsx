@@ -97,7 +97,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(newUser);
       
       console.log("[AuthContext] State updated. Redirecting to dashboard...");
-      router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
+      // Use microtask queue to ensure state updates are committed before redirect
+      Promise.resolve().then(() => {
+        router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
+      });
     },
     [authenticate, router],
   );

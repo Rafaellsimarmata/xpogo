@@ -1,21 +1,45 @@
 'use client';
 
 import { Plus, RefreshCw, ExternalLink, Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "@/src/components/ui/Modal";
 import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
 
 const DashboardPage = () => {
   console.log("[DashboardPage] Component rendering (at top level)");
+  const [initError, setInitError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("[DashboardPage] Component mounted (useEffect called)");
   }, []);
 
   console.log("[DashboardPage] Starting to call useDashboardController hook...");
-  const controller = useDashboardController();
-  console.log("[DashboardPage] Controller initialized successfully");
+  
+  let controller;
+  try {
+    controller = useDashboardController();
+    console.log("[DashboardPage] Controller initialized successfully");
+  } catch (error) {
+    console.error("[DashboardPage] Error initializing controller:", error);
+    setInitError(String(error));
+    return (
+      <section className="bg-background py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
+            <h1 className="text-3xl font-bold text-red-600">Error Loading Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-4">{initError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   try {
     

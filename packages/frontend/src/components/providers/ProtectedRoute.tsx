@@ -39,11 +39,12 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // While loading auth, show loading screen
   if (loading) {
+    console.log("[ProtectedRoute] Showing loading screen because loading === true");
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Loading Workspace...</p>
         </div>
       </div>
     );
@@ -51,6 +52,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // If not authenticated after loading, return null (will redirect)
   if (!user && !token) {
+    console.log("[ProtectedRoute] Not authenticated. Returning null to trigger redirect");
     return null;
   }
 
