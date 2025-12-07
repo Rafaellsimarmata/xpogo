@@ -2,7 +2,7 @@
 
 ## Quick Links
 - Website: https://xpogo.vercel.app/ 
-- Live Demo: 
+- Live Demo: https://youtu.be/HrAxP14Kfys
 
 ## Overview of the Idea
 XPOGO adalah platform ekspor sederhana berbasis AI yang dirancang untuk membantu UMKM memulai proses ekspor tanpa kerumitan. Pengguna cukup memilih produk, menentukan negara tujuan, dan mengikuti alur dokumen yang sudah disederhanakan. Dengan tambahan wawasan pasar dan bantuan asisten AI, XPOGO menjadi pintu masuk yang ramah bagi UMKM yang baru pertama kali mencoba ekspor.
