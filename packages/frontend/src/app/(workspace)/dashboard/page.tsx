@@ -1,18 +1,61 @@
 'use client';
 
+console.log("[DashboardPage Module] Loading dashboard page module...");
+
 import { Plus, RefreshCw, ExternalLink, Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "@/src/components/ui/Modal";
 import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
 
+console.log("[DashboardPage Module] Imports complete");
+
 const DashboardPage = () => {
+  console.log("[DashboardPage] Component rendering (at top level)");
+  const [initError, setInitError] = useState<string | null>(null);
+
   useEffect(() => {
-    console.log("[DashboardPage] Component mounted");
+    console.log("[DashboardPage] Component mounted (useEffect called)");
   }, []);
 
-  try {
-    const controller = useDashboardController();
+  console.log("[DashboardPage] About to call useDashboardController hook...");
+  const controller = useDashboardController();
+  console.log("[DashboardPage] Controller hook returned successfully");
+
+  // Show error state if controller initialization failed
+  if (initError) {
+    return (
+      <section className="bg-background py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-sm">
+            <h1 className="text-3xl font-bold text-red-600">Error Loading Dashboard</h1>
+            <p className="text-sm text-muted-foreground mt-4">{initError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg"
+            >
+              Reload
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Destructure controller safely
+  if (!controller) {
+    return (
+      <section className="bg-background py-12">
+        <div className="mx-auto max-w-6xl flex h-96 items-center justify-center">
+          <div className="text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading dashboard...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   const {
     profile,
     productCards,
@@ -45,6 +88,8 @@ const DashboardPage = () => {
 
   const showNewsSkeleton = newsLoading || newsRefreshing;
   const showProductSkeleton = workspaceLoading && productCards.length === 0;
+
+  console.log("[DashboardPage] Rendering dashboard. Products:", productCards.length, "News:", newsItems?.length);
 
   return (
     <section className="bg-background py-12">
@@ -369,28 +414,7 @@ const DashboardPage = () => {
         </div>
       </Modal>
     </section>
-    );
-  } catch (error) {
-    console.error("[DashboardPage] Error rendering dashboard:", error);
-    return (
-      <section className="bg-background py-12">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-red-200 bg-red-50 p-6">
-            <h2 className="text-lg font-semibold text-red-900">Error</h2>
-            <p className="text-sm text-red-700 mt-2">
-              Terjadi kesalahan saat memuat dashboard. Silakan muat ulang halaman.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
-              Muat Ulang
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  );
 };
 
 export default DashboardPage;

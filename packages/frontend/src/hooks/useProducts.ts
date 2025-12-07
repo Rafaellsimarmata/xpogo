@@ -30,6 +30,9 @@ export const useProducts = (filters?: ProductFilters, options?: UseProductsOptio
     queryKey: buildListKey(filters),
     queryFn: () => fetchProducts(filters),
     enabled: options?.enabled ?? true,
+    staleTime: 1000 * 60 * 10, // 10 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   const products = useMemo<Product[]>(() => {

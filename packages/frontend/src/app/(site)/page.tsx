@@ -19,7 +19,9 @@ const LandingPage = () => {
     // Immediate redirect for authenticated users
     if (!loading && user && token) {
       console.log("[LandingPage] User already logged in. Redirecting immediately to dashboard...");
+      console.log("[LandingPage] user:", user.name, "token exists:", !!token);
       router.replace(ROUTES.workspace.dashboard);
+      console.log("[LandingPage] router.replace() called");
       return;
     }
 
