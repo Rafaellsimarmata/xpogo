@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
 import { register as registerAccount } from "@/src/services/authService";
@@ -18,6 +19,8 @@ type SignUpValues = Omit<SignUpPayload, "business_name"> & {
 
 const SignUpForm = () => {
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signIn, loading: authLoading } = useAuth();
   const registerMutation = useMutation({ mutationFn: registerAccount });
   const {
@@ -75,9 +78,9 @@ const SignUpForm = () => {
             Nama Bisnis
           </label>
           <Input
-            type="text"          
+            type="text"
             placeholder="CV RempahIndoNusa"
-            {...register("businessName", { required: "Nama Perusahaan Wajib diisi" })}
+            {...register("businessName", { required: "Nama perusahaan wajib diisi" })}
             error={errors.businessName?.message}
           />
         </div>
@@ -96,28 +99,50 @@ const SignUpForm = () => {
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-600">Password</label>
-          <Input
-            type="password"
-            placeholder="Minimal 8 karakter"
-            {...register("password", {
-              required: "Password wajib diisi",
-              minLength: { value: 8, message: "Minimal 8 karakter" },
-            })}
-            error={errors.password?.message}
-          />
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="Minimal 8 karakter"
+              className="pr-12"
+              {...register("password", {
+                required: "Password wajib diisi",
+                minLength: { value: 8, message: "Minimal 8 karakter" },
+              })}
+              error={errors.password?.message}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-slate-700"
+              aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-600">
             Konfirmasi Password
           </label>
-          <Input
-            type="password"
-            placeholder="Ulangi password"
-            {...register("confirmPassword", {
-              validate: (value) => value === getValues("password") || "Password tidak sama",
-            })}
-            error={errors.confirmPassword?.message}
-          />
+          <div className="relative">
+            <Input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Ulangi password"
+              className="pr-12"
+              {...register("confirmPassword", {
+                validate: (value) => value === getValues("password") || "Password tidak sama",
+              })}
+              error={errors.confirmPassword?.message}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-4 flex items-center text-slate-500 hover:text-slate-700"
+              aria-label={showConfirmPassword ? "Sembunyikan password" : "Tampilkan password"}
+            >
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
       </div>
 
