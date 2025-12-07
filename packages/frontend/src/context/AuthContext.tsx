@@ -25,6 +25,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     
     console.log("[AuthContext] useEffect started - checking localStorage...");
     
+    // Set timeout to ensure hydration completes even if there's an error
+    const hydrationTimeout = setTimeout(() => {
+      if (!isHydrated) {
+        console.warn("[AuthContext] Hydration timeout - forcing completion");
+        setIsHydrated(true);
+      }
+    }, 5000); // 5 second timeout
+    
     try {
       const storedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
       const storedUser = localStorage.getItem(STORAGE_KEY_USER);
@@ -54,6 +62,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Mark as hydrated after restoring state
     console.log("[AuthContext] Hydration complete - setting isHydrated to true");
     setIsHydrated(true);
+    clearTimeout(hydrationTimeout);
   }, []);
 
   const signIn = useCallback(

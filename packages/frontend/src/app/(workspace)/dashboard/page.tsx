@@ -1,12 +1,18 @@
 'use client';
 
 import { Plus, RefreshCw, ExternalLink, Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import Modal from "@/src/components/ui/Modal";
 import { ProductCard } from "@/src/components/workspace/ProductCard";
 import { useDashboardController } from "@/src/controllers/workspace/dashboardController";
 
 const DashboardPage = () => {
-  const controller = useDashboardController();
+  useEffect(() => {
+    console.log("[DashboardPage] Component mounted");
+  }, []);
+
+  try {
+    const controller = useDashboardController();
   const {
     profile,
     productCards,
@@ -363,7 +369,28 @@ const DashboardPage = () => {
         </div>
       </Modal>
     </section>
-  );
+    );
+  } catch (error) {
+    console.error("[DashboardPage] Error rendering dashboard:", error);
+    return (
+      <section className="bg-background py-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="rounded-3xl border border-red-200 bg-red-50 p-6">
+            <h2 className="text-lg font-semibold text-red-900">Error</h2>
+            <p className="text-sm text-red-700 mt-2">
+              Terjadi kesalahan saat memuat dashboard. Silakan muat ulang halaman.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Muat Ulang
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 };
 
 export default DashboardPage;

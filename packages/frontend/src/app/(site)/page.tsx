@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/src/context/AuthContext";
 import Hero from "@/src/components/landing/Hero";
@@ -13,17 +13,21 @@ import { ROUTES } from "@/src/constants";
 const LandingPage = () => {
   const { user, token, loading } = useAuth();
   const router = useRouter();
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
 
   useEffect(() => {
-    // Jika sudah login, redirect ke dashboard
+    // Immediate redirect for authenticated users
     if (!loading && user && token) {
-      console.log("[LandingPage] User already logged in. Redirecting to dashboard...");
+      console.log("[LandingPage] User already logged in. Redirecting immediately to dashboard...");
       router.replace(ROUTES.workspace.dashboard);
+      return;
     }
+
+    setHasCheckedAuth(true);
   }, [user, token, loading, router]);
 
-  // Jika sedang loading auth, show nothing
-  if (loading) {
+  // Show nothing while checking auth
+  if (!hasCheckedAuth || loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
@@ -34,12 +38,11 @@ const LandingPage = () => {
     );
   }
 
-  // Jika sudah login, return null (akan redirect)
+  // Tampilkan landing page hanya untuk user yang belum login
   if (user && token) {
     return null;
   }
 
-  // Tampilkan landing page hanya untuk user yang belum login
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-950 via-gray-900 to-gray-950">
       <Hero />

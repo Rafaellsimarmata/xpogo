@@ -13,13 +13,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Jika sedang loading (hydrating), jangan lakukan apa-apa
+    // If still loading, don't do anything
     if (loading) {
       console.log("[ProtectedRoute] Still loading auth state...");
       return;
     }
 
-    // Setelah loading selesai, check auth
+    // After loading, check auth
     if (!user && !token) {
       console.warn("[ProtectedRoute] No auth found after hydration. Redirecting to home...");
       if (typeof window !== "undefined") {
@@ -33,7 +33,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [user, token, loading, router]);
 
-  // Selama sedang loading atau tidak ada auth, show loading screen
+  // While loading auth, show loading screen
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -45,7 +45,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  // Jika tidak ada auth setelah loading, return null (akan redirect)
+  // If not authenticated after loading, return null (will redirect)
   if (!user && !token) {
     return null;
   }
