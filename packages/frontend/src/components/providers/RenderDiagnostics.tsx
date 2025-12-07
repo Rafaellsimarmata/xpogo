@@ -2,47 +2,57 @@
 
 import { useEffect, useState } from "react";
 
+// Global logs array that starts capturing immediately
+let globalLogs: string[] = [];
+let originalLog: typeof console.log;
+let originalError: typeof console.error;
+let originalWarn: typeof console.warn;
+
+// Start capturing logs at module level
+if (typeof window !== 'undefined') {
+  originalLog = console.log;
+  originalError = console.error;
+  originalWarn = console.warn;
+
+  const addLog = (type: string, args: unknown[]) => {
+    const message = args.map(arg => {
+      if (typeof arg === 'object') return JSON.stringify(arg);
+      return String(arg);
+    }).join(' ');
+    
+    if (message.includes('[')) {  // Only log our debug messages
+      globalLogs.push(`[${type}] ${message}`);
+      if (globalLogs.length > 100) globalLogs = globalLogs.slice(-100);
+    }
+  };
+
+  console.log = (...args) => {
+    originalLog(...args);
+    addLog('LOG', args);
+  };
+
+  console.error = (...args) => {
+    originalError(...args);
+    addLog('ERROR', args);
+  };
+
+  console.warn = (...args) => {
+    originalWarn(...args);
+    addLog('WARN', args);
+  };
+}
+
 export const RenderDiagnostics = () => {
-  const [logs, setLogs] = useState<string[]>([]);
+  const [logs, setLogs] = useState<string[]>(() => [...globalLogs]);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Intercept console.log
-    const originalLog = console.log;
-    const originalError = console.error;
-    const originalWarn = console.warn;
+    // Update logs when global logs change
+    const interval = setInterval(() => {
+      setLogs([...globalLogs]);
+    }, 100);
 
-    const addLog = (type: string, args: unknown[]) => {
-      const message = args.map(arg => {
-        if (typeof arg === 'object') return JSON.stringify(arg);
-        return String(arg);
-      }).join(' ');
-      
-      if (message.includes('[')) {  // Only log our debug messages
-        setLogs(prev => [...prev.slice(-20), `[${type}] ${message}`]); // Keep last 20 logs
-      }
-    };
-
-    console.log = (...args) => {
-      originalLog(...args);
-      addLog('LOG', args);
-    };
-
-    console.error = (...args) => {
-      originalError(...args);
-      addLog('ERROR', args);
-    };
-
-    console.warn = (...args) => {
-      originalWarn(...args);
-      addLog('WARN', args);
-    };
-
-    return () => {
-      console.log = originalLog;
-      console.error = originalError;
-      console.warn = originalWarn;
-    };
+    return () => clearInterval(interval);
   }, []);
 
   return (
