@@ -99,3 +99,7 @@ Frontend akan tersedia di http://localhost:3000 dan otomatis memanggil backend d
 ### Catatan
 - Pastikan menggunakan npm v7+ agar workspaces dikenali.
 - Jalankan `npm install` sebelum menjalankan mode dev agar seluruh workspace terpasang.
+
+## Landing Page and Workspace
+<img width="1920" height="1020" alt="Screenshot 2025-12-07 230509" src="https://github.com/user-attachments/assets/b827bbef-b3c2-4207-9ad0-fd4e8c72b70f" />
+<img width="1920" height="1020" alt="Screenshot 2025-12-07 225654" src="https://github.com/user-attachments/assets/c4d3202d-3300-4132-a5c9-8c6c917308bc" />
