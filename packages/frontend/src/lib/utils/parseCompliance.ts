@@ -7,19 +7,11 @@ export type DocumentRequirement = {
   actionLabel?: string;
 };
 
-/**
- * Parse AI-generated compliance checklist text into structured document requirements
- * Expected format:
- * Document Name
- * 
- * Description text here.
- */
 export const parseComplianceChecklist = (
   content: string
 ): DocumentRequirement[] => {
   const documents: DocumentRequirement[] = [];
   
-  // Split by double newlines to get document blocks
   const blocks = content.split(/\n\s*\n/).map(block => block.trim()).filter(Boolean);
   
   let index = 0;
@@ -29,41 +21,34 @@ export const parseComplianceChecklist = (
     
     if (lines.length === 0) continue;
 
-    // First line should be the document title
     let title = lines[0];
     
-    // Remove any leading symbols like [], -, *, •, or numbers
     title = title
-      .replace(/^\[.*?\]\s*/, "") // Remove [ ] at start
-      .replace(/^[-*•]\s+/, "") // Remove bullet points
-      .replace(/^\d+\.\s*/, "") // Remove numbered lists
+      .replace(/^\[.*?\]\s*/, "") 
+      .replace(/^[-*•]\s+/, "") 
+      .replace(/^\d+\.\s*/, "") 
       .trim();
 
-    // Skip if title is too short or looks like a section header
     if (title.length < 3 || title.length > 100) continue;
-    if (title.match(/^#{1,3}\s+/)) continue; // Skip markdown headers
+    if (title.match(/^#{1,3}\s+/)) continue; 
 
-    // Get description from remaining lines
     const descriptionLines = lines.slice(1).filter(line => {
-      // Skip lines that look like another document title
       return !line.match(/^\[.*?\]/) && 
              !line.match(/^[-*•]\s+/) && 
              !line.match(/^\d+\.\s+/) &&
-             line.length > 10; // Description should be meaningful
+             line.length > 10; 
     });
 
     const description = descriptionLines.length > 0
       ? descriptionLines.join(" ")
       : `Dokumen yang diperlukan: ${title}`;
 
-    // Generate ID from title
     const id = title
       .toLowerCase()
       .replace(/[^a-z0-9\s-]/g, "")
       .replace(/\s+/g, "-")
       .substring(0, 50) || `doc-${index}`;
 
-    // Determine level based on content
     const level = title.toLowerCase().includes("sertifikat") ||
       title.toLowerCase().includes("certificate") ||
       title.toLowerCase().includes("registration") ||
@@ -85,7 +70,6 @@ export const parseComplianceChecklist = (
     index++;
   }
 
-  // Fallback: if no blocks found, try parsing line by line
   if (documents.length === 0) {
     const allLines = content.split("\n").map((line) => line.trim()).filter(Boolean);
     let currentTitle = "";
@@ -94,10 +78,8 @@ export const parseComplianceChecklist = (
     for (let i = 0; i < allLines.length; i++) {
       const line = allLines[i];
       
-      // Skip empty lines and headers
       if (!line || line.match(/^#{1,3}\s+/)) continue;
 
-      // Check if this looks like a title (short line, possibly followed by empty line)
       const isTitle = line.length < 100 && 
         !line.match(/^\[.*?\]/) &&
         !line.match(/^[-*•]\s+/) &&
@@ -107,14 +89,12 @@ export const parseComplianceChecklist = (
       if (isTitle && !currentTitle) {
         currentTitle = line.replace(/^\[.*?\]\s*/, "").trim();
       } else if (currentTitle && line.length > 10) {
-        // This is description
         if (currentDescription) {
           currentDescription += " " + line;
         } else {
           currentDescription = line;
         }
       } else if (currentTitle && line === "" && currentDescription) {
-        // End of document block
         const id = currentTitle
           .toLowerCase()
           .replace(/[^a-z0-9\s-]/g, "")
@@ -139,7 +119,6 @@ export const parseComplianceChecklist = (
       }
     }
 
-    // Add last document if exists
     if (currentTitle && currentDescription) {
       const id = currentTitle
         .toLowerCase()

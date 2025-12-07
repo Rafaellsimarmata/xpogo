@@ -24,7 +24,6 @@ export const DocumentCenterContent = () => {
 
   const countryId = country?.id;
 
-  // Persist status per country so each destination keeps its own checklist progress
   const [allDocumentStatuses, setAllDocumentStatuses] = useLocalStorage<Record<string, DocumentRequirement["status"]>>(
     `doc-statuses-${countryId || 'default'}`,
     {}

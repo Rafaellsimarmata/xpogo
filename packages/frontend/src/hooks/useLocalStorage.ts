@@ -1,9 +1,5 @@
 import { useState, useCallback } from 'react';
 
-/**
- * Custom hook untuk manage state dengan localStorage persistence
- * Menghindari React warning tentang setState dalam effect
- */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T
@@ -27,7 +23,6 @@ export function useLocalStorage<T>(
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         }
       } catch {
-        // Silently fail if localStorage is unavailable
       }
     },
     [key, storedValue]

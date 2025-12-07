@@ -22,9 +22,7 @@ export interface GetAgentsResponse {
   error?: string;
 }
 
-/**
- * Fetch export agents filtered by category
- */
+
 export const getExportAgentsByCategory = async (
   category: string
 ): Promise<ExportAgent[]> => {

@@ -19,17 +19,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isHydrated, setIsHydrated] = useState(false);
   const { mutateAsync: authenticate, isPending } = useMutation({ mutationFn: login });
 
-  // Initialize auth state from localStorage on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    // Set timeout to ensure hydration completes even if there's an error
     const hydrationTimeout = setTimeout(() => {
       if (!isHydrated) {
         console.warn("[AuthContext] Hydration timeout - forcing completion");
         setIsHydrated(true);
       }
-    }, 5000); // 5 second timeout
+    }, 5000); 
     
     try {
       const storedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
@@ -53,7 +51,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error("[AuthContext] Failed to access localStorage", error);
     }
     
-    // Mark as hydrated after restoring state
     setIsHydrated(true);
     clearTimeout(hydrationTimeout);
   }, []);
@@ -85,7 +82,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setToken(data.token);
         setUser(newUser);
         
-        // Schedule redirect for next event loop to ensure state is committed
         setTimeout(() => {
           router.push(options?.redirectTo ?? ROUTES.workspace.dashboard);
         }, 0);
